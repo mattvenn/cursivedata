@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="text/javascript">
+    function toggleVis(sliderID) 
+    {
+        var x = document.getElementById("rangeVal");
+        var y = document.getElementById("frame");
+        var embed = document.getElementById('embed');
+        svgdocument = embed.getSVGDocument();
+
+        x.value = y.value;
+        for (i=1; i<=5; i++)
+        {
+            var para = svgdocument.getElementById(i);
+            if( i > y.value )
+            {
+                para.style.display = "none";
+            }
+            else
+            {
+                para.style.display = "";
+            }
+        }
+    }
+</script>
+</head>
+<body>
+<input id="frame" type="range" min="0" max="5" step="1" onchange="toggleVis()">
+<input id="rangeVal" type="text" size="2"/>
+<embed src="op.svg" type="image/svg+xml" id="embed" />  
+
+</body>
+</html>
