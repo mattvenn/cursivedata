@@ -14,7 +14,7 @@ for infile in sorted(listing):
   svgfile = path + infile
   layout1.addSVG(svgfile)
 
-layout1.setSpacing(-707.7)
+layout1.setSpacing(-708.50)
 doc.setLayout(layout1)
 
 doc.save('concat.svg')
