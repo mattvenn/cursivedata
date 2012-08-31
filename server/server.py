@@ -33,9 +33,11 @@ def processData((light,time)):
     print seconds
 
     import subprocess
+    print >>sys.stderr, "building squares"
     subprocess.call(["./squares.py", "--number", str(mins), "--env", str(int(float(light)))])
     import os
     if os.path.isfile("squares.svg"):
+        print >>sys.stderr, "new robot data"
         #run the pycam stuff here
         #move the file to history with a timestamp
         newfile = "./history/" + str(seconds) + ".svg" 
@@ -55,6 +57,7 @@ sock.listen(1)
 
 while True:
     # Wait for a connection
+    print >>sys.stderr, '-----------------'
     print >>sys.stderr, 'waiting for a connection'
     connection, client_address = sock.accept()
 
@@ -70,6 +73,7 @@ while True:
                     for line in data.split("\n"):
                         if line.startswith("body="):
                             processData( extractData(line) )
+			    break
 
                 else:
                     print >>sys.stderr, 'no more data from', client_address
