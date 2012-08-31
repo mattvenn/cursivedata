@@ -10,10 +10,11 @@
         svgdocument = embed.getSVGDocument();
 
         x.value = y.value;
-        for (i=1; i<=5; i++)
+        for (i=0; i<1000; i++)
         {
-            var para = svgdocument.getElementById(i);
-            if( i > y.value )
+            var svgid = "id" + i + ":id" + i ;
+            var para = svgdocument.getElementById(svgid);
+            if( i >= y.value )
             {
                 para.style.display = "none";
             }
@@ -26,9 +27,13 @@
 </script>
 </head>
 <body>
-<input id="frame" type="range" min="0" max="5" step="1" onchange="toggleVis()">
+<div>
+<input id="frame" type="range" min="0" max="100" step="1" onchange="toggleVis()">
 <input id="rangeVal" type="text" size="2"/>
-<embed src="op.svg" type="image/svg+xml" id="embed" />  
+</div>
+<div>
+<embed src="concat.svg" type="image/svg+xml" id="embed" />  
+</div>
 
 </body>
 </html>
