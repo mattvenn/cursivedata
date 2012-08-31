@@ -10,7 +10,7 @@
         svgdocument = embed.getSVGDocument();
 
         x.value = y.value;
-        for (i=0; i<1000; i++)
+        for (i=0; i<4000; i++)
         {
             var svgid = "id" + i + ":id" + i ;
             var para = svgdocument.getElementById(svgid);
@@ -28,7 +28,7 @@
 </head>
 <body>
 <div>
-<input id="frame" type="range" min="0" max="100" step="1" onchange="toggleVis()">
+<input id="frame" type="range" min="0" style="width:1000px" max="4000" step="1" onchange="toggleVis()">
 <input id="rangeVal" type="text" size="2"/>
 </div>
 <div>
