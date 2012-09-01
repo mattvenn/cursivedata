@@ -61,8 +61,8 @@ def fetchRange(start_date,end_date):
 
     return alldatapoints
 
-start_date = datetime.datetime(2012, 8, 28, 0)
-end_date = datetime.datetime(2012, 8, 29, 16, 0)
+start_date = datetime.datetime(2012, 8, 30, 0)
+end_date = datetime.datetime(2012, 8, 31, 0)
 
 data = fetchRange(start_date,end_date)
 print len(data)
