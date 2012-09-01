@@ -8,12 +8,13 @@
         var y = document.getElementById("frame");
         var embed = document.getElementById('embed');
         svgdocument = embed.getSVGDocument();
-
         x.value = y.value;
-        for (i=0; i<4000; i++)
+        for (i=0; i<2000; i++)
         {
-            var svgid = "id" + i + ":id" + i ;
+            var svgid = i; //= "id" + i + ":id" + i ;
             var para = svgdocument.getElementById(svgid);
+            if( para )
+            {
             if( i >= y.value )
             {
                 para.style.display = "none";
@@ -22,13 +23,14 @@
             {
                 para.style.display = "";
             }
+            }
         }
     }
 </script>
 </head>
 <body>
 <div>
-<input id="frame" type="range" min="0" style="width:1000px" max="4000" step="1" onchange="toggleVis()">
+<input id="frame" type="range" min="0" style="width:1000px" max="2000" step="1" onchange="toggleVis()">
 <input id="rangeVal" type="text" size="2"/>
 </div>
 <div>
