@@ -1,72 +1,82 @@
 #!/usr/bin/python
-#from SVG import *
 import pickle
-import svgwrite
+import sys
 import math
 import argparse
+from pysvg.shape import *
+from pysvg import parser
+from pysvg.style import *
+from pysvg.structure import svg
+from pysvg.builders import *
 
 def setup(args):
   widthmm = "%fmm" % args.width
   heightmm = "%fmm" % args.height
 
-  dwg = svgwrite.Drawing(filename="squares.svg", debug=True, size=(widthmm,heightmm))
-  dwg.viewbox(width=args.width,height=args.height)
+  dwg = svg(width=widthmm,height=heightmm)
+  dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
   return dwg
 
-def square(x,y, width,dwg):
+def square(x,y, width,dwg,id):
   points = []
   hWidth = width/2
-  path = svgwrite.path.Path("M0,0", fill='none', stroke='black', stroke_width='0.1')
-  path.push("M%d,%d" % (x-hWidth,y-hWidth))
-  path.push("L%d,%d" % (x+hWidth,y-hWidth))
-  path.push("L%d,%d" % (x+hWidth,y+hWidth))
-  path.push("L%d,%d" % (x-hWidth,y+hWidth))
-  path.push("L%d,%d" % (x-hWidth,y-hWidth))
-  dwg.add(path)
+  #p = path("M%dmm,%dmm" % (x-hWidth,y-hWidth))
+  sh=StyleBuilder()
+  sh.setFilling('none')
+  sh.setStroke('#000')
+  sh.setStrokeWidth('0.1')
+
+  p = path("M%d,%d" % (x-hWidth,y-hWidth),style=sh.getStyle())
+  p.appendLineToPath(x+hWidth,y-hWidth,False)
+  p.appendLineToPath(x+hWidth,y+hWidth,False)
+  p.appendLineToPath(x-hWidth,y+hWidth,False)
+  p.appendLineToPath(x-hWidth,y-hWidth,False)
+  p.set_id(id)
+  dwg.addElement(p)
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(
+  argparser = argparse.ArgumentParser(
       description="generates square based energy drawings")
-  parser.add_argument('--height',
+  argparser.add_argument('--height',
       action='store', dest='height', type=int, default=200,
       help="height of paper")
-  parser.add_argument('--width',
+  argparser.add_argument('--width',
       action='store', dest='width', type=int, default=200,
       help="width of paper")
-  parser.add_argument('--startenv',
+  argparser.add_argument('--startenv',
       action='store', dest='startenv', type=int, default=0,
       help="where to start from")
-  parser.add_argument('--number',
+  argparser.add_argument('--number',
       action='store', dest='number', type=int, default=0,
       help="will end up being the time")
-  parser.add_argument('--env',
+  argparser.add_argument('--env',
       action='store', dest='env', type=int, default=0,
       help="environmental var to plot")
-  parser.add_argument('--xdiv',
+  argparser.add_argument('--xdiv',
       action='store', dest='xdiv', type=int, default=12,
       help="divide paper into x divs")
-  parser.add_argument('--ydiv',
+  argparser.add_argument('--ydiv',
       action='store', dest='ydiv', type=int, default=12,
       help="divide paper into y divs")
-  parser.add_argument('--value',
+  argparser.add_argument('--value',
       action='store', dest='value', type=int, default=5000,
       help="value of each square")
-  parser.add_argument('--squareIncMM',
+  argparser.add_argument('--squareIncMM',
       action='store', dest='squareIncMM', type=int, default=2,
       help="mm increase in size per square")
-  parser.add_argument('--load',
+  argparser.add_argument('--load',
       action='store_const', const=True, dest='load', default=False,
       help="load values for env and number")
-  parser.add_argument('--nosavestate',
+  argparser.add_argument('--nosavestate',
       action='store_const', const=False, dest='savestate', default=True,
       help="save state")
-  parser.add_argument('--drawoutline',
+  argparser.add_argument('--drawoutline',
       action='store_const', const=True, dest='drawoutline', default=False,
       help="draw the outline of the square")
 
 
-  args = parser.parse_args()
+  args = argparser.parse_args()
   state = {}
   loadedvars = {} 
 
@@ -91,6 +101,7 @@ if __name__ == '__main__':
       #duplicate code, avoid?
       state["number"] = args.number
       state["startenv"] = args.startenv
+      state["id"] = 0
        
     #if we move on to a different number, set startenv back to 0
     if args.number != state["number"]:
@@ -99,8 +110,10 @@ if __name__ == '__main__':
   else:
     state["number"] = args.number
     state["startenv"] = args.startenv
+    state["id"] = 0
 
   print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
+  print "id:%d" % (state["id"])
   
   #work out where to draw
   import math
@@ -113,6 +126,16 @@ if __name__ == '__main__':
   startSquare = int(state["startenv"] / args.value)
   endSquare = int(args.env / args.value)
   print "start sq:%d end sq:%d" % ( startSquare, endSquare )
+
+  #also update the concat
+  try:
+      concat = parser.parse("concat.svg")
+#      print concat.getXML()
+      print "parsed concat ok"
+  except:
+      print "problem parsing concat"
+      concat = setup(args)
+
   if endSquare > startSquare:
     #create drawing
     dwg = setup(args)
@@ -120,9 +143,12 @@ if __name__ == '__main__':
     for i in range( startSquare, endSquare ):
       width = args.squareIncMM + i * args.squareIncMM
       print "square #%d width %d" % ( i, width )
-      square( startx,starty, width, dwg )
+      square( startx,starty, width, dwg, state["id"] )
+      square( startx,starty, width, concat, state["id"] )
+      state["id"] += 1
 
-    dwg.save()
+  dwg.save("square.svg")
+  concat.save("concat.svg")
 
   state["startenv"] = args.env;
   pickle.dump( state, open( "save.p", "wb" ) )
