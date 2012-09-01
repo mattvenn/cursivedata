@@ -1,13 +1,29 @@
 #!/usr/bin/python
 import pickle
+import math
 import sys
 import math
 import argparse
+import json
 from pysvg.shape import *
 from pysvg import parser
 from pysvg.style import *
 from pysvg.structure import svg
 from pysvg.builders import *
+import iso8601
+
+def processData(json):
+    data = []
+    for d in json:
+        if len(data) > 10000:
+            break
+        date = iso8601.parse_date(d["at"])
+        minute = int( date.strftime("%M") ) # minute 0 -59
+        hour = int(date.strftime("%H") ) # hour 0 -23
+        mins =  (minute + hour * 60)/10 # 0 - 143
+        light = d["value"]
+        data.append((mins,light))
+    return data
 
 def setup(args):
   widthmm = "%fmm" % args.width
@@ -74,6 +90,9 @@ if __name__ == '__main__':
   argparser.add_argument('--drawoutline',
       action='store_const', const=True, dest='drawoutline', default=False,
       help="draw the outline of the square")
+  argparser.add_argument('--loadhistory',
+      action='store', dest='loadhistory', default=None,
+      help="load a history file")
 
 
   args = argparser.parse_args()
@@ -92,8 +111,31 @@ if __name__ == '__main__':
     args.number = loadedvars["number"]
     args.env = loadedvars["env"]
 
+  #create drawing
+  dwg = setup(args)
 
-  if args.savestate:
+  #also update the concat
+  try:
+      concat = parser.parse("concat.svg")
+#      print concat.getXML()
+      print "parsed concat ok"
+  except:
+      print "problem parsing concat"
+      concat = setup(args)
+
+  if args.loadhistory:
+    try:
+        fh = open(args.loadhistory)
+        jsondata = json.load(fh)
+        data=processData(jsondata)
+        state["startenv"] = 0
+        state["number"] = 0
+        state["id"] = 0
+
+    except:
+        "failed to read history file"
+        exit(1)
+  elif args.savestate:
     print "using saved state"
     try:
       state = pickle.load( open( "save.p", "rb" ) )
@@ -112,42 +154,41 @@ if __name__ == '__main__':
     state["startenv"] = args.startenv
     state["id"] = 0
 
-  print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
-  print "id:%d" % (state["id"])
+  for datum in data:
+      #print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
+      args.env = int(float(datum[1]))
+      last_number = state["number"]
+      state["number"]=int(datum[0])
+      if last_number != state["number"]:
+        #reset
+        state["startenv"] = 0
+
+      print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
+      print "id:%d" % (state["id"])
   
-  #work out where to draw
-  import math
-  startx = ( args.width / args.xdiv ) * (( state["number"] ) % args.xdiv ) + args.width / (args.xdiv * 2)
-  starty = ( args.width / args.ydiv ) * math.ceil(state["number"] / args.ydiv ) + args.width / (args.ydiv * 2 )
+      #work out where to draw
+      startx = ( args.width / args.xdiv ) * (( state["number"] ) % args.xdiv ) + args.width / (args.xdiv * 2)
+      starty = ( args.width / args.ydiv ) * math.ceil(state["number"] / args.ydiv ) + args.width / (args.ydiv * 2 )
  
-  print "x:%d y:%d" % ( startx, starty )
+      print "x:%d y:%d" % ( startx, starty )
 
-  args.env += state["startenv"]
-  startSquare = int(state["startenv"] / args.value)
-  endSquare = int(args.env / args.value)
-  print "start sq:%d end sq:%d" % ( startSquare, endSquare )
+      args.env += state["startenv"]
+      startSquare = int(state["startenv"] / args.value)
+      endSquare = int(args.env / args.value)
+      print "start sq:%d end sq:%d" % ( startSquare, endSquare )
 
-  #also update the concat
-  try:
-      concat = parser.parse("concat.svg")
-#      print concat.getXML()
-      print "parsed concat ok"
-  except:
-      print "problem parsing concat"
-      concat = setup(args)
+      if endSquare > startSquare:
 
-  if endSquare > startSquare:
-    #create drawing
-    dwg = setup(args)
+        for i in range( startSquare, endSquare ):
+          width = args.squareIncMM + i * args.squareIncMM
+          print "square #%d width %d" % ( i, width )
+  #        square( startx,starty, width, dwg, state["id"] )
+          square( startx,starty, width, concat, state["id"] )
+          state["id"] += 1
 
-    for i in range( startSquare, endSquare ):
-      width = args.squareIncMM + i * args.squareIncMM
-      print "square #%d width %d" % ( i, width )
-      square( startx,starty, width, dwg, state["id"] )
-      square( startx,starty, width, concat, state["id"] )
-      state["id"] += 1
+      state["startenv"] = args.env
 
-  dwg.save("square.svg")
+  #dwg.save("square.svg")
   concat.save("concat.svg")
 
   state["startenv"] = args.env;
