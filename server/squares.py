@@ -141,8 +141,10 @@ if __name__ == '__main__':
   else:
     try:
       state = pickle.load( open( "save.p", "rb" ) )
+      #will throw an exception if not available
+      state["id"]
     except:
-      #duplicate code, avoid?
+      print "exception loading state, creating default state"
       state["startenv"] = args.startenv
       state["number"] = args.number
       state["id"] = 0
