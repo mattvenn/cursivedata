@@ -112,9 +112,11 @@ if __name__ == '__main__':
   #also setup concat drawing
   try:
       concat = parser.parse("concat.svg")
-      print "parsed concat ok"
+      if args.debug:
+        print "parsed concat ok"
   except:
-      print "problem parsing concat"
+      if args.debug:
+        print "problem parsing concat"
       concat = setup(args)
 
   #draw outline square
