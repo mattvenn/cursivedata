@@ -181,7 +181,6 @@ if __name__ == '__main__':
           print "start sq:%d end sq:%d" % ( startSquare, endSquare )
 
       if endSquare > startSquare:
-
         for i in range( startSquare, endSquare ):
           width = args.squareIncMM + i * args.squareIncMM
           print "square #%d width %d" % ( i, width )
@@ -190,10 +189,11 @@ if __name__ == '__main__':
           square( startx,starty, width, concat, state["id"] )
           state["id"] += 1
 
+        if not args.loadhistory:
+          dwg.save("square.svg")
+
       state["startenv"] = args.env
 
-  if not args.loadhistory:
-      dwg.save("square.svg")
   concat.save("concat.svg")
 
   state["startenv"] = args.env;
