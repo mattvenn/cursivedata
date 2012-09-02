@@ -84,9 +84,9 @@ if __name__ == '__main__':
   argparser.add_argument('--load',
       action='store_const', const=True, dest='load', default=False,
       help="load values for env and number")
-  argparser.add_argument('--nosavestate',
-      action='store_const', const=False, dest='savestate', default=True,
-      help="save state")
+  argparser.add_argument('--debug',
+      action='store_const', const=True, dest='debug', default=False,
+      help="debug print")
   argparser.add_argument('--drawoutline',
       action='store_const', const=True, dest='drawoutline', default=False,
       help="draw the outline of the square")
@@ -99,11 +99,6 @@ if __name__ == '__main__':
   state = {}
   loadedvars = {} 
 
-  if args.drawoutline:
-    dwg = setup(args)
-    square( args.width / 2,args.height/2, args.width, dwg )
-    dwg.save()
-    exit(0)
 
   if args.load:
     print "using numbers from file"
@@ -114,15 +109,23 @@ if __name__ == '__main__':
   #create drawing
   dwg = setup(args)
 
-  #also update the concat
+  #also setup concat drawing
   try:
       concat = parser.parse("concat.svg")
-#      print concat.getXML()
       print "parsed concat ok"
   except:
       print "problem parsing concat"
       concat = setup(args)
 
+  #draw outline square
+  if args.drawoutline:
+    dwg = setup(args)
+    square( args.width / 2,args.height/2, args.width, dwg )
+    dwg.save()
+    exit(0)
+
+  #2 different things can happen here, either we are loading a whole load of points at once, or we are running realtime
+  #load of points at once
   if args.loadhistory:
     try:
         fh = open(args.loadhistory)
@@ -135,60 +138,60 @@ if __name__ == '__main__':
     except:
         "failed to read history file"
         exit(1)
-  elif args.savestate:
-    print "using saved state"
+  else:
     try:
       state = pickle.load( open( "save.p", "rb" ) )
     except:
       #duplicate code, avoid?
-      state["number"] = args.number
       state["startenv"] = args.startenv
+      state["number"] = args.number
       state["id"] = 0
        
     #if we move on to a different number, set startenv back to 0
     if args.number != state["number"]:
       state["startenv"] = 0
       state["number"] = args.number
-  else:
-    state["number"] = args.number
-    state["startenv"] = args.startenv
-    state["id"] = 0
+
+    #prepare the array, only one datum which is for now
+    data = []
+    data.append((state["number"],args.env))
 
   for datum in data:
-      #print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
       args.env = int(float(datum[1]))
       last_number = state["number"]
       state["number"]=int(datum[0])
       if last_number != state["number"]:
         #reset
         state["startenv"] = 0
-
-      print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
-      print "id:%d" % (state["id"])
   
       #work out where to draw
       startx = ( args.width / args.xdiv ) * (( state["number"] ) % args.xdiv ) + args.width / (args.xdiv * 2)
       starty = ( args.width / args.ydiv ) * math.ceil(state["number"] / args.ydiv ) + args.width / (args.ydiv * 2 )
  
-      print "x:%d y:%d" % ( startx, starty )
-
       args.env += state["startenv"]
       startSquare = int(state["startenv"] / args.value)
       endSquare = int(args.env / args.value)
-      print "start sq:%d end sq:%d" % ( startSquare, endSquare )
+
+      if args.debug:
+          print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
+          print "id:%d" % (state["id"])
+          print "x:%d y:%d" % ( startx, starty )
+          print "start sq:%d end sq:%d" % ( startSquare, endSquare )
 
       if endSquare > startSquare:
 
         for i in range( startSquare, endSquare ):
           width = args.squareIncMM + i * args.squareIncMM
           print "square #%d width %d" % ( i, width )
-  #        square( startx,starty, width, dwg, state["id"] )
+          if not args.loadhistory:
+              square( startx,starty, width, dwg, state["id"] )
           square( startx,starty, width, concat, state["id"] )
           state["id"] += 1
 
       state["startenv"] = args.env
 
-  #dwg.save("square.svg")
+  if not args.loadhistory:
+      dwg.save("square.svg")
   concat.save("concat.svg")
 
   state["startenv"] = args.env;
