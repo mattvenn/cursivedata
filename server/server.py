@@ -34,30 +34,40 @@ def processData((light,time)):
 
     import subprocess
     print >>sys.stderr, "building squares"
-    subprocess.call(["./squares.py", "--number", str(mins), "--env", str(int(float(light)))])
+    subprocess.call(["./squares.py", "--rotate", "20", "--number", str(mins), "--env", str(int(float(light)))])
     import os
     #replace this with doing the subprocess stuff properly and capturing exit code and output
     if os.path.isfile("square.svg"):
-        print >>sys.stderr, "new robot data"
-        #run the pycam stuff here
-	subprocess.call(["../../pycam-0.5.1/pycam", "square.svg", "--export-gcode=square.ngc", "--process-path-strategy=engrave"])
-
-
+      print >>sys.stderr, "new robot data"
+      #run the pycam stuff here
+      result = subprocess.call(["../../pycam-0.5.1/pycam", "square.svg", "--export-gcode=square.ngc", "--process-path-strategy=engrave"])
+      if result == 0: #unix for all good
         print >>sys.stderr, "process gcode to polar code"
-	p = subprocess.Popen(["./preprocess.py", "--file", "square.ngc"], stdout=subprocess.PIPE)
-	gcode, err = p.communicate()
-	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	try:
-	    client_socket.connect(("localhost", 5000))
-	    client_socket.send(gcode)
-	    client_socket.close()
-	    print >>sys.stderr, "sent data to robot"
-	except:
-	    print "connection to robot failed"
-          
-        #move the file to history with a timestamp
+        p = subprocess.Popen(["./preprocess.py", "--file", "square.ngc"], stdout=subprocess.PIPE)
+        gcode, err = p.communicate()
+        fh = open( "square.polar", "w" )
+        fh.write(gcode)
+        fh.close()
+
+        #move the svg file to history with a timestamp
         newfile = "./history/" + str(seconds) + ".svg" 
         os.rename("square.svg", newfile)
+
+        #send the data to robot
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+          client_socket.connect(("localhost", 5000))
+          client_socket.send(gcode)
+          client_socket.close()
+          print >>sys.stderr, "sent data to robot"
+        except:
+          print "connection to robot failed"
+      else:
+        #move the svg file to history with a timestamp
+        newfile = "./bustsvg/" + str(seconds) + ".svg" 
+        os.rename("square.svg", newfile)
+        
+         
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
