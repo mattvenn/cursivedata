@@ -1,4 +1,8 @@
 #!/usr/bin/python
+"""
+bugs:
+  with squareIncMM an odd number, the squares don't join up properly...
+"""
 import pickle
 import math
 import sys
@@ -33,7 +37,7 @@ def setup(args):
   dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
   return dwg
 
-def square(x,y, width,dwg,id):
+def square(x,y, width,dwg,id,args):
   points = []
   hWidth = width/2
   #p = path("M%dmm,%dmm" % (x-hWidth,y-hWidth))
@@ -48,6 +52,10 @@ def square(x,y, width,dwg,id):
   p.appendLineToPath(x-hWidth,y+hWidth,False)
   p.appendLineToPath(x-hWidth,y-hWidth,False)
   p.set_id(id)
+  if args.rotate:
+    p.set_transform("rotate(%d,%d,%d)" % (id*args.rotate,x,y))
+  #group.addElement(p)
+  #dwg.addElement(group)
   dwg.addElement(p)
 
 
@@ -78,8 +86,11 @@ if __name__ == '__main__':
   argparser.add_argument('--value',
       action='store', dest='value', type=int, default=5000,
       help="value of each square")
+  argparser.add_argument('--rotate',
+      action='store', dest='rotate', type=int, default=0,
+      help="degrees to rotate * the shape's id")
   argparser.add_argument('--squareIncMM',
-      action='store', dest='squareIncMM', type=int, default=2,
+      action='store', dest='squareIncMM', type=float, default=2,
       help="mm increase in size per square")
   argparser.add_argument('--load',
       action='store_const', const=True, dest='load', default=False,
@@ -187,8 +198,8 @@ if __name__ == '__main__':
           width = args.squareIncMM + i * args.squareIncMM
           print "square #%d width %d" % ( i, width )
           if not args.loadhistory:
-              square( startx,starty, width, dwg, state["id"] )
-          square( startx,starty, width, concat, state["id"] )
+              square( startx,starty, width, dwg, state["id"],args )
+          square( startx,starty, width, concat, state["id"],args )
           state["id"] += 1
 
         if not args.loadhistory:
