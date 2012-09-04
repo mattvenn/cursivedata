@@ -29,15 +29,12 @@ def readResponse(args,serial,timeout=10):
     try:
       if(timeout > 0):
         signal.alarm(timeout)
-
       response = serial.readline()
       signal.alarm(0)
       if args.verbose:
-        print response,
-      if response == "ok\n":
-        print "got ok"
+        print "<", response,
     except:
-      print "timeout on read"
+      print "timeout %d secs on read" % timeout
       return
 
 def readFile(args):
@@ -52,7 +49,7 @@ def readFile(args):
 
 def initRobot(args):
   serial = None
-  port = '/dev/ttyACM0'
+  port = args.serialport
   try:
     serial = open( port, 'r+' )
   except IOError:
@@ -81,8 +78,8 @@ def writeToRobot(args,serial,gcodes):
   for line in gcodes:
     if p.match(line):
       print "skipping line:", line
-    else:
-      print line
+    elif not line == None:
+      print "> %s" % line
       if not args.norobot:
         serial.write(line)
         readResponse(args,serial)
@@ -135,6 +132,9 @@ if __name__ == '__main__':
     parser.add_argument('--port',
         action='store', dest='port', type=int,
         help="port to listen on")
+    parser.add_argument('--serialport',
+        action='store', dest='serialport', default='/dev/ttyACM0',
+        help="serial port to listen on")
     parser.add_argument('--file',
         action='store', dest='file', 
         help="file to open")
