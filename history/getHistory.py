@@ -1,9 +1,11 @@
+#!/usr/bin/python
 import urllib
 import urllib2
 import datetime
 import json
 import iso8601
 import dateutil.parser
+import argparse
 
 def fetchRange(start_date,end_date):
     alldatapoints = []
@@ -61,10 +63,24 @@ def fetchRange(start_date,end_date):
 
     return alldatapoints
 
-start_date = datetime.datetime(2012, 8, 30, 0)
-end_date = datetime.datetime(2012, 8, 31, 0)
+if __name__ == '__main__':
+  argparser = argparse.ArgumentParser(
+      description="fetches historical data from cosm")
+  argparser.add_argument('--start',
+    action='store', dest='start',
+      help="start date")
+  argparser.add_argument('--end',
+      action='store', dest='end',
+      help="end date")
 
-data = fetchRange(start_date,end_date)
-print len(data)
-savefh=open("history.json","w")
-json.dump(data,savefh)
+  args = argparser.parse_args()
+  if not ( args.start and args.end ):
+    print "must provide start and end date"
+    exit(1)
+  start_date = dateutil.parser.parse(args.start)
+  end_date = dateutil.parser.parse(args.end)
+
+  data = fetchRange(start_date,end_date)
+  print len(data)
+  savefh=open("history.json","w")
+  json.dump(data,savefh)
