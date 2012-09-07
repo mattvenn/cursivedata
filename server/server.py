@@ -53,6 +53,7 @@ def processData((light,time)):
         newfile = "./history/" + str(seconds) + ".svg" 
         os.rename("square.svg", newfile)
 
+        """
         #send the data to robot
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -62,6 +63,7 @@ def processData((light,time)):
           print >>sys.stderr, "sent data to robot"
         except:
           print "connection to robot failed"
+        """
       else:
         #move the svg file to history with a timestamp
         newfile = "./bustsvg/" + str(seconds) + ".svg" 
