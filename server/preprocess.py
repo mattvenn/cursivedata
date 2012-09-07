@@ -63,8 +63,9 @@ def parse(args):
       if outy > ymax:
         ymax = outy
 
-  print "# xmin %f xmax %f" % (xmin, xmax)
-  print "# ymin %f ymax %f" % (ymin, ymax)
+  if args.showminmax:
+    print "# xmin %f xmax %f" % (xmin, xmax)
+    print "# ymin %f ymax %f" % (ymin, ymax)
 
 
 if __name__ == '__main__':
@@ -85,13 +86,10 @@ if __name__ == '__main__':
     parser.add_argument('--xoffset',
         action='store', dest='xoffset', type=int, default=1000,
         help="how far to move the file on x axis")
-    """
-    parser.add_argument('--stoneCutLength',
-        action='store', dest='stoneCutLength', type=int, default=280,
-        help="mm long side of material to cut the stones from")
-    parser.add_argument('--drawSizeLine',
-        action='store_const', const=True, dest='drawSizeLine', default=False,
-      """
+    parser.add_argument('--showminmax',
+        action='store_const', const=True, dest='showminmax', default=False,
+        help="show the min and max xy after scaling")
+
     args = parser.parse_args()
 
     #set values, must be a better way of doing this
