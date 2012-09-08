@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from TimeStats import TimeStats
 import sys
 import json
 import argparse
@@ -6,6 +7,9 @@ import SocketServer
 import SimpleHTTPServer
 import urllib
 import os
+  
+#how to do this properly?
+cosmPostTimes = TimeStats()
 
 def extractData(line):
     jsondata = urllib.unquote(line)
@@ -54,7 +58,10 @@ def processData((light,time)):
         
 class postHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_POST(self):
-        print >>sys.stderr, '>>>>connection from', self.client_address
+        global cosmPostTimes
+        cosmPostTimes.addTime()
+        time_span = 10 * 60
+        print >>sys.stderr, '>>>>connection from %s [%d in %dsecs]' % ( self.client_address, cosmPostTimes.howMany(time_span),time_span)
         content_len = int(self.headers.getheader('content-length'))
         post_body = self.rfile.read(content_len)
         processData( extractData(post_body) )
