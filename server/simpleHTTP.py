@@ -9,7 +9,10 @@ PORT = 10002
 
 class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def do_GET(self):
-    print "got request"
+    global nanodeGetTimes
+    nanodeGetTimes.addTime()
+    time_span = 10 * 60
+    print >>sys.stderr, '>>>>connection from %s [%d in %dsecs]' % ( self.client_address, nanodeGetTimes.howMany(time_span),time_span)
     try:
       filename = sorted( os.listdir("newpolar") )[0]
 #      fh = open("square.polar")
