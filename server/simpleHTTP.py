@@ -4,6 +4,10 @@ import SimpleHTTPServer
 import urllib
 import os
 import datetime
+import sys
+from TimeStats import TimeStats
+
+nanodeGetTimes = TimeStats()
 
 PORT = 10002
 
