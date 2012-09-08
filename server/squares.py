@@ -171,6 +171,7 @@ if __name__ == '__main__':
     data = []
     data.append((state["number"],args.env))
 
+  newfile = False #exit status depends on if we write a new file
   for datum in data:
       args.env = int(float(datum[1]))
       last_number = state["number"]
@@ -197,6 +198,7 @@ if __name__ == '__main__':
         for i in range( startSquare, endSquare ):
           width = args.squareIncMM + i * args.squareIncMM
           print "square #%d width %d" % ( i, width )
+          newfile = True
           if not args.loadhistory:
               square( startx,starty, width, dwg, state["id"],args )
           square( startx,starty, width, concat, state["id"],args )
@@ -204,7 +206,7 @@ if __name__ == '__main__':
 
         if not args.loadhistory:
           dwg.save("square.svg")
-
+      
       state["startenv"] = args.env
 
   concat.save("concat.svg")
@@ -214,4 +216,6 @@ if __name__ == '__main__':
 
   #pycam can do text natively!
   #dwg.add(dwg.text('Test', insert=(0, 0.2), fill='black'))
-
+  if newfile:
+    exit(0)
+  exit(1)
