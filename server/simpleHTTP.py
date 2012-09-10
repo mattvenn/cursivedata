@@ -4,18 +4,25 @@ import SimpleHTTPServer
 import urllib
 import os
 import datetime
+import sys
+from TimeStats import TimeStats
+
+nanodeGetTimes = TimeStats()
 
 PORT = 10002
 
 class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def do_GET(self):
-    print "got request"
+    global nanodeGetTimes
+    nanodeGetTimes.addTime()
+    time_span = 10 * 60
+    print >>sys.stderr, '>>>>connection from %s [%d in %dsecs]' % ( self.client_address, nanodeGetTimes.howMany(time_span),time_span)
     try:
-      filename = sorted( os.listdir("newpolar") )[0]
-#      fh = open("square.polar")
-      oldfile = "./newpolar/" + filename
-      fh = open( oldfile )
-      print "sending file",  oldfile
+      #filename = sorted( os.listdir("newpolar") )[0]
+      fh = open("square.polar")
+#      oldfile = "./newpolar/" + filename
+#      fh = open( oldfile )
+      print "sending file" #,  oldfile
       gcode = fh.read()
       fh.close()
       self.send_response(200)
@@ -27,10 +34,10 @@ class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
       try:
         now = datetime.datetime.now()
         seconds = now.strftime("%s")
-#        newfile = "./oldpolar/" + str(seconds) + ".polar" 
-#        os.rename("square.polar", newfile)
-        newfile = "./oldpolar/" + filename
-        os.rename( oldfile, newfile)
+        newfile = "./oldpolar/" + str(seconds) + ".polar" 
+        os.rename("square.polar", newfile)
+#        newfile = "./oldpolar/" + filename
+#        os.rename( oldfile, newfile)
       except:
         e = sys.exc_info()[0]
         print "couldn't move file", e
