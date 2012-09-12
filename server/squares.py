@@ -59,7 +59,7 @@ def square(x,y, width,dwg,id,args):
   p.appendLineToPath(x-hWidth,y-hWidth,False)
   p.set_id(id)
   if args.rotate:
-    p.set_transform("rotate(%d,%d,%d)" % (id*args.rotate,x,y))
+    p.set_transform("rotate(%d,%d,%d)" % ((int(id)*args.rotate) % 360 ,x,y))
   #group.addElement(p)
   #dwg.addElement(group)
   dwg.addElement(p)
