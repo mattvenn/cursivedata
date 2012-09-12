@@ -3,6 +3,7 @@
 bugs:
   with squareIncMM an odd number, the squares don't join up properly...
 """
+import datetime
 import pickle
 import math
 import sys
@@ -15,6 +16,11 @@ from pysvg.style import *
 from pysvg.structure import svg
 from pysvg.builders import *
 import iso8601
+
+def writeJSVars(id,startid):
+    fh = open( "vars.js", 'w' )
+    fh.write( "var min = %s; var max = %s;" % (startid, id ))
+    fh.close()
 
 def processData(json):
     data = []
@@ -146,7 +152,6 @@ if __name__ == '__main__':
         data=processData(jsondata)
         state["startenv"] = 0
         state["number"] = 0
-        state["id"] = 0
 
     except:
         "failed to read history file"
@@ -155,12 +160,10 @@ if __name__ == '__main__':
     try:
       state = pickle.load( open( "save.p", "rb" ) )
       #will throw an exception if not available
-      state["id"]
     except:
       print "exception loading state, creating default state"
       state["startenv"] = args.startenv
       state["number"] = args.number
-      state["id"] = 0
        
     #if we move on to a different number, set startenv back to 0
     if args.number != state["number"]:
@@ -188,9 +191,15 @@ if __name__ == '__main__':
       startSquare = int(state["startenv"] / args.value)
       endSquare = int(args.env / args.value)
 
+      now = datetime.datetime.now()
+      start_date = now - datetime.timedelta(hours=12)
+      id = now.strftime("%s")
+      startid = start_date.strftime("%s")
+      writeJSVars(id,startid)
+
       if args.debug:
           print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
-          print "id:%d" % (state["id"])
+          print "id:%d" % (id)
           print "x:%d y:%d" % ( startx, starty )
           print "start sq:%d end sq:%d" % ( startSquare, endSquare )
 
@@ -200,9 +209,8 @@ if __name__ == '__main__':
           print "square #%d width %d" % ( i, width )
           newfile = True
           if not args.loadhistory:
-              square( startx,starty, width, dwg, state["id"],args )
-          square( startx,starty, width, concat, state["id"],args )
-          state["id"] += 1
+              square( startx,starty, width, dwg, id,args )
+          square( startx,starty, width, concat, id,args )
 
         if not args.loadhistory:
           dwg.save("square.svg")
