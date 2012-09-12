@@ -8,8 +8,8 @@
         var range = document.getElementById("frame");
         range.min = min;
         range.max = max;
-        toggleVis("range");
         range.value = max;
+        toggleVis("range");
 
     }
     function toggleVis(sliderID) 
@@ -19,7 +19,7 @@
         var embed = document.getElementById('embed');
         svgdocument = embed.getSVGDocument();
         x.value = y.value;
-        for (i=min; i<max; i+=1)
+        for (i=min; i<=max; i+=1)
         {
             var svgid = i; //= "id" + i + ":id" + i ;
             var para = svgdocument.getElementById(svgid);
