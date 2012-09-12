@@ -1,0 +1,228 @@
+#!/usr/bin/python
+"""
+bugs:
+"""
+
+import random
+import pickle
+import math
+import sys
+import math
+import argparse
+import json
+from pysvg.shape import *
+from pysvg import parser
+from pysvg.style import *
+from pysvg.structure import svg
+from pysvg.builders import *
+import iso8601
+
+def processData(json):
+    data = []
+    minMin = 1500
+    maxMin = 0
+    for d in json:
+        date = iso8601.parse_date(d["at"])
+        minute = int( date.strftime("%M") ) # minute 0 -59
+        hour = int(date.strftime("%H") ) # hour 0 -23
+        mins =  (minute + hour * 60)/10 # 0 - 143
+        if mins < minMin:
+            minMin = mins
+        if mins > maxMin:
+            maxMin = mins
+        light = d["value"]
+        data.append((mins,light))
+    global args
+    if args.debug:
+        print "parsed %d lines" % len(data)
+        print "min mins: %d max mins: %d" % ( minMin ,maxMin )
+    return data
+
+def setup(args):
+  widthmm = "%fmm" % args.width
+  heightmm = "%fmm" % args.height
+
+  dwg = svg(width=widthmm,height=heightmm)
+  dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
+  return dwg
+
+
+def leaf(x,y,width,dwg,id,args):
+  leafsvg = parser.parse("leaf.svg")
+#  import pdb; pdb.set_trace()
+  leaf = leafsvg.getElementAt(1)
+  rotate = random.randint(0,360)
+  th=TransformBuilder()
+  scale = width #random.uniform(0.1,1)
+  th.setScaling( scale ) # scale ) #width )
+  th.setRotation( rotate)
+  th.setTranslation( "%d,%d" % ( x, y ) )
+  """
+  leaf.set_transform("rotate(%d,%d,%d)" % (rotate,x,y))
+  leaf.set_transform("translate(%d,%d)" % (x,y))
+  leaf.set_transform("scale(%d)" % (width))
+  """
+  leaf.set_transform(th.getTransform())
+  leaf.set_id(id)
+  dwg.addElement(leaf)
+
+
+"""
+def square(x,y, width,dwg,id,args):
+  points = []
+  hWidth = width/2
+  #p = path("M%dmm,%dmm" % (x-hWidth,y-hWidth))
+  sh=StyleBuilder()
+  sh.setFilling('none')
+  sh.setStroke('#000')
+  sh.setStrokeWidth('0.1')
+
+  p = path("M%d,%d" % (x-hWidth,y-hWidth),style=sh.getStyle())
+  p.appendLineToPath(x+hWidth,y-hWidth,False)
+  p.appendLineToPath(x+hWidth,y+hWidth,False)
+  p.appendLineToPath(x-hWidth,y+hWidth,False)
+  p.appendLineToPath(x-hWidth,y-hWidth,False)
+  p.set_id(id)
+  if args.rotate:
+    p.set_transform("rotate(%d,%d,%d)" % (id*args.rotate,x,y))
+  #group.addElement(p)
+  #dwg.addElement(group)
+  dwg.addElement(p)
+"""
+
+if __name__ == '__main__':
+  argparser = argparse.ArgumentParser(
+      description="generates square based energy drawings")
+  argparser.add_argument('--height',
+      action='store', dest='height', type=int, default=200,
+      help="height of paper")
+  argparser.add_argument('--width',
+      action='store', dest='width', type=int, default=200,
+      help="width of paper")
+  argparser.add_argument('--startenv',
+      action='store', dest='startenv', type=int, default=0,
+      help="where to start from")
+  argparser.add_argument('--number',
+      action='store', dest='number', type=int, default=0,
+      help="will end up being the time")
+  argparser.add_argument('--env',
+      action='store', dest='env', type=int, default=0,
+      help="environmental var to plot")
+  """
+  argparser.add_argument('--value',
+      action='store', dest='value', type=int, default=5000,
+      help="value of each square")
+  """
+  argparser.add_argument('--scale',
+      action='store', dest='scale', type=float, default=40000,
+      help="divide data total by this number to get svg scale amount")
+  argparser.add_argument('--load',
+      action='store_const', const=True, dest='load', default=False,
+      help="load values for env and number")
+  argparser.add_argument('--debug',
+      action='store_const', const=True, dest='debug', default=False,
+      help="debug print")
+  argparser.add_argument('--drawoutline',
+      action='store_const', const=True, dest='drawoutline', default=False,
+      help="draw the outline of the square")
+  argparser.add_argument('--loadhistory',
+      action='store', dest='loadhistory', default=None,
+      help="load a history file")
+
+
+  args = argparser.parse_args()
+  state = {}
+  loadedvars = {} 
+
+
+  if args.load:
+    print "using numbers from file"
+    loadedvars = pickle.load( open( "vars.p", "rb" ) )
+    args.number = loadedvars["number"]
+    args.env = loadedvars["env"]
+
+  #create drawing
+  dwg = setup(args)
+
+  #also setup concat drawing
+  try:
+      concat = parser.parse("tree.svg")
+      if args.debug:
+        print "parsed concat ok"
+  except:
+      if args.debug:
+        print "problem parsing concat"
+      concat = setup(args)
+
+  #draw outline square
+  if args.drawoutline:
+    dwg = setup(args)
+    square( args.width / 2,args.height/2, args.width, dwg )
+    dwg.save()
+    exit(0)
+
+  #2 different things can happen here, either we are loading a whole load of points at once, or we are running realtime
+  #load of points at once
+  if args.loadhistory:
+    try:
+        fh = open(args.loadhistory)
+        jsondata = json.load(fh)
+        data=processData(jsondata)
+        state["startenv"] = 0
+        state["number"] = 0
+
+    except:
+        "failed to read history file"
+        exit(1)
+  else:
+    try:
+      state = pickle.load( open( "save.p", "rb" ) )
+      #will throw an exception if not available
+    except:
+      print "exception loading state, creating default state"
+      state["startenv"] = args.startenv
+      state["number"] = args.number
+       
+    #prepare the array, only one datum which is for now
+    data = []
+    data.append((args.number,args.env))
+
+  newfile = False #exit status depends on if we write a new file
+  for datum in data:
+      value = int(float(datum[1])) #the value of the datum
+      last_number = state["number"] #last datum's minute
+      state["number"]=int(datum[0]) #this datum's minute
+      if args.debug:
+        print "last number: %d, number: %d, value: %d" % ( last_number, state["number"], value )
+
+      if last_number != state["number"]: #if move onto next minute
+
+        scale = float(state["startenv"]) / args.scale 
+        if args.debug:
+            print "total for %d was %d" % (last_number, state["startenv"])
+            print "scale %f" % scale
+        state["startenv"] = 0
+
+        #work out where to draw
+        startx =  random.randint(0, args.width)
+        starty = args.height
+        while starty > args.height / 2:
+          starty = random.randint(0, args.height)
+
+        if not args.loadhistory:
+            leaf( startx,starty, scale, dwg, last_number,args )
+            dwg.save("leaf_frame.svg")
+        leaf( startx,starty, scale, concat, last_number,args )
+        newfile = True
+
+      state["startenv"] += value
+
+  concat.save("tree.svg")
+
+  pickle.dump( state, open( "save.p", "wb" ) )
+
+  #pycam can do text natively!
+  #dwg.add(dwg.text('Test', insert=(0, 0.2), fill='black'))
+  if newfile:
+    exit(0)
+  exit(1)
