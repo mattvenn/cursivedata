@@ -19,7 +19,7 @@
         var embed = document.getElementById('embed');
         svgdocument = embed.getSVGDocument();
         x.value = y.value;
-        for (i=min; i<max; i++)
+        for (i=min; i<max; i+=60)
         {
             var svgid = i; //= "id" + i + ":id" + i ;
             var para = svgdocument.getElementById(svgid);
