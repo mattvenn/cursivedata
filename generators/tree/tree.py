@@ -49,11 +49,13 @@ def setup(args):
 
 def leaf(x,y,width,dwg,id,args):
   leafsvg = parser.parse("leaf.svg")
-#  import pdb; pdb.set_trace()
+  import pdb
+#  pdb.set_trace()
   leaf = leafsvg.getElementAt(1)
   rotate = random.randint(0,360)
   th=TransformBuilder()
-  scale = width #random.uniform(0.1,1)
+  scale = random.uniform(0.1,1)
+#  scale = width #random.uniform(0.1,1)
   th.setScaling( scale ) # scale ) #width )
   th.setRotation( rotate)
   th.setTranslation( "%d,%d" % ( x, y ) )
@@ -204,9 +206,11 @@ if __name__ == '__main__':
         state["startenv"] = 0
 
         #work out where to draw
-        startx =  random.randint(0, args.width)
-        starty = args.height
-        while starty > args.height / 2:
+        border = args.width / 10
+        startx = 0
+        starty = 0
+        startx =  random.randint(border, args.width-border)
+        while starty > (args.height / 2) or starty < border:
           starty = random.randint(0, args.height)
 
         if not args.loadhistory:
