@@ -78,13 +78,13 @@ if __name__ == '__main__':
         action='store', dest='scale', type=float, default=6.3,
         help="scale factor")
     parser.add_argument('--ysub',
-        action='store', dest='ysub', type=int, default=1000,
-        help="need to reflect y axis atm, this is what the y is subtracted from")
+        action='store', dest='ysub', type=int, default=1500,
+        help="need to reflect y axis atm, this is what the y is subtracted from. should be a bit bigger than maximum y")
     parser.add_argument('--yoffset',
-        action='store', dest='yoffset', type=int, default=500,
+        action='store', dest='yoffset', type=int, default=800,
         help="how far to move the file on y axis")
     parser.add_argument('--xoffset',
-        action='store', dest='xoffset', type=int, default=1000,
+        action='store', dest='xoffset', type=int, default=1200,
         help="how far to move the file on x axis")
     parser.add_argument('--showminmax',
         action='store_const', const=True, dest='showminmax', default=False,
