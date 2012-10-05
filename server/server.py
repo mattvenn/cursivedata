@@ -19,8 +19,9 @@ def extractData(line):
     trigger = json.loads(jsondata.lstrip("body="))
     light = trigger["triggering_datastream"]["value"]["value"]
     time = trigger["triggering_datastream"]["at"]
-    feed = trigger["triggering_datastream"]["feeds"]
-    print "got %s at %s for feed %s" % ( light, time, feed )
+    feed = trigger["environment"]["id"]
+    if args.debug:
+        print "got %s at %s for feed %s" % ( light, time, feed )
     return (light,time, feed)
 
 def processData((light,time,feed)):
@@ -29,13 +30,19 @@ def processData((light,time,feed)):
     date = iso8601.parse_date(time)
     minute = int( date.strftime("%M") ) # minute 0 -59
     hour = int(date.strftime("%H") ) # hour 0 -23
+    #ten mins
     mins =  (minute + hour * 60)/10 # 0 - 143
     seconds = date.strftime("%s")
-    print seconds
 
     import subprocess
-    print >>sys.stderr, "building squares"
-    result = subprocess.call([config[feed]["generator"], config[feed]["draw_args"], "--number", str(mins), "--env", str(int(float(light)))])
+    args = [ config[feed]["generator"] ]
+    args.extend( config[feed]["draw_args"] )
+    args.extend( [ "--number", str(mins), "--env", str(int(float(light)))])
+    print >>sys.stderr, "calling generator: %s" % args
+    p = subprocess.Popen( args, stdout=subprocess.PIPE )
+    stdout, result = p.communicate()
+    if args.debug:
+        print stdout
     if result == 0 and config[feed]["needs_polar"]:
       print >>sys.stderr, "new svg"
       #run the pycam stuff here
@@ -90,17 +97,13 @@ if __name__ == '__main__':
   argparser.add_argument('--port',
       action='store', dest='port', type=int, default=10001,
       help="port")
-  argparser.add_argument('--startenv',
-      action='store', dest='startenv', type=int, default=0,
-      help="where to start from")
   argparser.add_argument('--pycam',
       action='store', dest='pycam', default="/usr/bin/pycam",
       help="where pycam is")
-  argparser.add_argument('--svggen',
-      action='store', dest='svggen', default="./squares.py",
-      help="where the svg generator program is")
+  argparser.add_argument('--debug',
+      action='store_const', const=True, dest='debug', default=False,
+      help="debug print")
 
-  print config
   args = argparser.parse_args()
   run_server(args)
 
