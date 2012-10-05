@@ -48,9 +48,7 @@ def setup(args):
 
 
 def leaf(x,y,width,dwg,id,args):
-  leafsvg = parser.parse("leaf.svg")
-  import pdb
-#  pdb.set_trace()
+  leafsvg = parser.parse(args.dir + "leaf.svg")
   leaf = leafsvg.getElementAt(1)
   rotate = random.randint(0,360)
   th=TransformBuilder()
@@ -118,6 +116,9 @@ if __name__ == '__main__':
   argparser.add_argument('--scale',
       action='store', dest='scale', type=float, default=40000,
       help="divide data total by this number to get svg scale amount")
+  argparser.add_argument('--dir',
+      action='store', dest='dir', default="./",
+      help="directory for files")
   argparser.add_argument('--load',
       action='store_const', const=True, dest='load', default=False,
       help="load values for env and number")
@@ -139,7 +140,7 @@ if __name__ == '__main__':
 
   if args.load:
     print "using numbers from file"
-    loadedvars = pickle.load( open( "vars.p", "rb" ) )
+    loadedvars = pickle.load( open( args.dir + vars.p, "rb" ) )
     args.number = loadedvars["number"]
     args.env = loadedvars["env"]
 
@@ -148,7 +149,7 @@ if __name__ == '__main__':
 
   #also setup concat drawing
   try:
-      concat = parser.parse("tree.svg")
+      concat = parser.parse(args.dir + "tree.svg")
       if args.debug:
         print "parsed concat ok"
   except:
@@ -167,7 +168,7 @@ if __name__ == '__main__':
   #load of points at once
   if args.loadhistory:
     try:
-        fh = open(args.loadhistory)
+        fh = open(args.dir + args.loadhistory)
         jsondata = json.load(fh)
         data=processData(jsondata)
         state["startenv"] = 0
@@ -178,7 +179,7 @@ if __name__ == '__main__':
         exit(1)
   else:
     try:
-      state = pickle.load( open( "save.p", "rb" ) )
+      state = pickle.load( open( args.dir + "save.p", "rb" ) )
       #will throw an exception if not available
     except:
       print "exception loading state, creating default state"
@@ -215,15 +216,15 @@ if __name__ == '__main__':
 
         if not args.loadhistory:
             leaf( startx,starty, scale, dwg, last_number,args )
-            dwg.save("leaf_frame.svg")
+            dwg.save(args.dir + "leaf_frame.svg")
         leaf( startx,starty, scale, concat, last_number,args )
         newfile = True
 
       state["startenv"] += value
 
-  concat.save("tree.svg")
+  concat.save(args.dir + "tree.svg")
 
-  pickle.dump( state, open( "save.p", "wb" ) )
+  pickle.dump( state, open( args.dir + "save.p", "wb" ) )
 
   #pycam can do text natively!
   #dwg.add(dwg.text('Test', insert=(0, 0.2), fill='black'))
