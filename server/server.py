@@ -7,19 +7,23 @@ import SocketServer
 import SimpleHTTPServer
 import urllib
 import os
+
+from config import config
   
 #how to do this properly?
 cosmPostTimes = TimeStats()
+
 
 def extractData(line):
     jsondata = urllib.unquote(line)
     trigger = json.loads(jsondata.lstrip("body="))
     light = trigger["triggering_datastream"]["value"]["value"]
     time = trigger["triggering_datastream"]["at"]
-    print "got %s at %s" % ( light, time )
-    return (light,time)
+    feed = trigger["triggering_datastream"]["feeds"]
+    print "got %s at %s for feed %s" % ( light, time, feed )
+    return (light,time, feed)
 
-def processData((light,time)):
+def processData((light,time,feed)):
     global args
     import iso8601
     date = iso8601.parse_date(time)
@@ -31,8 +35,8 @@ def processData((light,time)):
 
     import subprocess
     print >>sys.stderr, "building squares"
-    result = subprocess.call([args.svggen, "--rotate", "20", "--number", str(mins), "--env", str(int(float(light)))])
-    if result == 0:
+    result = subprocess.call([config[feed]["generator"], config[feed]["draw_args"], "--number", str(mins), "--env", str(int(float(light)))])
+    if result == 0 and config[feed]["needs_polar"]:
       print >>sys.stderr, "new svg"
       #run the pycam stuff here
       result = subprocess.call([args.pycam, "square.svg", "--export-gcode=square.ngc", "--process-path-strategy=engrave"])
@@ -96,6 +100,7 @@ if __name__ == '__main__':
       action='store', dest='svggen', default="./squares.py",
       help="where the svg generator program is")
 
+  print config
   args = argparser.parse_args()
   run_server(args)
 
