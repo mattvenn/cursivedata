@@ -10,7 +10,7 @@ config = {
     75479 :
     {
         "name" : "Solar Tree",
-        "draw_args" : [ "--scale", "500", "--debug" ],
+        "draw_args" : [ "--scale", "100", "--debug" ],
         "start_daily" : True,
         "generator" : "../generators/tree/tree.py",
         "needs_polar" : False,
