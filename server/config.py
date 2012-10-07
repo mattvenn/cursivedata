@@ -11,6 +11,7 @@ config = {
     {
         "name" : "Solar Tree",
         "draw_args" : [ "--scale", "500", "--debug", "--dir", "../tmp/46756/" ],
+        "start_daily" : True,
         "generator" : "../generators/tree/tree.py",
         "needs_polar" : False,
     },
