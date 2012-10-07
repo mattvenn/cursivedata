@@ -47,7 +47,7 @@ def processData((light,time,feed)):
     config[feed]["last_time"] = date
     
     #tmp dir
-    tmp_dir = "../tmp/" + feed + "/"
+    tmp_dir = "../tmp/" + str(feed) + "/"
     generator_args = [ config[feed]["generator"] ]
     generator_args.extend( config[feed]["draw_args"] )
     if wipe:
