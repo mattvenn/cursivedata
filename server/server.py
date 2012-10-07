@@ -1,13 +1,14 @@
 #!/usr/bin/python
 from TimeStats import TimeStats
 import sys
+import subprocess
 import json
 import argparse
 import SocketServer
 import SimpleHTTPServer
 import urllib
 import os
-
+import iso8601
 from config import config
   
 #how to do this properly?
@@ -26,35 +27,50 @@ def extractData(line):
 
 def processData((light,time,feed)):
     global args
-    import iso8601
     date = iso8601.parse_date(time)
     minute = int( date.strftime("%M") ) # minute 0 -59
     hour = int(date.strftime("%H") ) # hour 0 -23
+    day = int(date.strftime("%d") ) # day
+
     #ten mins
     mins =  (minute + hour * 60)/10 # 0 - 143
     seconds = date.strftime("%s")
+#    import pdb;pdb.set_trace()
+    wipe = False
+    #do we need to start afresh with a new drawing?
+    if config[feed]["start_daily"] and config[feed].has_key("last_time"):
+        last_day = int(config[feed]["last_time"].strftime("%d")) # day
+        if last_day != day:
+            wipe = True
 
-    import subprocess
-    args = [ config[feed]["generator"] ]
-    args.extend( config[feed]["draw_args"] )
-    args.extend( [ "--number", str(mins), "--env", str(int(float(light)))])
-    print >>sys.stderr, "calling generator: %s" % args
-    p = subprocess.Popen( args, stdout=subprocess.PIPE )
-    stdout, result = p.communicate()
+    #save the date
+    config[feed]["last_time"] = date
+
+    generator_args = [ config[feed]["generator"] ]
+    generator_args.extend( config[feed]["draw_args"] )
+    if wipe:
+        generator_args.append( "--wipe" )
+    generator_args.extend( [ "--number", str(mins), "--env", str(int(float(light)))])
+    if args.debug:
+        print >>sys.stderr, "calling generator: %s" % generator_args
+    p = subprocess.Popen( generator_args, stdout=subprocess.PIPE )
+    stdout,stderr = p.communicate()
     if args.debug:
         print stdout
-    if result == 0 and config[feed]["needs_polar"]:
-      print >>sys.stderr, "new svg"
+        if p.returncode == 0:
+            print "generator created svg file"
+
+    if p.returncode == 0 and config[feed]["needs_polar"]:
+      print >>sys.stderr, "convert svg to gcode"
       #run the pycam stuff here
       result = subprocess.call([args.pycam, "square.svg", "--export-gcode=square.ngc", "--process-path-strategy=engrave"])
       if result == 0: #unix for all good
-        print >>sys.stderr, "process gcode to polar code"
+        print >>sys.stderr, "convert gcode to polar code"
         p = subprocess.Popen(["./preprocess.py", "--file", "square.ngc"], stdout=subprocess.PIPE)
-        gcode, err = p.communicate()
+        gcode,stderr = p.communicate()
         fh = open( "square.polar", "w" )
         fh.write(gcode)
         fh.close()
-        print "written polar code"
 
         #move the svg file to history with a timestamp
         newfile = "./history/" + str(seconds) + ".svg" 
@@ -64,8 +80,6 @@ def processData((light,time,feed)):
         #move the svg file to history with a timestamp
         newfile = "./bustsvg/" + str(seconds) + ".svg" 
         os.rename("square.svg", newfile)
-    else:
-        print "no svg"
         
 class postHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_POST(self):
