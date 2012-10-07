@@ -38,7 +38,7 @@ def processData((light,time,feed)):
 #    import pdb;pdb.set_trace()
     wipe = False
     #do we need to start afresh with a new drawing?
-    if config[feed]["start_daily"] and config[feed].has_key("last_time"):
+    if config[feed].has_key("start_daily") and config[feed].has_key("last_time"):
         last_day = int(config[feed]["last_time"].strftime("%d")) # day
         if last_day != day:
             wipe = True
