@@ -119,6 +119,9 @@ if __name__ == '__main__':
   argparser.add_argument('--dir',
       action='store', dest='dir', default="./",
       help="directory for files")
+  argparser.add_argument('--wipe',
+      action='store_const', const=True, dest='wipe', default=False,
+      help="start with a new tree")
   argparser.add_argument('--load',
       action='store_const', const=True, dest='load', default=False,
       help="load values for env and number")
@@ -137,6 +140,13 @@ if __name__ == '__main__':
   state = {}
   loadedvars = {} 
 
+  if args.wipe:
+    print "wiping"
+    fromfile = open(args.dir + "tree_init.svg",'r')
+    tofile = open(args.dir + "tree.svg",'w')
+    tofile.write(fromfile.read())
+    tofile.close()
+    fromfile.close()
 
   if args.load:
     print "using numbers from file"
