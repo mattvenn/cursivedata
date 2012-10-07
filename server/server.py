@@ -65,23 +65,23 @@ def processData((light,time,feed)):
     if p.returncode == 0 and config[feed]["needs_polar"]:
       print >>sys.stderr, "convert svg to gcode"
       #run the pycam stuff here
-      result = subprocess.call([args.pycam, temp_dir + "square.svg", "--export-gcode=" + temp_dir + "square.ngc", "--process-path-strategy=engrave"])
+      result = subprocess.call([args.pycam, tmp_dir + "square.svg", "--export-gcode=" + tmp_dir + "square.ngc", "--process-path-strategy=engrave"])
       if result == 0: #unix for all good
         print >>sys.stderr, "convert gcode to polar code"
-        p = subprocess.Popen(["./preprocess.py", "--file", temp_dir + "square.ngc"], stdout=subprocess.PIPE)
+        p = subprocess.Popen(["./preprocess.py", "--file", tmp_dir + "square.ngc"], stdout=subprocess.PIPE)
         gcode,stderr = p.communicate()
-        fh = open( temp_dir + "square.polar", "w" )
+        fh = open( tmp_dir + "square.polar", "w" )
         fh.write(gcode)
         fh.close()
 
         #move the svg file to history with a timestamp
-        newfile = temp_dir + "history/" + str(seconds) + ".svg" 
-        os.rename(temp_dir + "square.svg", newfile)
+        newfile = tmp_dir + "history/" + str(seconds) + ".svg" 
+        os.rename(tmp_dir + "square.svg", newfile)
 
       else:
         #move the svg file to history with a timestamp
-        newfile = temp_dir + "bustsvg/" + str(seconds) + ".svg" 
-        os.rename(temp_dir + "square.svg", newfile)
+        newfile = tmp_dir + "bustsvg/" + str(seconds) + ".svg" 
+        os.rename(tmp_dir + "square.svg", newfile)
         
 class postHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_POST(self):
