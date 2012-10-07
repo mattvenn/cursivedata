@@ -52,7 +52,7 @@ def processData((light,time,feed)):
     generator_args.extend( config[feed]["draw_args"] )
     if wipe:
         generator_args.append( "--wipe" )
-    generator_args.extend( [ "--number", str(mins), "--env", str(int(float(light)))])
+    generator_args.extend( [ "--dir", tmp_dir, "--number", str(mins), "--env", str(int(float(light)))])
     if args.debug:
         print >>sys.stderr, "calling generator: %s" % generator_args
     p = subprocess.Popen( generator_args, stdout=subprocess.PIPE )
@@ -65,7 +65,10 @@ def processData((light,time,feed)):
     if p.returncode == 0 and config[feed]["needs_polar"]:
       print >>sys.stderr, "convert svg to gcode"
       #run the pycam stuff here
-      result = subprocess.call([args.pycam, tmp_dir + "square.svg", "--export-gcode=" + tmp_dir + "square.ngc", "--process-path-strategy=engrave"])
+      pycam_args = [args.pycam, tmp_dir + "square.svg", "--export-gcode=" + tmp_dir + "square.ngc", "--process-path-strategy=engrave"]
+      if args.debug:
+        print pycam_args
+      result = subprocess.call(pycam_args)
       if result == 0: #unix for all good
         print >>sys.stderr, "convert gcode to polar code"
         p = subprocess.Popen(["./preprocess.py", "--file", tmp_dir + "square.ngc"], stdout=subprocess.PIPE)
