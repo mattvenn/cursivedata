@@ -43,20 +43,20 @@ def setup(args):
   dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
   return dwg
 
-def square(x,y, width,dwg,id,args):
+def square(x,y, width,dwg,id,args,hidden):
   points = []
   hWidth = width/2
   #p = path("M%dmm,%dmm" % (x-hWidth,y-hWidth))
-  sh=StyleBuilder()
-  sh.setFilling('none')
-  sh.setStroke('#000')
-  sh.setStrokeWidth('0.1')
+  style_dict = { "fill":"none", "stroke":"#000", "stroke-width":"0.1" }
+  if hidden:
+    style_dict["display"]="none"
 
-  p = path("M%d,%d" % (x-hWidth,y-hWidth),style=sh.getStyle())
+  p = path("M%d,%d" % (x-hWidth,y-hWidth))
   p.appendLineToPath(x+hWidth,y-hWidth,False)
   p.appendLineToPath(x+hWidth,y+hWidth,False)
   p.appendLineToPath(x-hWidth,y+hWidth,False)
   p.appendLineToPath(x-hWidth,y-hWidth,False)
+  p.set_style(StyleBuilder(style_dict).getStyle())
   p.set_id(id)
   if args.rotate:
     p.set_transform("rotate(%d,%d,%d)" % ((int(id)*args.rotate) % 360 ,x,y))
@@ -90,7 +90,7 @@ if __name__ == '__main__':
       action='store', dest='ydiv', type=int, default=12,
       help="divide paper into y divs")
   argparser.add_argument('--value',
-      action='store', dest='value', type=int, default=5000,
+      action='store', dest='value', type=int, default=3000,
       help="value of each square")
   argparser.add_argument('--rotate',
       action='store', dest='rotate', type=int, default=0,
@@ -212,8 +212,8 @@ if __name__ == '__main__':
           print "square #%d width %d" % ( i, width )
           newfile = True
           if not args.loadhistory:
-              square( startx,starty, width, dwg, id,args )
-          square( startx,starty, width, concat, id,args )
+              square( startx,starty, width, dwg, id,args,False )
+          square( startx,starty, width, concat, id,args,True )
 
         if not args.loadhistory:
           dwg.save(args.dir + "square.svg")
