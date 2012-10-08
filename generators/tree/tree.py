@@ -52,43 +52,13 @@ def leaf(x,y,width,dwg,id,args):
   leaf = leafsvg.getElementAt(1)
   rotate = random.randint(0,360)
   th=TransformBuilder()
-  scale = random.uniform(0.1,1)
-#  scale = width #random.uniform(0.1,1)
-  th.setScaling( scale ) # scale ) #width )
+  th.setScaling( width ) 
   th.setRotation( rotate)
-  th.setTranslation( "%d,%d" % ( x, y ) )
-  """
-  leaf.set_transform("rotate(%d,%d,%d)" % (rotate,x,y))
-  leaf.set_transform("translate(%d,%d)" % (x,y))
-  leaf.set_transform("scale(%d)" % (width))
-  """
+  th.setTranslation( "%d,%d" % ( x ,y ) )
   leaf.set_transform(th.getTransform())
   leaf.set_id(id)
   dwg.addElement(leaf)
 
-
-"""
-def square(x,y, width,dwg,id,args):
-  points = []
-  hWidth = width/2
-  #p = path("M%dmm,%dmm" % (x-hWidth,y-hWidth))
-  sh=StyleBuilder()
-  sh.setFilling('none')
-  sh.setStroke('#000')
-  sh.setStrokeWidth('0.1')
-
-  p = path("M%d,%d" % (x-hWidth,y-hWidth),style=sh.getStyle())
-  p.appendLineToPath(x+hWidth,y-hWidth,False)
-  p.appendLineToPath(x+hWidth,y+hWidth,False)
-  p.appendLineToPath(x-hWidth,y+hWidth,False)
-  p.appendLineToPath(x-hWidth,y-hWidth,False)
-  p.set_id(id)
-  if args.rotate:
-    p.set_transform("rotate(%d,%d,%d)" % (id*args.rotate,x,y))
-  #group.addElement(p)
-  #dwg.addElement(group)
-  dwg.addElement(p)
-"""
 
 if __name__ == '__main__':
   argparser = argparse.ArgumentParser(
@@ -114,7 +84,7 @@ if __name__ == '__main__':
       help="value of each square")
   """
   argparser.add_argument('--scale',
-      action='store', dest='scale', type=float, default=40000,
+      action='store', dest='scale', type=float, default=100,
       help="divide data total by this number to get svg scale amount")
   argparser.add_argument('--dir',
       action='store', dest='dir', default="./",
@@ -128,6 +98,9 @@ if __name__ == '__main__':
   argparser.add_argument('--debug',
       action='store_const', const=True, dest='debug', default=False,
       help="debug print")
+  argparser.add_argument('--drawnow',
+      action='store_const', const=True, dest='drawnow', default=False,
+      help="draw a leaf of given size immediately")
   argparser.add_argument('--drawoutline',
       action='store_const', const=True, dest='drawoutline', default=False,
       help="draw the outline of the square")
@@ -208,7 +181,7 @@ if __name__ == '__main__':
       if args.debug:
         print "last number: %d, number: %d, value: %d" % ( last_number, state["number"], value )
 
-      if last_number != state["number"]: #if move onto next minute
+      if last_number != state["number"] or args.drawnow: #if move onto next minute
 
         scale = float(state["startenv"]) / args.scale 
         if args.debug:
