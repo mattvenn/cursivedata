@@ -5,33 +5,33 @@
 <script type="text/javascript">
     function load()
     {
-        var range = document.getElementById("frame");
-        range.min = min;
-        range.max = max;
-        range.value = max;
-        toggleVis("range");
+        var slider = document.getElementById("slider");
+        slider.min = min;
+        slider.max = max;
+        slider.value = max;
+        toggleVis("slider");
 
     }
     function toggleVis(sliderID) 
     {
-        var x = document.getElementById("rangeVal");
-        var y = document.getElementById("frame");
+        var sliderText = document.getElementById("rangeVal");
+        var slider = document.getElementById("slider");
         var embed = document.getElementById('embed');
         svgdocument = embed.getSVGDocument();
-        x.value = y.value;
+        sliderText.value = slider.value;
         for (i=min; i<=max; i+=1)
         {
             var svgid = i; //= "id" + i + ":id" + i ;
-            var para = svgdocument.getElementById(svgid);
-            if( para )
+            var square = svgdocument.getElementById(svgid);
+            if( square )
             {
-            if( i >= y.value )
+            if( i >= slider.value )
             {
-                para.style.display = "none";
+                square.style.display = "none";
             }
             else
             {
-                para.style.display = "";
+                square.style.display = "inline";
             }
             }
         }
@@ -42,7 +42,7 @@
 <div>
 <a href="debug.html">debug info</a>
 <br>
-<input id="frame" type="range" min="0" style="width:1000px" max="0" step="1" onchange="toggleVis()">
+<input id="slider" type="range" min="0" style="width:1000px" max="0" step="60" onchange="toggleVis()">
 <input id="rangeVal" type="text" size="8"/>
 </div>
 <div>
