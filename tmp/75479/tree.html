@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="text/javascript">
+    function load()
+    {
+        var slider = document.getElementById("slider");
+        min = 0;
+        max = 144;
+        slider.min = min;
+        slider.max = max;
+        slider.value = max;
+        toggleVis("slider");
+
+    }
+    function toggleVis(sliderID) 
+    {
+        var embed = document.getElementById('embed');
+        svgdocument = embed.getSVGDocument();
+        for (i=min; i<=max; i+=1)
+        {
+            var svgid = i; //= "id" + i + ":id" + i ;
+            var square = svgdocument.getElementById(svgid);
+            if( square )
+            {
+            if( i >= slider.value )
+            {
+                square.style.display = "none";
+            }
+            else
+            {
+                square.style.display = "inline";
+            }
+            }
+        }
+    }
+</script>
+</head>
+<body onload="load()">
+<div>
+<embed src="tree.svg" type="image/svg+xml" id="embed" />  
+</div>
+<div>
+<input id="slider" type="range" min="0" style="width:500px" max="0" step="1" onchange="toggleVis()">
+</div>
+
+</body>
+</html>
