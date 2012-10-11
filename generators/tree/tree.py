@@ -3,6 +3,7 @@
 bugs:
 """
 
+import datetime
 import random
 import pickle
 import math
@@ -46,11 +47,32 @@ def setup(args):
   dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
   return dwg
 
+def get_style():
+    style=StyleBuilder()
+    style.setFontFamily(fontfamily="Verdana")
+    style.setFontSize(args.height / 20 )
+    style.setFilling("black")
+    return style.getStyle()
 
-def leaf(x,y,width,dwg,id,args):
+def write_date(svg):
+    print "date"
+    now = datetime.datetime.now()
+    date = now.strftime("%d/%m/%Y")
+    print date
+    t=text(date,10,args.height)
+    t.set_style(get_style())
+    svg.addElement(t)
+
+
+def write_scale(svg):
+    leaf(10,args.height - 100,1,svg,0,0,args)
+    t=text("= 1kWh",50, args.height - 60)
+    t.set_style(get_style())
+    svg.addElement(t)
+
+def leaf(x,y,width,dwg,id,rotate,args):
   leafsvg = parser.parse(args.dir + "leaf.svg")
   leaf = leafsvg.getElementAt(1)
-  rotate = random.randint(0,360)
   th=TransformBuilder()
   th.setScaling( width ) 
   th.setRotation( rotate)
@@ -64,10 +86,10 @@ if __name__ == '__main__':
   argparser = argparse.ArgumentParser(
       description="generates square based energy drawings")
   argparser.add_argument('--height',
-      action='store', dest='height', type=int, default=200,
+      action='store', dest='height', type=int, default=500,
       help="height of paper")
   argparser.add_argument('--width',
-      action='store', dest='width', type=int, default=200,
+      action='store', dest='width', type=int, default=500,
       help="width of paper")
   argparser.add_argument('--startenv',
       action='store', dest='startenv', type=int, default=0,
@@ -121,6 +143,7 @@ if __name__ == '__main__':
     tofile.close()
     fromfile.close()
 
+
   if args.load:
     print "using numbers from file"
     loadedvars = pickle.load( open( args.dir + vars.p, "rb" ) )
@@ -139,6 +162,10 @@ if __name__ == '__main__':
       if args.debug:
         print "problem parsing concat"
       concat = setup(args)
+
+  if args.wipe:
+    write_date(concat)
+    write_scale(concat)
 
   #draw outline square
   if args.drawoutline:
@@ -197,10 +224,11 @@ if __name__ == '__main__':
         while starty > (args.height / 2) or starty < border:
           starty = random.randint(0, args.height)
 
+        rotate = random.randint(0,360)
         if not args.loadhistory:
-            leaf( startx,starty, scale, dwg, last_number,args )
+            leaf( startx,starty, scale, dwg, last_number,rotate,args )
             dwg.save(args.dir + "leaf_frame.svg")
-        leaf( startx,starty, scale, concat, last_number,args )
+        leaf( startx,starty, scale, concat, last_number,rotate,args )
         newfile = True
 
       state["startenv"] += value
