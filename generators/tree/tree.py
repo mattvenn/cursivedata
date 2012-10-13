@@ -66,7 +66,16 @@ def write_date(svg):
 
 def write_scale(svg):
     leaf(10,args.height - 100,1,svg,0,0,args)
-    t=text("= 1kWh",50, args.height - 60)
+    #assume we get something every 5 minutes - wrong assumption but for now
+    #the number we get in is in watts, eg 100 = 100W
+    #so if scale is 100, 100W will result in leaf being scaled to 1(original  size)
+    #so a full size leaf is equal in energy to 100W for 5min
+    #typical is in hours, so divide by (60/5) 12 = 100/12 = 8.3wH
+    #if it was 100W but scale is 50, then a full size leaf is 50W for 5 mins
+    #so leaf is 50/20 = 2wH
+    #so scale text is args.scale/12
+    scale_text = "= %.1fWh" % ( args.scale / 12 )
+    t=text(scale_text,50, args.height - 60)
     t.set_style(get_style())
     svg.addElement(t)
 
