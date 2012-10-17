@@ -145,12 +145,15 @@ if __name__ == '__main__':
   loadedvars = {} 
 
   if args.wipe:
-    print "wiping"
-    fromfile = open(args.dir + "tree_init.svg",'r')
-    tofile = open(args.dir + "tree.svg",'w')
-    tofile.write(fromfile.read())
-    tofile.close()
-    fromfile.close()
+    try:
+        print "wiping"
+        fromfile = open(args.dir + "tree_init.svg",'r')
+        tofile = open(args.dir + "tree.svg",'w')
+        tofile.write(fromfile.read())
+        tofile.close()
+        fromfile.close()
+    except IOError as (errno, strerror):
+        print "I/O error({0}): {1}".format(errno, strerror)
 
 
   if args.load:
