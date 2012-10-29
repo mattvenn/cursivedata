@@ -5,31 +5,49 @@
     function load()
     {
         var slider = document.getElementById("slider");
+        var time = document.getElementById("time");
         min = 0;
         max = 144;
         slider.min = min;
         slider.max = max;
         slider.value = max;
         toggleVis("slider");
+        setTime();
 
+    }
+    function setTime()
+    {
+        var embed = document.getElementById('embed');
+        var svgdocument = embed.getSVGDocument();
+        var datetext = svgdocument.getElementById("datetext");
+
+        var totalminutes = slider.value * 10;
+        var hours = Math.floor(totalminutes / 60);
+        var minutes = totalminutes - hours * 60;
+        if( hours < 10 )
+            hours = "0" + hours;
+        if( minutes < 10 )
+            minutes = "0" + minutes;
+        datetext.textContent = hours + ":" + minutes; 
     }
     function toggleVis(sliderID) 
     {
         var embed = document.getElementById('embed');
-        svgdocument = embed.getSVGDocument();
+        var svgdocument = embed.getSVGDocument();
+        setTime();
         for (i=min; i<=max; i+=1)
         {
             var svgid = i; //= "id" + i + ":id" + i ;
-            var square = svgdocument.getElementById(svgid);
-            if( square )
+            var leaf = svgdocument.getElementById(svgid);
+            if( leaf )
             {
             if( i >= slider.value )
             {
-                square.style.display = "none";
+                leaf.style.display = "none";
             }
             else
             {
-                square.style.display = "inline";
+                leaf.style.display = "inline";
             }
             }
         }

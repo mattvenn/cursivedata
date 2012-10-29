@@ -63,9 +63,14 @@ def write_date(svg):
     t.set_style(get_style())
     svg.addElement(t)
 
+    t=text("24:00",110,args.height)
+    t.set_style(get_style())
+    t.set_id("datetext")
+    svg.addElement(t)
 
 def write_scale(svg):
-    leaf(10,args.height - 100,1,svg,0,0,args)
+    id = -1 #no id for the leaf
+    leaf(10,args.height - 100,1,svg,id,0,args)
     #assume we get something every 5 minutes - wrong assumption but for now
     #the number we get in is in watts, eg 100 = 100W
     #so if scale is 100, 100W will result in leaf being scaled to 1(original  size)
