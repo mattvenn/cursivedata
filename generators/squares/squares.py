@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
       id = args.number
       startid = 0
-      writeJSVars(id,startid)
+      writeJSVars(id + 1, startid)
 
       if args.debug:
           print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
