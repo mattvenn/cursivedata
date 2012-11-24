@@ -206,10 +206,8 @@ if __name__ == '__main__':
       startSquare = int(state["startenv"] / args.value)
       endSquare = int(args.env / args.value)
 
-      now = datetime.datetime.now()
-      start_date = now - datetime.timedelta(hours=12)
-      id = now.strftime("%s")
-      startid = start_date.strftime("%s")
+      id = args.number
+      startid = 0
       writeJSVars(id,startid)
 
       if args.debug:
