@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 bugs:
   with squareIncMM an odd number, the squares don't join up properly...
