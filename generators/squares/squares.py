@@ -10,6 +10,8 @@ import sys
 import math
 import argparse
 import json
+from xml.dom import Node
+from pysvg.core import TextContent
 from pysvg.shape import *
 from pysvg import parser
 from pysvg.style import *
@@ -42,6 +44,15 @@ def setup(args):
   dwg = svg(width=widthmm,height=heightmm)
   dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
   return dwg
+
+def stripsvg(root):
+    """Remove any nodes which just contain whitespace."""
+    for i, node in enumerate(reversed(root.getAllElements())):
+        if isinstance(node, TextContent) and not node.content.strip():
+            del root._subElements[i]
+        else:
+            stripsvg(node)
+
 
 def square(x,y, width,dwg,id,args,hidden):
   points = []
@@ -132,6 +143,7 @@ if __name__ == '__main__':
   #also setup concat drawing
   try:
       concat = parser.parse(args.dir + "concat.svg")
+      stripsvg(concat)
       if args.debug:
         print "parsed concat ok"
   except IOError:
