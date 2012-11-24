@@ -213,7 +213,7 @@ if __name__ == '__main__':
           newfile = True
           if not args.loadhistory:
               square( startx,starty, width, dwg, id,args,False )
-          square( startx,starty, width, concat, id,args,True )
+          square( startx,starty, width, concat, id,args, False )
 
         if not args.loadhistory:
           dwg.save(args.dir + "square.svg")
