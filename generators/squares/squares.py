@@ -202,7 +202,7 @@ if __name__ == '__main__':
 
       if args.debug:
           print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
-          print "id:%d" % (id)
+          print "id:%s" % (id)
           print "x:%d y:%d" % ( startx, starty )
           print "start sq:%d end sq:%d" % ( startSquare, endSquare )
 
