@@ -134,7 +134,7 @@ if __name__ == '__main__':
       concat = parser.parse(args.dir + "concat.svg")
       if args.debug:
         print "parsed concat ok"
-  except:
+  except IOError:
       if args.debug:
         print "problem parsing concat"
       concat = setup(args)
