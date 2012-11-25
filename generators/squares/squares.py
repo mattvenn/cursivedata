@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 bugs:
   with squareIncMM an odd number, the squares don't join up properly...
@@ -10,6 +10,8 @@ import sys
 import math
 import argparse
 import json
+from xml.dom import Node
+from pysvg.core import TextContent
 from pysvg.shape import *
 from pysvg import parser
 from pysvg.style import *
@@ -42,6 +44,15 @@ def setup(args):
   dwg = svg(width=widthmm,height=heightmm)
   dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
   return dwg
+
+def stripsvg(root):
+    """Remove any nodes which just contain whitespace."""
+    for i, node in enumerate(reversed(root.getAllElements())):
+        if isinstance(node, TextContent) and not node.content.strip():
+            del root._subElements[i]
+        else:
+            stripsvg(node)
+
 
 def square(x,y, width,dwg,id,args,hidden):
   points = []
@@ -132,9 +143,10 @@ if __name__ == '__main__':
   #also setup concat drawing
   try:
       concat = parser.parse(args.dir + "concat.svg")
+      stripsvg(concat)
       if args.debug:
         print "parsed concat ok"
-  except:
+  except IOError:
       if args.debug:
         print "problem parsing concat"
       concat = setup(args)
@@ -194,15 +206,13 @@ if __name__ == '__main__':
       startSquare = int(state["startenv"] / args.value)
       endSquare = int(args.env / args.value)
 
-      now = datetime.datetime.now()
-      start_date = now - datetime.timedelta(hours=12)
-      id = now.strftime("%s")
-      startid = start_date.strftime("%s")
-      writeJSVars(id,startid)
+      id = args.number
+      startid = 0
+      writeJSVars(id + 1, startid)
 
       if args.debug:
           print "number:%d\nstartenv:%d\nenv:%d" % (state["number"], state["startenv"], args.env)
-          print "id:%d" % (id)
+          print "id:%s" % (id)
           print "x:%d y:%d" % ( startx, starty )
           print "start sq:%d end sq:%d" % ( startSquare, endSquare )
 
@@ -213,7 +223,7 @@ if __name__ == '__main__':
           newfile = True
           if not args.loadhistory:
               square( startx,starty, width, dwg, id,args,False )
-          square( startx,starty, width, concat, id,args,True )
+          square( startx,starty, width, concat, id,args, False )
 
         if not args.loadhistory:
           dwg.save(args.dir + "square.svg")
