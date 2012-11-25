@@ -15,32 +15,41 @@ class Generator( models.Model ) :
     module_name = models.CharField(max_length=200)
     module = None
     def init(self) :
-        self.module = get_file( self.module_name )
+        self.module = self.get_file( self.module_name )
         return
     #Processes a given chunk of data to return some SVG
-    def process_data( self, data, state ) :
+    def process_data( self, data, params, state ) :
         #print "Processing data with",map(str,state.generatorstateparameter_set.all())
-        return self.module.process(data,state)
+        return self.module.process(data,params,state)
     def __unicode__(self):
         return self.name
     @staticmethod
     def create_from_file(module_name) :
         mod = Generator.get_file( module_name )
         g = Generator( name=mod.get_name(), description=mod.get_description(), module_name=module_name )
-        g.save();
+        g.save()
         for p in mod.get_params() :
-            param = Parameter( name=p["name"] )
+            param = Parameter( name=p["name"], default=p["default"] )
             g.parameter_set.add( param )
             param.save()
-        return g;
+        return g
             
     @staticmethod
-    def get_file(module_name) : #No error checking yet!
+    def get_file(module_name) : #No error checking yet!))
         f, filename, data = find_module(module_name, ["./scripts"])
         return load_module(module_name, f, filename, data)
 
+    def get_state( self ) :
+        s = GeneratorState( name=self.name, generator=self )
+        s.save()
+        for p in self.parameter_set.all():
+            ps = GeneratorStateParameter( parameter=p, state=s, value=p.default )
+            ps.save()
+        return s
+
 class Parameter( models.Model ) :
     name = models.CharField(max_length=200)
+    default = models.FloatField()
     generator = models.ForeignKey( Generator )
     def __unicode__(self):
         return self.name
@@ -75,8 +84,27 @@ class FileDataSource( DataSource ) :
 class GeneratorState( models.Model ):
     name = models.CharField(max_length=200)
     generator = models.ForeignKey( Generator )
+    params = {}
+    def update(self) :
+        for p in self.generatorstateparameter_set:
+            self.params[p.parameter.name] = p
+        
+    def get_param(self,name) :
+        self.update() #Ugly - find a better way when Dave understands the database model better
+        return self.params[name].value
     def __unicode__(self):
         return self.name
+
+    def params_to_dict(self) :
+        state = {}
+        for p in self.generatorstateparameter_set.all():
+            state[p.parameter.name] = p.value
+        return state
+    def params_from_dict(self,data):
+        self.update()
+        for (key,value) in data.iteritems() :
+            self.params[key].value = value
+
 
 class GeneratorStateParameter( models.Model ):
     parameter = models.ForeignKey( Parameter )
@@ -85,6 +113,7 @@ class GeneratorStateParameter( models.Model ):
     def __unicode__(self):
         return self.parameter.name+"="+str(self.value)
 
+#A Robot, or other output device
 class Endpoint( models.Model ):
     name = models.CharField(max_length=200)
     device = models.CharField(max_length=200)
@@ -107,10 +136,8 @@ class Pipeline( models.Model ) :
     #Executes the pipeline by running the generator on the next bit of data
     def update( self ) :
         data = self.data_source.get_next_data()
-        print "Data",str(data)
-        state = self.state 
-        print "State",str(state)
-        retVal = self.generator.process_data( data, state )
+        params = self.state.params_to_dict();
+        retVal = self.generator.process_data( data, params, state )
         self.state.save()
         print str(self),"using",str(self.generator),"to send to endpoint", str(self.endpoint)
         print "Sending data", str( retVal  )
@@ -135,3 +162,12 @@ def setup_test_data() :
     p1 = Pipeline(name="Test Pipeline",data_source=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
     p1.save()
     return p1
+
+def testing() :
+    g = Generator.create_from_file("squares2")
+    g.save()
+    gs = g.get_state()
+    g.init()
+    data = [ (0,1), (1,2), (3,4) ]
+    state = { "number":2, "startenv":1 }
+    g.process_data( data, gs.params_to_dict(), state )
