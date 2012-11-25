@@ -22,6 +22,9 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGALRM, handler)
 signal.signal(signal.SIGINT, signal_handler)
 
+"""
+this requires the robot to respond in the expected way, where all responsed end with "ok"
+"""
 def readResponse(args,serial,timeout=10):
   response = ""
   #print "setting timeout to", timeout
@@ -61,13 +64,16 @@ def initRobot(args):
     serial.write("c")
     readResponse(args,serial,0)
 
+  print "speed and pwm"
   #speed and pwm
   serial.write("p%d,%d" % (args.speed, args.pwm ))
   readResponse(args,serial)
   #ms
+  print "microstep: %d, %d" % (MS0, MS1 )
   serial.write("i%d,%d" % (MS0, MS1 ))
   readResponse(args,serial)
   #where are we
+  print "where are we?"
   serial.write("q")
   readResponse(args,serial)
 
