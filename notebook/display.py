@@ -8,9 +8,7 @@ from IPython.core.display import DisplayObject, Javascript
 class SVGSliderJS(Javascript):
 
     def __init__(self, feedId, width='100%', height='700px'):
-        lib = ["files/tmp/%d/vars.js" % feedId]
         data = """
-            var min = 0, max = 76;
             var slider = $('<input type="range" style="width:%(width)s" step="1">').appendTo(element);
             var rangeVal = $('<input type="text" size="8" />').appendTo(element);
             var embed = $('<embed src="files/tmp/%(feedId)d/concat.svg" type="image/svg+xml" style="height:%(height)s;width:%(width)s" />').appendTo(element);
@@ -50,6 +48,10 @@ class SVGSliderJS(Javascript):
             };
 
             embedElem.onload = function() {
+                var svg = $(embedElem.getSVGDocument());
+                var elems = svg.find('svg').children();
+                var min = +elems.first().attr('id');
+                var max = +elems.last().attr('id') + 1;
                 slider.change(toggleVis);
                 slider.attr('min', min);
                 slider.attr('max', max);
@@ -61,4 +63,4 @@ class SVGSliderJS(Javascript):
 
             container.show();
         """ % {'feedId': feedId, 'width': width, 'height': height}
-        super(SVGSliderJS, self).__init__(data=data, lib=lib)
+        super(SVGSliderJS, self).__init__(data=data)
