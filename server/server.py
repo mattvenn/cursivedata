@@ -1,60 +1,90 @@
 #!/usr/bin/python
 from TimeStats import TimeStats
 import sys
+import subprocess
 import json
 import argparse
 import SocketServer
 import SimpleHTTPServer
 import urllib
 import os
+import iso8601
+from config import config
   
 #how to do this properly?
 cosmPostTimes = TimeStats()
+
 
 def extractData(line):
     jsondata = urllib.unquote(line)
     trigger = json.loads(jsondata.lstrip("body="))
     light = trigger["triggering_datastream"]["value"]["value"]
     time = trigger["triggering_datastream"]["at"]
-    print "got %s at %s" % ( light, time )
-    return (light,time)
+    feed = trigger["environment"]["id"]
+    if args.debug:
+        print "got %s at %s for feed %s" % ( light, time, feed )
+    return (light,time, feed)
 
-def processData((light,time)):
+def processData((light,time,feed)):
     global args
-    import iso8601
     date = iso8601.parse_date(time)
     minute = int( date.strftime("%M") ) # minute 0 -59
     hour = int(date.strftime("%H") ) # hour 0 -23
+    day = int(date.strftime("%d") ) # day
+
+    #ten mins
     mins =  (minute + hour * 60)/10 # 0 - 143
     seconds = date.strftime("%s")
-    print seconds
+#    import pdb;pdb.set_trace()
+    wipe = False
+    #do we need to start afresh with a new drawing?
+    if config[feed].has_key("start_daily") and config[feed].has_key("last_time"):
+        last_day = int(config[feed]["last_time"].strftime("%d")) # day
+        if last_day != day:
+            wipe = True
 
-    import subprocess
-    print >>sys.stderr, "building squares"
-    result = subprocess.call([args.svggen, "--rotate", "20", "--number", str(mins), "--env", str(int(float(light)))])
-    if result == 0:
-      print >>sys.stderr, "new svg"
+    #save the date
+    config[feed]["last_time"] = date
+    
+    #tmp dir
+    tmp_dir = "../tmp/" + str(feed) + "/"
+    generator_args = [ config[feed]["generator"] ]
+    generator_args.extend( config[feed]["draw_args"] )
+    if wipe:
+        generator_args.append( "--wipe" )
+    generator_args.extend( [ "--dir", tmp_dir, "--number", str(mins), "--env", str(int(float(light)))])
+    if args.debug:
+        print >>sys.stderr, "calling generator: %s" % generator_args
+    p = subprocess.Popen( generator_args, stdout=subprocess.PIPE )
+    stdout,stderr = p.communicate()
+    if args.debug:
+        print stdout
+        if p.returncode == 0:
+            print "generator created svg file"
+
+    if p.returncode == 0 and config[feed]["needs_polar"]:
+      print >>sys.stderr, "convert svg to gcode"
       #run the pycam stuff here
-      result = subprocess.call([args.pycam, "square.svg", "--export-gcode=square.ngc", "--process-path-strategy=engrave"])
+      pycam_args = [args.pycam, tmp_dir + "square.svg", "--export-gcode=" + tmp_dir + "square.ngc", "--process-path-strategy=engrave"]
+      if args.debug:
+        print pycam_args
+      result = subprocess.call(pycam_args)
       if result == 0: #unix for all good
-        print >>sys.stderr, "process gcode to polar code"
-        p = subprocess.Popen(["./preprocess.py", "--file", "square.ngc"], stdout=subprocess.PIPE)
-        gcode, err = p.communicate()
-        fh = open( "square.polar", "w" )
+        print >>sys.stderr, "convert gcode to polar code"
+        p = subprocess.Popen(["./preprocess.py", "--file", tmp_dir + "square.ngc"], stdout=subprocess.PIPE)
+        gcode,stderr = p.communicate()
+        fh = open( tmp_dir + "square.polar", "w" )
         fh.write(gcode)
         fh.close()
-        print "written polar code"
 
         #move the svg file to history with a timestamp
-        newfile = "./history/" + str(seconds) + ".svg" 
-        os.rename("square.svg", newfile)
+        newfile = tmp_dir + "history/" + str(seconds) + ".svg" 
+        os.rename(tmp_dir + "square.svg", newfile)
 
       else:
         #move the svg file to history with a timestamp
-        newfile = "./bustsvg/" + str(seconds) + ".svg" 
-        os.rename("square.svg", newfile)
-    else:
-        print "no svg"
+        newfile = tmp_dir + "bustsvg/" + str(seconds) + ".svg" 
+        os.rename(tmp_dir + "square.svg", newfile)
         
 class postHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -86,15 +116,12 @@ if __name__ == '__main__':
   argparser.add_argument('--port',
       action='store', dest='port', type=int, default=10001,
       help="port")
-  argparser.add_argument('--startenv',
-      action='store', dest='startenv', type=int, default=0,
-      help="where to start from")
   argparser.add_argument('--pycam',
       action='store', dest='pycam', default="/usr/bin/pycam",
       help="where pycam is")
-  argparser.add_argument('--svggen',
-      action='store', dest='svggen', default="./squares.py",
-      help="where the svg generator program is")
+  argparser.add_argument('--debug',
+      action='store_const', const=True, dest='debug', default=False,
+      help="debug print")
 
   args = argparser.parse_args()
   run_server(args)

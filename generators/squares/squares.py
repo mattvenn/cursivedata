@@ -18,7 +18,7 @@ from pysvg.builders import *
 import iso8601
 
 def writeJSVars(id,startid):
-    fh = open( "vars.js", 'w' )
+    fh = open( args.dir + "vars.js", 'w' )
     fh.write( "var min = %s; var max = %s;" % (startid, id ))
     fh.close()
 
@@ -110,6 +110,9 @@ if __name__ == '__main__':
   argparser.add_argument('--loadhistory',
       action='store', dest='loadhistory', default=None,
       help="load a history file")
+  argparser.add_argument('--dir',
+      action='store', dest='dir', default="./",
+      help="directory for files")
 
 
   args = argparser.parse_args()
@@ -119,7 +122,7 @@ if __name__ == '__main__':
 
   if args.load:
     print "using numbers from file"
-    loadedvars = pickle.load( open( "vars.p", "rb" ) )
+    loadedvars = pickle.load( open( args.dir + "vars.p", "rb" ) )
     args.number = loadedvars["number"]
     args.env = loadedvars["env"]
 
@@ -128,7 +131,7 @@ if __name__ == '__main__':
 
   #also setup concat drawing
   try:
-      concat = parser.parse("concat.svg")
+      concat = parser.parse(args.dir + "concat.svg")
       if args.debug:
         print "parsed concat ok"
   except:
@@ -147,7 +150,7 @@ if __name__ == '__main__':
   #load of points at once
   if args.loadhistory:
     try:
-        fh = open(args.loadhistory)
+        fh = open(args.dir + args.loadhistory)
         jsondata = json.load(fh)
         data=processData(jsondata)
         state["startenv"] = 0
@@ -158,7 +161,7 @@ if __name__ == '__main__':
         exit(1)
   else:
     try:
-      state = pickle.load( open( "save.p", "rb" ) )
+      state = pickle.load( open( args.dir + "save.p", "rb" ) )
       #will throw an exception if not available
     except:
       print "exception loading state, creating default state"
@@ -213,14 +216,14 @@ if __name__ == '__main__':
           square( startx,starty, width, concat, id,args,True )
 
         if not args.loadhistory:
-          dwg.save("square.svg")
+          dwg.save(args.dir + "square.svg")
       
       state["startenv"] = args.env
 
-  concat.save("concat.svg")
+  concat.save(args.dir + "concat.svg")
 
   state["startenv"] = args.env;
-  pickle.dump( state, open( "save.p", "wb" ) )
+  pickle.dump( state, open( args.dir + "save.p", "wb" ) )
 
   #pycam can do text natively!
   #dwg.add(dwg.text('Test', insert=(0, 0.2), fill='black'))

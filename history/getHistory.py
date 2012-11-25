@@ -18,7 +18,7 @@ def fetchRange(start_date,end_date,key,feed_number):
             values = {
                       'start' : start_date.isoformat(),
                       'duration' : "6hours",
-                      'interval' : 0, #once a minute. 0 is everything but can only get 6 hours at a time
+                      'interval' : args.interval, #once a minute. 0 is everything but can only get 6 hours at a time
                       'key' : key,
                       'per_page' : per_page,
                       'page' : page,
@@ -81,6 +81,9 @@ if __name__ == '__main__':
   argparser.add_argument('--feed',
     action='store', dest='feed', type=int, default = 46756, #default is for bristol hackspace
       help="feed number")
+  argparser.add_argument('--interval',
+    action='store', dest='interval', default=0, type=int,
+      help="interval, 0 for everything")
   argparser.add_argument('--start',
     action='store', dest='start',
       help="start date")
