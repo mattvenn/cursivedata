@@ -49,10 +49,28 @@ class Parameter( models.Model ) :
 class DataSource( models.Model ) :
     name = models.CharField(max_length=200)
     #Returns the next bit of data to be drawn
-    def getNextData(self) : 
+    def get_next_data(self) : 
         return ""
     def __unicode__(self):
         return self.name
+
+#Testing data source which just reads a file in
+class FileDataSource( DataSource ) :
+    def __init__( self, file_name ):
+        self.file_name = file_name
+    file_name = "example.csv";
+    def get_next_data(self) :
+        data = [];
+        f = open(self.file_name, 'r')
+        for line in f :
+            l = line.strip();
+            if len(l) > 0 :
+                time,sep,val = l.partition(",")
+                d = (float(time),float(val))
+                data.append(d )
+        return data
+
+    
 
 class GeneratorState( models.Model ):
     name = models.CharField(max_length=200)
@@ -88,7 +106,7 @@ class Pipeline( models.Model ) :
 
     #Executes the pipeline by running the generator on the next bit of data
     def update( self ) :
-        data = self.data_source.getNextData()
+        data = self.data_source.get_next_data()
         print "Data",str(data)
         state = self.state 
         print "State",str(state)
