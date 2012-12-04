@@ -1,4 +1,8 @@
 #!/usr/bin/python
+"""
+main problem with reading and writing to the robot is that if we read too much we hang.
+if we don't read enough, the leonardo resets!
+"""
 import re
 import sys
 import tty
@@ -29,11 +33,13 @@ def finish():
   print serial
   print "closing serial"
   serial.close()
+#  store.close()
 
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
 """
 def readResponse(args,serial,timeout=3):
+
   response = ""
   while string.find(response,"ok"):
     try:
@@ -43,6 +49,8 @@ def readResponse(args,serial,timeout=3):
       signal.alarm(0)
       if args.verbose:
         print "<- %s" % response,
+      if args.store_file:
+        store.write(response)
     except TimeoutException:
       print "timeout %d secs on read" % timeout
       finish()
@@ -63,7 +71,7 @@ def initRobot(args):
   try:
     serialp=serial.Serial()
     serialp.port=port
-    serialp.baudrate=9600
+    serialp.baudrate=args.baud
     serialp.open()
   #  serial = open(port, 'r+')
   except IOError:
@@ -150,6 +158,9 @@ if __name__ == '__main__':
     parser.add_argument('--port',
         action='store', dest='port', type=int,
         help="port to listen on")
+    parser.add_argument('--baud',
+        action='store', dest='baud', type=int, default='57600',
+        help="baud rate")
     parser.add_argument('--command',
         action='store', dest='command', default='q',
         help="command to send")
@@ -159,6 +170,9 @@ if __name__ == '__main__':
     parser.add_argument('--file',
         action='store', dest='file', 
         help="file to open")
+    parser.add_argument('--store',
+        action='store', dest='store_file', 
+        help="file to write robot responses in")
     parser.add_argument('--verbose',
         action='store_const', const=True, dest='verbose', default=False,
         help="verbose")
@@ -199,6 +213,9 @@ if __name__ == '__main__':
     elif args.ms == 3:
       MS0 = 1
       MS1 = 1
+
+    if args.store_file:
+      store=open(args.store_file,'w+')
 
     if args.file:
       gcodes = readFile(args)
