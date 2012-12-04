@@ -7,11 +7,14 @@ import string
 import argparse
 import signal
 import socket
-
+import serial
 TIMEOUT = 0.5 # number of seconds your want for timeout
 
-def handler():
-  print "timed out on serial read"
+class TimeoutException(Exception): 
+  pass
+
+def timeout_handler(signum, frame):
+  raise TimeoutException()
 
 def signal_handler(signum, frame):
     print "closing socket"
@@ -19,15 +22,19 @@ def signal_handler(signum, frame):
     sock.close()
     exit(1)
 
-signal.signal(signal.SIGALRM, handler)
+signal.signal(signal.SIGALRM, timeout_handler)
 signal.signal(signal.SIGINT, signal_handler)
+
+def finish():
+  print serial
+  print "closing serial"
+  serial.close()
 
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
 """
-def readResponse(args,serial,timeout=10):
+def readResponse(args,serial,timeout=3):
   response = ""
-  #print "setting timeout to", timeout
   while string.find(response,"ok"):
     try:
       if(timeout > 0):
@@ -35,10 +42,11 @@ def readResponse(args,serial,timeout=10):
       response = serial.readline()
       signal.alarm(0)
       if args.verbose:
-        print "<", response,
-    except:
+        print "<- %s" % response,
+    except TimeoutException:
       print "timeout %d secs on read" % timeout
-      return
+      finish()
+  return
 
 def readFile(args):
 
@@ -51,33 +59,37 @@ def readFile(args):
   return gcodes
 
 def initRobot(args):
-  serial = None
   port = args.serialport
   try:
-    serial = open( port, 'r+' )
+    serialp=serial.Serial()
+    serialp.port=port
+    serialp.baudrate=9600
+    serialp.open()
+  #  serial = open(port, 'r+')
   except IOError:
     print "robot not connected?"
     exit(1)
-  tty.setraw(serial);
+#  tty.setraw(serial);
 
   if args.home:
-    serial.write("c")
-    readResponse(args,serial,0)
+    serialp.write("c")
+    readResponse(args,serialp,0)
 
-  print "speed and pwm"
-  #speed and pwm
-  serial.write("p%d,%d" % (args.speed, args.pwm ))
-  readResponse(args,serial)
-  #ms
-  print "microstep: %d, %d" % (MS0, MS1 )
-  serial.write("i%d,%d" % (MS0, MS1 ))
-  readResponse(args,serial)
-  #where are we
-  print "where are we?"
-  serial.write("q")
-  readResponse(args,serial)
+  if args.setup_robot:
+    print "speed and pwm"
+    #speed and pwm
+    serialp.write("p%d,%d" % (args.speed, args.pwm ))
+    readResponse(args,serialp)
+    #ms
+    print "microstep: %d, %d" % (MS0, MS1 )
+    serialp.write("i%d,%d" % (MS0, MS1 ))
+    readResponse(args,serialp)
+    #where are we
+    print "where are we?"
+    serialp.write("q")
+    readResponse(args,serialp)
 
-  return serial
+  return serialp
 
 def writeToRobot(args,serial,gcodes):
   p = re.compile( "^#" )
@@ -85,7 +97,7 @@ def writeToRobot(args,serial,gcodes):
     if p.match(line):
       print "skipping line:", line
     elif not line == None:
-      print "> %s" % line
+      print "-> %s" % line,
       if not args.norobot:
         serial.write(line)
         readResponse(args,serial)
@@ -138,6 +150,9 @@ if __name__ == '__main__':
     parser.add_argument('--port',
         action='store', dest='port', type=int,
         help="port to listen on")
+    parser.add_argument('--command',
+        action='store', dest='command', default='q',
+        help="command to send")
     parser.add_argument('--serialport',
         action='store', dest='serialport', default='/dev/ttyACM0',
         help="serial port to listen on")
@@ -153,6 +168,9 @@ if __name__ == '__main__':
     parser.add_argument('--home',
         action='store_const', const=True, dest='home', default=False,
         help="home to start")
+    parser.add_argument('--setup_robot',
+        action='store_const', const=True, dest='setup_robot', default=False,
+        help="send pwm, ms etc commands to robot before the given file")
     parser.add_argument('--pwm',
         action='store', dest='pwm', type=int, default=80,
         help="pwm to draw")
@@ -195,6 +213,13 @@ if __name__ == '__main__':
       else:
         serial = None
       listenPort(args,serial,sock)
+    elif args.command:
+        serial = initRobot(args)
+        gcodes=[args.command+"\n"]
+        writeToRobot(args,serial,gcodes)
+        finish()
+        print "finished"
+
     else:
       print "must specify either port or file"
       exit(1)
