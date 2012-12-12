@@ -22,6 +22,7 @@ def parse(args):
   gcodes = gcode.readlines()
   startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
   contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
+  polar_code=""
   #p = re.compile( "G([01])(?= Z(\S+))")
   for line in gcodes:
     s = startCode.match(line)
@@ -34,10 +35,10 @@ def parse(args):
       z = float(s.group(4))
       if z > 0 :
         #don't draw
-        print "d0"
+        polar_code += "d0\n"
       else:
         #draw
-        print "d1"
+        polar_code += "d1\n"
     elif c: 
       try:
         x = float(c.group(1))
@@ -51,7 +52,7 @@ def parse(args):
   #    print line
       outx = x*args.scale+args.xoffset
       outy = args.ysub - y*args.scale+args.yoffset
-      print "g%d,%d" %  (outx,outy) 
+      polar_code += "g%d,%d\n" %  (outx,outy) 
       lastX = x
       lastY = y
       if outx < xmin:
@@ -64,9 +65,14 @@ def parse(args):
         ymax = outy
 
   if args.showminmax:
-    print "# xmin %f xmax %f" % (xmin, xmax)
-    print "# ymin %f ymax %f" % (ymin, ymax)
+    polar_code += "# xmin %f xmax %f\n" % (xmin, xmax)
+    polar_code += "# ymin %f ymax %f\n" % (ymin, ymax)
 
+  if args.force_store:
+    print "s%d" % len(polar_code.splitlines())
+  print polar_code,
+  if args.force_store:
+    print "s\ne" 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -75,13 +81,13 @@ if __name__ == '__main__':
         action='store', dest='file', 
         help="file to open")
     parser.add_argument('--scale',
-        action='store', dest='scale', type=float, default=6.3,
+        action='store', dest='scale', type=float, default=5.0,
         help="scale factor")
     parser.add_argument('--ysub',
         action='store', dest='ysub', type=int, default=1500,
         help="need to reflect y axis atm, this is what the y is subtracted from. should be a bit bigger than maximum y")
     parser.add_argument('--yoffset',
-        action='store', dest='yoffset', type=int, default=800,
+        action='store', dest='yoffset', type=int, default=400,
         help="how far to move the file on y axis")
     parser.add_argument('--xoffset',
         action='store', dest='xoffset', type=int, default=1200,
@@ -89,6 +95,9 @@ if __name__ == '__main__':
     parser.add_argument('--showminmax',
         action='store_const', const=True, dest='showminmax', default=False,
         help="show the min and max xy after scaling")
+    parser.add_argument('--force_store',
+        action='store_const', const=True, dest='force_store', default=False,
+        help="forces the robot to store the drawing before doing it")
 
     args = parser.parse_args()
 
