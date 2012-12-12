@@ -68,11 +68,12 @@ def parse(args):
     polar_code += "# xmin %f xmax %f\n" % (xmin, xmax)
     polar_code += "# ymin %f ymax %f\n" % (ymin, ymax)
 
+  gcodes = len(polar_code.splitlines())
   if args.force_store:
-    print "s%d" % len(polar_code.splitlines())
+    print "s%d,0" % gcodes
   print polar_code,
   if args.force_store:
-    print "s\ne" 
+    print "s%d,0\ne%d,0" % (gcodes,gcodes)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
