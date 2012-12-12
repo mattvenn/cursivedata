@@ -71,7 +71,7 @@ def processData((light,time,feed)):
       result = subprocess.call(pycam_args)
       if result == 0: #unix for all good
         print >>sys.stderr, "convert gcode to polar code"
-        p = subprocess.Popen(["./preprocess.py", "--file", tmp_dir + "square.ngc"], stdout=subprocess.PIPE)
+        p = subprocess.Popen(["./preprocess.py", "--force_store", "--file", tmp_dir + "square.ngc"], stdout=subprocess.PIPE)
         gcode,stderr = p.communicate()
         fh = open( tmp_dir + "square.polar", "w" )
         fh.write(gcode)
