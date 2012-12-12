@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import argparse
 import re
+import sys
 
 def parse(args):
   try:
@@ -69,6 +70,16 @@ def parse(args):
     polar_code += "# ymin %f ymax %f\n" % (ymin, ymax)
 
   gcodes = len(polar_code.splitlines())
+  total_lines = gcodes
+
+  if args.force_store:
+    total_lines+=3
+
+  if total_lines>=15:
+    #too long for the robot!
+    print >> sys.stderr, "too many gcodes for the robot"
+    exit(1)
+
   if args.force_store:
     print "s%d,0" % gcodes
   print polar_code,
