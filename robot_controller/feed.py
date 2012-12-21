@@ -154,22 +154,24 @@ def listenPort(args,serial,sock):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="feed polar files to polargraph robot")
-    parser.add_argument('--port',
-        action='store', dest='port', type=int,
-        help="port to listen on")
+        description="feed polar files to polargraph robot",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--baud',
         action='store', dest='baud', type=int, default='57600',
         help="baud rate")
-    parser.add_argument('--command',
-        action='store', dest='command', default='q',
-        help="command to send")
     parser.add_argument('--serialport',
         action='store', dest='serialport', default='/dev/ttyACM0',
         help="serial port to listen on")
-    parser.add_argument('--file',
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--file',
         action='store', dest='file', 
-        help="file to open")
+        help="file containing commands")
+    group.add_argument('--command',
+        action='store', dest='command',
+        help="a single command to send")
+    group.add_argument('--port',
+        action='store', dest='port', type=int,
+        help="tcp port to listen on for commands")
     parser.add_argument('--store',
         action='store', dest='store_file', 
         help="file to write robot responses in")
