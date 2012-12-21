@@ -8,7 +8,8 @@ import sys
 from TimeStats import TimeStats
 
 nanodeGetTimes = TimeStats()
-dir = "/home/matt/polargraphenergymonitor/tmp/46756/"
+file="square.polar"
+dir = "/home/mattvenn/polargraphenergymonitor/tmp/46756/" 
 PORT = 10002
 
 class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -18,14 +19,16 @@ class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
     time_span = 10 * 60
     print >>sys.stderr, '>>>>connection from %s [%d in %dsecs]' % ( self.client_address, nanodeGetTimes.howMany(time_span),time_span)
     try:
-      fh = open(dir+"square.polar")
-      print "sending file: square.polar"
+      fh = open(dir+file)
       gcode = fh.read()
+      print "sending file %s, %d bytes" %( file, len(gcode))
       fh.close()
       self.send_response(200)
       self.send_header('Content-type','text/html')
       self.end_headers()
       self.wfile.write(gcode)
+      self.wfile.close()
+      """
       #then remove it
       print "moving old file"
       try:
@@ -36,7 +39,9 @@ class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
       except:
         e = sys.exc_info()[0]
         print "couldn't move file", e
-    except:
+      """
+      #TODO: sort this global except done
+    except IOError:
       print "no new data"
       self.send_response(404)
       self.send_header('Content-type','text/html')
@@ -44,7 +49,7 @@ class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
     return
 
 print "serving at port", PORT
-server = SocketServer.ThreadingTCPServer(("mattvenn.net", PORT), Proxy,False)
+server = SocketServer.ThreadingTCPServer(("192.168.0.100", PORT), Proxy,False)
 server.allow_reuse_address=True
 server.server_bind()
 server.server_activate()
