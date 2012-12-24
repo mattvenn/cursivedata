@@ -7,6 +7,7 @@ import string
 import argparse
 import signal
 import socket
+#from pyserial
 import serial
 TIMEOUT = 0.5 # number of seconds your want for timeout
 
@@ -26,9 +27,10 @@ signal.signal(signal.SIGALRM, timeout_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
 def finish():
-  print serial
-  print "closing serial"
-  serial.close()
+  if serial:
+      print "closing serial"
+      print serial
+      serial.close()
 
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
