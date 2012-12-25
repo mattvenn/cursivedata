@@ -24,6 +24,13 @@ class getHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 fh.write("%s : %s<br>\n" % (key, status[key]))
             fh.close()
         else:
+            if self.client_address[0] == '195.10.248.18':
+                print "rejected connection from hackspace"
+                self.send_response(404)
+                self.send_header('Content-type','text/html')
+                self.end_headers()
+                return
+                
             global nanodeGetTimes
             nanodeGetTimes.addTime()
             time_span = 10 * 60
