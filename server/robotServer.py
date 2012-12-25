@@ -69,7 +69,7 @@ if __name__ == '__main__':
         action='store', dest='dir', default="/home/matt/polargraphenergymonitor/tmp/46756/",
         help="where the file is to be served, and the archive directory")
     parser.add_argument('--status-file',
-        action='store', dest='statusfile', default="robot.status",
+        action='store', dest='statusfile', default="robot.status.html",
         help="the file to store status to")
     parser.add_argument('--file',
         action='store', dest='file', default="square.polar",
