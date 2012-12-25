@@ -9,7 +9,7 @@ import sys
 import re
 import sys
 import tty
-import time
+import datetime
 import string
 import argparse
 import signal
@@ -24,7 +24,6 @@ def fetch_data(args):
     try:
         response = urllib2.urlopen(req)
         gcodes = response.read()
-        import pdb; pdb.set_trace()
         if args.verbose:
             print "got answer from server:"
             print gcodes
@@ -148,7 +147,10 @@ if __name__ == '__main__':
     parser.add_argument('--verbose',
         action='store_const', const=True, dest='verbose', default=False,
         help="verbose")
-    parser.add_argument('--norobot',
+    parser.add_argument('--send-status',
+        action='store_const', const=True, dest='sendstatus', default=False,
+        help="send current status of the robot to the server")
+    parser.add_argument('--no-robot',
         action='store_const', const=True, dest='norobot', default=False,
         help="no robot connected, for testing")
     parser.add_argument('--home',
@@ -193,3 +195,19 @@ if __name__ == '__main__':
         serial = initRobot(args)
         writeToRobot(args,serial,gcodes)
         finish_serial()
+
+    if args.sendstatus and args.server:
+        print "sending status to server"
+        status = {
+            "last_draw" : str(datetime.datetime.now()),
+            }
+        data = urllib.urlencode(status)
+        url = args.server + "/status?" + data
+        try:
+            response = urllib2.urlopen(url)
+            the_page = response.read()
+            print the_page
+        except urllib2.URLError, e:
+            print e.code
+            print e.read()
+
