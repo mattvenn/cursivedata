@@ -199,7 +199,7 @@ if __name__ == '__main__':
     if args.sendstatus and args.server:
         print "sending status to server"
         status = {
-            "last_draw" : str(datetime.datetime.now()),
+            "run time" : str(datetime.datetime.now()),
             }
         data = urllib.urlencode(status)
         url = args.server + "/status?" + data
