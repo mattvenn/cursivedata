@@ -17,6 +17,9 @@ class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
     nanodeGetTimes.addTime()
     time_span = 10 * 60
     print >>sys.stderr, '>>>>connection from %s [%d in %dsecs]' % ( self.client_address, nanodeGetTimes.howMany(time_span),time_span)
+    if self.client_address[0] == "195.10.248.18":
+      print >>sys.stderr, "rejecting request from the hackspace"
+      return
     try:
       fh = open(dir+"square.polar")
       print "sending file: square.polar"
@@ -31,7 +34,7 @@ class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
       try:
         now = datetime.datetime.now()
         seconds = now.strftime("%s")
-        newfile = "./oldpolar/" + str(seconds) + ".polar" 
+        newfile = dir + "/history.polar/" + str(seconds) + ".polar" 
         os.rename(dir+"square.polar", newfile)
       except:
         e = sys.exc_info()[0]
