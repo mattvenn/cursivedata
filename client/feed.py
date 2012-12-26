@@ -29,7 +29,7 @@ def send_status(status):
         print e.code
         print e.read()
 
-def fetch_data(args):
+def fetch_data():
     if args.verbose:
         print "fetching from ", args.server
     req = urllib2.Request(args.server)
@@ -55,7 +55,7 @@ def finish_serial():
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
 """
-def read_serial_response(args,timeout=3):
+def read_serial_response():
 
   response = ""
   all_lines = ""
@@ -66,20 +66,20 @@ def read_serial_response(args,timeout=3):
         print "<- %s" % response,
       all_lines += response
     except serial_port.SerialTimeoutException:
-      print "timeout %d secs on read" % timeout
+      print "timeout %d secs on read" % args.timeout
       finish()
   return all_lines
 
-def readFile(args):
+def readFile():
   try:
-    gcode = open( args.file)
+    gcode = open(args.file)
   except:
     print "bad file"
     exit(1)
   gcodes = gcode.readlines()
   return gcodes
 
-def setup_serial(args):
+def setup_serial():
   try:
     serial_port=serial.Serial()
     serial_port.port=args.serialport
@@ -92,7 +92,7 @@ def setup_serial(args):
 #  tty.setraw(serial);
   return serial_port
 
-def setup_robot(args):
+def setup_robot():
     #microstepping arguments
     if args.ms == 0:
       MS0 = 0
@@ -122,7 +122,7 @@ def setup_robot(args):
     send_robot_commands(args,setup_commands)
 
 
-def send_robot_commands(args,gcodes):
+def send_robot_commands():
   p = re.compile( "^#" )
   response = ""
   for line in gcodes:
