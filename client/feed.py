@@ -9,6 +9,7 @@ import sys
 import re
 import sys
 import tty
+import time
 import datetime
 import string
 import argparse
@@ -46,25 +47,25 @@ def fetch_data(args):
 
 
 def finish_serial():
-  if serial:
+  if serial_port:
       print "closing serial"
-      print serial
-      serial.close()
+      print serial_port
+      serial_port.close()
 
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
 """
-def read_serial_response(args,serial,timeout=3):
+def read_serial_response(args,timeout=3):
 
   response = ""
   all_lines = ""
   while string.find(response,"ok"):
     try:
-      response = serial.readline()
+      response = serial_port.readline()
       if args.verbose:
         print "<- %s" % response,
       all_lines += response
-    except serial.SerialTimeoutException:
+    except serial_port.SerialTimeoutException:
       print "timeout %d secs on read" % timeout
       finish()
   return all_lines
@@ -79,19 +80,20 @@ def readFile(args):
   return gcodes
 
 def setup_serial(args):
+  import pdb; pdb.set_trace()
   try:
-    serialp=serial.Serial()
-    serialp.port=args.serialport
-    serialp.timeout=args.timeout
-    serialp.baudrate=args.baud
-    serialp.open()
+    serial_port=serial.Serial()
+    serial_port.port=args.serialport
+    serial_port.timeout=args.timeout
+    serial_port.baudrate=args.baud
+    serial_port.open()
   except IOError:
     print "robot not connected?"
     exit(1)
 #  tty.setraw(serial);
-  return serialp
+  return serial_port
 
-def setup_robot(args,serial):
+def setup_robot(args):
     #microstepping arguments
     if args.ms == 0:
       MS0 = 0
@@ -118,10 +120,10 @@ def setup_robot(args,serial):
     if args.home:
         setup_commands.append("c")
     
-    send_robot_commands(args,serial,setup_commands)
+    send_robot_commands(args,setup_commands)
 
 
-def send_robot_commands(args,serial,gcodes):
+def send_robot_commands(args,gcodes):
   p = re.compile( "^#" )
   response = ""
   for line in gcodes:
@@ -129,8 +131,8 @@ def send_robot_commands(args,serial,gcodes):
       print "skipping line:", line
     elif not line == None:
       print "-> %s" % line,
-      serial.write(line)
-      response += read_serial_response(args,serial)
+      serial_port.write(line)
+      response += read_serial_response(args)
   return response
 
 if __name__ == '__main__':
@@ -192,9 +194,9 @@ if __name__ == '__main__':
         gcodes = fetch_data(args)
 
     if args.sendstatus and args.server and not args.norobot:
-        serial = setup_serial(args)
+        serial_port = setup_serial(args)
         status_commands=["q\n"]
-        response = send_robot_commands(args,serial,status_commands)
+        response = send_robot_commands(args,status_commands)
         finish_serial()
         status = {
             "run time" : str(datetime.datetime.now()),
@@ -207,10 +209,11 @@ if __name__ == '__main__':
         exit(1)
 
     if not args.norobot:
-        serial = setup_serial(args)
+        time.sleep(1)
+        serial_port = setup_serial(args)
         if args.setup_robot:
-            setup_robot(args,serial)
-        response = send_robot_commands(args,serial,gcodes)
+            setup_robot(args)
+        response = send_robot_commands(args,gcodes)
         if args.store_file:
           store=open(args.store_file,'w+')
           store.write(response)
