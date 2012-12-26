@@ -15,7 +15,21 @@ import argparse
 import signal
 import socket
 import serial
-TIMEOUT = 0.5 # number of seconds your want for timeout
+
+def send_status():
+    print "sending status to server"
+    status = {
+        "run time" : str(datetime.datetime.now()),
+        }
+    data = urllib.urlencode(status)
+    url = args.server + "/status?" + data
+    try:
+        response = urllib2.urlopen(url)
+        the_page = response.read()
+        print the_page
+    except urllib2.URLError, e:
+        print e.code
+        print e.read()
 
 def fetch_data(args):
     if args.verbose:
@@ -43,7 +57,7 @@ def finish_serial():
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
 """
-def readResponse(args,serial,timeout=3):
+def read_serial_response(args,serial,timeout=3):
 
   response = ""
   while string.find(response,"ok"):
@@ -67,7 +81,7 @@ def readFile(args):
   gcodes = gcode.readlines()
   return gcodes
 
-def initRobot(args):
+def setup_serial(args):
   try:
     serialp=serial.Serial()
     serialp.port=args.serialport
@@ -78,18 +92,10 @@ def initRobot(args):
     print "robot not connected?"
     exit(1)
 #  tty.setraw(serial);
+  return serialp
 
-  if args.home:
-    serialp.write("c")
-    readResponse(args,serialp,0)
-
-  if args.setup_robot:
-    print "speed and pwm"
-    #speed and pwm
-    serialp.write("p%d,%d" % (args.speed, args.pwm ))
-    readResponse(args,serialp)
-    #ms
-    #none
+def setup_robot(args,serial):
+    #microstepping arguments
     if args.ms == 0:
       MS0 = 0
       MS1 = 0
@@ -105,17 +111,20 @@ def initRobot(args):
     elif args.ms == 3:
       MS0 = 1
       MS1 = 1
-    print "microstep: %d, %d" % (MS0, MS1 )
-    serialp.write("i%d,%d" % (MS0, MS1 ))
-    readResponse(args,serialp)
-    #where are we
-    print "where are we?"
-    serialp.write("q")
-    readResponse(args,serialp)
 
-  return serialp
+    setup_commands= [
+            #speed and pwm
+            "p%d,%d" % (args.speed, args.pwm ),
+            "i%d,%d" % (MS0, MS1 ),
+        ]
+    #home
+    if args.home:
+        setup_commands.append("c")
+    
+    send_robot_commands(args,serial,setup_commands)
 
-def writeToRobot(args,serial,gcodes):
+
+def send_robot_commands(args,serial,gcodes):
   p = re.compile( "^#" )
   for line in gcodes:
     if p.match(line):
@@ -124,7 +133,7 @@ def writeToRobot(args,serial,gcodes):
       print "-> %s" % line,
       if not args.norobot:
         serial.write(line)
-        readResponse(args,serial)
+        read_serial_response(args,serial)
 
 
 if __name__ == '__main__':
@@ -187,27 +196,21 @@ if __name__ == '__main__':
     if args.server:
         gcodes = fetch_data(args)
 
+    if args.sendstatus and args.server and not args.norobot:
+        serial = setup_serial(args)
+        status_commands=["q\n"]
+        send_robot_commands(args,serial,status_commands)
+        finish_serial()
+        send_status()
+
     if not gcodes:
         print >>sys.stderr, "no gcodes found"
         exit(1)
 
     if not args.norobot:
-        serial = initRobot(args)
-        writeToRobot(args,serial,gcodes)
+        serial = setup_serial(args)
+        if args.setup_robot:
+            setup_robot(args,serial)
+        send_robot_commands(args,serial,gcodes)
         finish_serial()
-
-    if args.sendstatus and args.server:
-        print "sending status to server"
-        status = {
-            "run time" : str(datetime.datetime.now()),
-            }
-        data = urllib.urlencode(status)
-        url = args.server + "/status?" + data
-        try:
-            response = urllib2.urlopen(url)
-            the_page = response.read()
-            print the_page
-        except urllib2.URLError, e:
-            print e.code
-            print e.read()
 
