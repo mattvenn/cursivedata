@@ -65,7 +65,7 @@ def read_serial_response():
       if args.verbose:
         print "<- %s" % response,
       all_lines += response
-    except serial_port.SerialTimeoutException:
+    except serial.SerialTimeoutException:
       print "timeout %d secs on read" % args.timeout
       finish()
   return all_lines
