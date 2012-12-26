@@ -20,8 +20,10 @@ class getHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_response(200)
             #write it to a file
             fh = open(args.dir+args.statusfile,'w')
+            fh.write("<ul>")
             for key in status.keys():
-                fh.write("%s : %s<br>\n" % (key, status[key]))
+                fh.write("<li>%s : %s</li>\n" % (key, status[key][0].replace("\r\n","<br>\n")))
+            fh.write("</ul>")
             fh.close()
         else:
             if self.client_address[0] == '195.10.248.18':
