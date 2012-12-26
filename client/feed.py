@@ -80,7 +80,6 @@ def readFile(args):
   return gcodes
 
 def setup_serial(args):
-  import pdb; pdb.set_trace()
   try:
     serial_port=serial.Serial()
     serial_port.port=args.serialport
