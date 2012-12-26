@@ -9,15 +9,27 @@ import sys
 import re
 import sys
 import tty
+import time
 import datetime
 import string
 import argparse
 import signal
 import socket
 import serial
-TIMEOUT = 0.5 # number of seconds your want for timeout
 
-def fetch_data(args):
+def send_status(status):
+    print "sending status to server"
+    data = urllib.urlencode(status)
+    url = args.server + "/status?" + data
+    try:
+        response = urllib2.urlopen(url)
+        the_page = response.read()
+        print the_page
+    except urllib2.URLError, e:
+        print e.code
+        print e.read()
+
+def fetch_data():
     if args.verbose:
         print "fetching from ", args.server
     req = urllib2.Request(args.server)
@@ -35,61 +47,53 @@ def fetch_data(args):
 
 
 def finish_serial():
-  if serial:
+  if serial_port:
       print "closing serial"
-      print serial
-      serial.close()
+      print serial_port
+      serial_port.close()
 
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
 """
-def readResponse(args,serial,timeout=3):
+def read_serial_response():
 
   response = ""
+  all_lines = ""
   while string.find(response,"ok"):
     try:
-      response = serial.readline()
+      response = serial_port.readline()
       if args.verbose:
         print "<- %s" % response,
-      if args.store_file:
-        store.write(response)
-    except serial.SerialTimeoutException:
-      print "timeout %d secs on read" % timeout
+      all_lines += response
+    except serial_port.SerialTimeoutException:
+      print "timeout %d secs on read" % args.timeout
       finish()
-  return
+  return all_lines
 
-def readFile(args):
+def readFile():
   try:
-    gcode = open( args.file)
+    gcode = open(args.file)
   except:
     print "bad file"
     exit(1)
   gcodes = gcode.readlines()
   return gcodes
 
-def initRobot(args):
+def setup_serial():
   try:
-    serialp=serial.Serial()
-    serialp.port=args.serialport
-    serialp.timeout=args.timeout
-    serialp.baudrate=args.baud
-    serialp.open()
+    serial_port=serial.Serial()
+    serial_port.port=args.serialport
+    serial_port.timeout=args.timeout
+    serial_port.baudrate=args.baud
+    serial_port.open()
   except IOError:
     print "robot not connected?"
     exit(1)
 #  tty.setraw(serial);
+  return serial_port
 
-  if args.home:
-    serialp.write("c")
-    readResponse(args,serialp,0)
-
-  if args.setup_robot:
-    print "speed and pwm"
-    #speed and pwm
-    serialp.write("p%d,%d" % (args.speed, args.pwm ))
-    readResponse(args,serialp)
-    #ms
-    #none
+def setup_robot():
+    #microstepping arguments
     if args.ms == 0:
       MS0 = 0
       MS1 = 0
@@ -105,27 +109,30 @@ def initRobot(args):
     elif args.ms == 3:
       MS0 = 1
       MS1 = 1
-    print "microstep: %d, %d" % (MS0, MS1 )
-    serialp.write("i%d,%d" % (MS0, MS1 ))
-    readResponse(args,serialp)
-    #where are we
-    print "where are we?"
-    serialp.write("q")
-    readResponse(args,serialp)
 
-  return serialp
+    setup_commands= [
+            #speed and pwm
+            "p%d,%d" % (args.speed, args.pwm ),
+            "i%d,%d" % (MS0, MS1 ),
+        ]
+    #home
+    if args.home:
+        setup_commands.append("c")
+    
+    send_robot_commands(setup_commands)
 
-def writeToRobot(args,serial,gcodes):
+
+def send_robot_commands(gcodes):
   p = re.compile( "^#" )
+  response = ""
   for line in gcodes:
     if p.match(line):
       print "skipping line:", line
     elif not line == None:
       print "-> %s" % line,
-      if not args.norobot:
-        serial.write(line)
-        readResponse(args,serial)
-
+      serial_port.write(line)
+      response += read_serial_response()
+  return response
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="feed polar files to polargraph robot")
@@ -156,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument('--home',
         action='store_const', const=True, dest='home', default=False,
         help="home to start")
-    parser.add_argument('--setup_robot',
+    parser.add_argument('--setup-robot',
         action='store_const', const=True, dest='setup_robot', default=False,
         help="send pwm, ms etc commands to robot before the given file")
     parser.add_argument('--pwm',
@@ -174,40 +181,40 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.store_file:
-      store=open(args.store_file,'w+')
 
     #send a file   
     if args.file:
-        gcodes = readFile(args)
+        gcodes = readFile()
     #send a command
     if args.command:
         gcodes=[args.command+"\n"]
     #use a remote server 
     if args.server:
-        gcodes = fetch_data(args)
+        gcodes = fetch_data()
+
+    if args.sendstatus and args.server and not args.norobot:
+        serial_port = setup_serial()
+        status_commands=["q\n"]
+        response = send_robot_commands(status_commands)
+        finish_serial()
+        status = {
+            "run time" : str(datetime.datetime.now()),
+            "q" : response,
+            }
+        send_status(status)
 
     if not gcodes:
         print >>sys.stderr, "no gcodes found"
         exit(1)
 
     if not args.norobot:
-        serial = initRobot(args)
-        writeToRobot(args,serial,gcodes)
+        time.sleep(1)
+        serial_port = setup_serial()
+        if args.setup_robot:
+            setup_robot()
+        response = send_robot_commands(gcodes)
+        if args.store_file:
+          store=open(args.store_file,'w+')
+          store.write(response)
         finish_serial()
-
-    if args.sendstatus and args.server:
-        print "sending status to server"
-        status = {
-            "last_draw" : str(datetime.datetime.now()),
-            }
-        data = urllib.urlencode(status)
-        url = args.server + "/status?" + data
-        try:
-            response = urllib2.urlopen(url)
-            the_page = response.read()
-            print the_page
-        except urllib2.URLError, e:
-            print e.code
-            print e.read()
 
