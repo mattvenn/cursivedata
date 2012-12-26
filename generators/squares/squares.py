@@ -43,7 +43,7 @@ def setup(args):
   dwg.set_viewBox("0 0 %s %s" % (args.width, args.height))
   return dwg
 
-def square(x,y, width,dwg,id,args,hidden):
+def square(x,y, width,dwg,id=0,hidden=False):
   points = []
   hWidth = width/2
   #p = path("M%dmm,%dmm" % (x-hWidth,y-hWidth))
@@ -143,7 +143,7 @@ if __name__ == '__main__':
   if args.drawoutline:
     dwg = setup(args)
     square( args.width / 2,args.height/2, args.width, dwg )
-    dwg.save()
+    dwg.save(args.dir + "square.svg")
     exit(0)
 
   #2 different things can happen here, either we are loading a whole load of points at once, or we are running realtime
@@ -212,8 +212,8 @@ if __name__ == '__main__':
           print "square #%d width %d" % ( i, width )
           newfile = True
           if not args.loadhistory:
-              square( startx,starty, width, dwg, id,args,False )
-          square( startx,starty, width, concat, id,args,True )
+              square( startx,starty, width, dwg, id,False )
+          square( startx,starty, width, concat, id,True )
 
         if not args.loadhistory:
           dwg.save(args.dir + "square.svg")
