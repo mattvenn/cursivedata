@@ -9,22 +9,38 @@ def parse(args):
   except:
     print "bad file"
     exit( 1 )
-  
 
-  #start the file
-  #print "p3,100"
-  #print "c"
-
-  xmin = 100000
-  xmax = 0
-  ymin = 100000
-  ymax = 0
+  #assume, could fix when we sort out the below
+  xmin = 0
+  ymin = 0
 
   gcodes = gcode.readlines()
+  try:
+    xmax = float(re.search(r'^;maxx = (\S+)$',"".join(gcodes),re.MULTILINE).group(1))
+    xmin = float(re.search(r'^;minx = (\S+)$',"".join(gcodes),re.MULTILINE).group(1))
+    ymax = float(re.search(r'^;maxy = (\S+)$',"".join(gcodes),re.MULTILINE).group(1))
+    ymin = float(re.search(r'^;miny = (\S+)$',"".join(gcodes),re.MULTILINE).group(1))
+  except AttributeError, e:
+    print "couldn't find min and max x and y in file, aborting!"
+    exit(1)
+
+  available_x = args.robot_width - args.side_margin * 2
+  if float(xmax) > available_x:
+    print "gcodes x too large for robot"
+    exit(1)
+
+  available_y = args.robot_height - args.top_margin
+  if ymax > available_y:
+    print "gcodes y too large for robot"
+    exit(1)
+
+  xoffset = (available_x - xmax) / 2 + args.side_margin
+  yoffset = args.top_margin
+
   startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
   contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
+  
   polar_code=""
-  #p = re.compile( "G([01])(?= Z(\S+))")
   for line in gcodes:
     s = startCode.match(line)
     c = contCode.match(line)
@@ -51,19 +67,12 @@ def parse(args):
         y = lastY
   #    z = float(c.group(3))
   #    print line
-      outx = x*args.scale+args.xoffset
-      outy = args.ysub - y*args.scale+args.yoffset
+
+      outx = x+xoffset
+      outy = ymax-y+yoffset #flip y because pycam outputs with 0,0 in the bottom left, but the robot's 0,0 is the top left
       polar_code += "g%d,%d\n" %  (outx,outy) 
       lastX = x
       lastY = y
-      if outx < xmin:
-        xmin = outx 
-      if outx > xmax:
-        xmax = outx
-      if outy < ymin:
-        ymin = outy
-      if outy > ymax:
-        ymax = outy
 
   if args.showminmax:
     polar_code += "# xmin %f xmax %f\n" % (xmin, xmax)
@@ -74,12 +83,12 @@ def parse(args):
 
   if args.force_store:
     total_lines+=3
-
+  """
   if total_lines>=15:
     #too long for the robot!
     print >> sys.stderr, "too many gcodes for the robot"
     exit(1)
-
+  """
   if args.force_store:
     print "s%d,0" % gcodes
   print polar_code,
@@ -93,17 +102,20 @@ if __name__ == '__main__':
         action='store', dest='file', 
         help="file to open")
     parser.add_argument('--scale',
-        action='store', dest='scale', type=float, default=5.0,
+        action='store', dest='scale', type=float, default=1.0,
         help="scale factor")
-    parser.add_argument('--ysub',
-        action='store', dest='ysub', type=int, default=1500,
-        help="need to reflect y axis atm, this is what the y is subtracted from. should be a bit bigger than maximum y")
-    parser.add_argument('--yoffset',
-        action='store', dest='yoffset', type=int, default=400,
-        help="how far to move the file on y axis")
-    parser.add_argument('--xoffset',
-        action='store', dest='xoffset', type=int, default=1200,
-        help="how far to move the file on x axis")
+    parser.add_argument('--top-margin',
+        action='store', dest='top_margin', type=int, default=100,
+        help="top margin of the robot in mm")
+    parser.add_argument('--side-margin',
+        action='store', dest='side_margin', type=int, default=100,
+        help="side margin of the robot in mm")
+    parser.add_argument('--robot-width',
+        action='store', dest='robot_width', type=int, default=500,
+        help="width of the robot in mm")
+    parser.add_argument('--robot-height',
+        action='store', dest='robot_height', type=int, default=300,
+        help="height of the robot in mm")
     parser.add_argument('--showminmax',
         action='store_const', const=True, dest='showminmax', default=False,
         help="show the min and max xy after scaling")
