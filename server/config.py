@@ -3,7 +3,9 @@ config = {
     46756 :
     {
         "name" : "Bristol Hackspace Light Level",
-        "draw_args" : ["--rotate", "20", "--value", "2000" ],
+        "draw_args" : ["--rotate", "20", "--value", "1" ],
+        #for the prototype board, force_store makes the robot use the sd card
+        "process_args" : ["--robot-width", "520", "--robot-height", "300", "--top-margin", "61", "--side-margin", "105", "--force_store" ],
         "generator" : "../generators/squares/squares.py",
         "needs_polar" : True,
     },
