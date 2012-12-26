@@ -16,11 +16,8 @@ import signal
 import socket
 import serial
 
-def send_status():
+def send_status(status):
     print "sending status to server"
-    status = {
-        "run time" : str(datetime.datetime.now()),
-        }
     data = urllib.urlencode(status)
     url = args.server + "/status?" + data
     try:
@@ -60,17 +57,17 @@ this requires the robot to respond in the expected way, where all responsed end 
 def read_serial_response(args,serial,timeout=3):
 
   response = ""
+  all_lines = ""
   while string.find(response,"ok"):
     try:
       response = serial.readline()
       if args.verbose:
         print "<- %s" % response,
-      if args.store_file:
-        store.write(response)
+      all_lines += response
     except serial.SerialTimeoutException:
       print "timeout %d secs on read" % timeout
       finish()
-  return
+  return all_lines
 
 def readFile(args):
   try:
@@ -126,15 +123,15 @@ def setup_robot(args,serial):
 
 def send_robot_commands(args,serial,gcodes):
   p = re.compile( "^#" )
+  response = ""
   for line in gcodes:
     if p.match(line):
       print "skipping line:", line
     elif not line == None:
       print "-> %s" % line,
-      if not args.norobot:
-        serial.write(line)
-        read_serial_response(args,serial)
-
+      serial.write(line)
+      response += read_serial_response(args,serial)
+  return response
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="feed polar files to polargraph robot")
@@ -165,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--home',
         action='store_const', const=True, dest='home', default=False,
         help="home to start")
-    parser.add_argument('--setup_robot',
+    parser.add_argument('--setup-robot',
         action='store_const', const=True, dest='setup_robot', default=False,
         help="send pwm, ms etc commands to robot before the given file")
     parser.add_argument('--pwm',
@@ -183,8 +180,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.store_file:
-      store=open(args.store_file,'w+')
 
     #send a file   
     if args.file:
@@ -199,9 +194,13 @@ if __name__ == '__main__':
     if args.sendstatus and args.server and not args.norobot:
         serial = setup_serial(args)
         status_commands=["q\n"]
-        send_robot_commands(args,serial,status_commands)
+        response = send_robot_commands(args,serial,status_commands)
         finish_serial()
-        send_status()
+        status = {
+            "run time" : str(datetime.datetime.now()),
+            "q" : response,
+            }
+        send_status(status)
 
     if not gcodes:
         print >>sys.stderr, "no gcodes found"
@@ -211,6 +210,9 @@ if __name__ == '__main__':
         serial = setup_serial(args)
         if args.setup_robot:
             setup_robot(args,serial)
-        send_robot_commands(args,serial,gcodes)
+        response = send_robot_commands(args,serial,gcodes)
+        if args.store_file:
+          store=open(args.store_file,'w+')
+          store.write(response)
         finish_serial()
 
