@@ -70,10 +70,10 @@ if __name__ == '__main__':
       description="generates square based energy drawings")
   argparser.add_argument('--height',
       action='store', dest='height', type=int, default=200,
-      help="height of paper")
+      help="height of paper in mm")
   argparser.add_argument('--width',
       action='store', dest='width', type=int, default=200,
-      help="width of paper")
+      help="width of paper in mm")
   argparser.add_argument('--startenv',
       action='store', dest='startenv', type=int, default=0,
       help="where to start from")
