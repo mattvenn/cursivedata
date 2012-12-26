@@ -119,10 +119,10 @@ def setup_robot():
     if args.home:
         setup_commands.append("c")
     
-    send_robot_commands(args,setup_commands)
+    send_robot_commands(setup_commands)
 
 
-def send_robot_commands():
+def send_robot_commands(gcodes):
   p = re.compile( "^#" )
   response = ""
   for line in gcodes:
@@ -131,7 +131,7 @@ def send_robot_commands():
     elif not line == None:
       print "-> %s" % line,
       serial_port.write(line)
-      response += read_serial_response(args)
+      response += read_serial_response()
   return response
 
 if __name__ == '__main__':
@@ -184,18 +184,18 @@ if __name__ == '__main__':
 
     #send a file   
     if args.file:
-        gcodes = readFile(args)
+        gcodes = readFile()
     #send a command
     if args.command:
         gcodes=[args.command+"\n"]
     #use a remote server 
     if args.server:
-        gcodes = fetch_data(args)
+        gcodes = fetch_data()
 
     if args.sendstatus and args.server and not args.norobot:
-        serial_port = setup_serial(args)
+        serial_port = setup_serial()
         status_commands=["q\n"]
-        response = send_robot_commands(args,status_commands)
+        response = send_robot_commands(status_commands)
         finish_serial()
         status = {
             "run time" : str(datetime.datetime.now()),
@@ -209,10 +209,10 @@ if __name__ == '__main__':
 
     if not args.norobot:
         time.sleep(1)
-        serial_port = setup_serial(args)
+        serial_port = setup_serial()
         if args.setup_robot:
-            setup_robot(args)
-        response = send_robot_commands(args,gcodes)
+            setup_robot()
+        response = send_robot_commands(gcodes)
         if args.store_file:
           store=open(args.store_file,'w+')
           store.write(response)
