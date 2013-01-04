@@ -13,8 +13,11 @@ def parse(args):
   #assume, could fix when we sort out the below
   xmin = 0
   ymin = 0
+  xmax = args.width
+  ymax = args.height
 
   gcodes = gcode.readlines()
+  """ doesn't work because min and max are for each animation frame
   try:
     xmax = float(re.search(r'^;maxx = (\S+)$',"".join(gcodes),re.MULTILINE).group(1))
     xmin = float(re.search(r'^;minx = (\S+)$',"".join(gcodes),re.MULTILINE).group(1))
@@ -23,7 +26,7 @@ def parse(args):
   except AttributeError, e:
     print "couldn't find min and max x and y in file, aborting!"
     exit(1)
-
+  """
   available_x = args.robot_width - args.side_margin * 2
   if float(xmax) > available_x:
     print "gcodes x too large for robot"
@@ -104,6 +107,12 @@ if __name__ == '__main__':
     parser.add_argument('--scale',
         action='store', dest='scale', type=float, default=1.0,
         help="scale factor")
+    parser.add_argument('--width',
+        action='store', dest='width', type=int, default=200,
+        help="width of the whole drawing")
+    parser.add_argument('--height',
+        action='store', dest='height', type=int, default=200,
+        help="height of the whole drawing")
     parser.add_argument('--top-margin',
         action='store', dest='top_margin', type=int, default=100,
         help="top margin of the robot in mm")
