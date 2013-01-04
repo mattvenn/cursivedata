@@ -47,6 +47,7 @@ def fetch_data():
 
 
 def finish_serial():
+#  import pdb; pdb.set_trace()
   if serial_port:
       print "closing serial"
       print serial_port
@@ -60,14 +61,14 @@ def read_serial_response():
   response = ""
   all_lines = ""
   while string.find(response,"ok"):
-    try:
-      response = serial_port.readline()
-      if args.verbose:
-        print "<- %s" % response,
-      all_lines += response
-    except serial.SerialTimeoutException:
-      print "timeout %d secs on read" % args.timeout
-      finish()
+    response = serial_port.readline()
+    if response == "":
+      print >>sys.stderr, "timeout on serial read"
+      finish_serial()
+      exit(1)
+    if args.verbose:
+      print "<- %s" % response,
+    all_lines += response
   return all_lines
 
 def readFile():
@@ -86,8 +87,8 @@ def setup_serial():
     serial_port.timeout=args.timeout
     serial_port.baudrate=args.baud
     serial_port.open()
-  except IOError:
-    print "robot not connected?"
+  except IOError, e:
+    print "robot not connected?", e
     exit(1)
 #  tty.setraw(serial);
   return serial_port
@@ -210,11 +211,15 @@ if __name__ == '__main__':
     if not args.norobot:
         time.sleep(1)
         serial_port = setup_serial()
+
         if args.setup_robot:
-            setup_robot()
+          setup_robot()
+
         response = send_robot_commands(gcodes)
+
         if args.store_file:
           store=open(args.store_file,'w+')
           store.write(response)
+
         finish_serial()
 
