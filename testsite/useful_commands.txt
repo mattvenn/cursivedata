@@ -1,0 +1,17 @@
+== Interactive shell: ==
+ipython manage.py shell
+
+== Reloading (in ipython): ==
+
+%load_ext autoreload
+%autoreload 2
+(autoreload should only need to be called once, but seems to need to be called each time reloading is desired)
+
+
+== Database ==
+
+Update db:
+
+zap db, create a new one and add a superuser:
+rm db/testsite.sqlite; python manage.py syncdb --noinput; python manage.py createsuperuser --noinput --username=admin --email=a@b.com
+
