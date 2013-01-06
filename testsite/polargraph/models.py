@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from imp import find_module, load_module
 import json
 import csv
+import polargraph.svg as svg
 
 # Create your models here.
 
@@ -161,6 +162,16 @@ class Endpoint( models.Model ):
     name = models.CharField(max_length=200)
     device = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
+    full_svg_file = models.CharField(max_length=200)
+    def add_svg(self,svg_file ):
+        # Add SVG to full output history
+        svg.append_svg_to_file( svg_file, self.full_svg_file )
+        gcode = svg.convert_svg_to_gcode(svg_file, svg.get_temp_filename("gcode"))
+        self.send_to_device(gcode)
+        
+    def send_to_device(self,gcode):
+        print "Seinding gcode file",gcode,"to",self.device,"at",self.location
+        
     def __unicode__(self):
         return self.name
 
@@ -181,13 +192,16 @@ class Pipeline( models.Model ) :
         params = self.state.params_to_dict();
         internal_state = self.state.read_internal_state()
         if self.generator.can_run( self.data_source, params, internal_state ):
-            retVal = self.generator.process_data( self.data_source, params, internal_state )
+            svg = self.generator.process_data( self.data_source, params, internal_state )
             self.data.clear_current()
             self.state.write_state(internal_state)
             self.state.save()
+            
+            svgfile = svg.write_temp_svg_file(svg)
+            self.endpoint.add_svg( svgfile )
             print str(self),"using",str(self.generator),"to send to endpoint", str(self.endpoint)
-            print "Sending data", str( retVal  )
-            return retVal;
+            print "Sending data", str( svg  )
+            return svg;
         return ""
 
 def setup_test_data() :
