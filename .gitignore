@@ -1,1 +1,5 @@
 *pyc
+testsite/db/testsite.sqlite
+.project
+.pydevproject
+testsite/tmp/*
