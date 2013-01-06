@@ -3,7 +3,13 @@ from django.contrib import admin
 admin.autodiscover()
 
 from polargraph import views
+from polargraph.api import DataStoreResource
 
+from tastypie.api import Api
+
+v1_api = Api(api_name='v1')
+v1_api.register(DataStoreResource())
+datastore_resource = DataStoreResource()
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -20,6 +26,8 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
      url(r'^admin/', include(admin.site.urls)),
 
-	 url(r'^polargraph/', include('polargraph.urls')),
-	 
+     url(r'^polargraph/', include('polargraph.urls')),
+     
+     url(r'^api/', include(v1_api.urls)), #e.g. /api/v1/datastore/?format=json
+     
 )

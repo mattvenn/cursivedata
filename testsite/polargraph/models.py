@@ -97,12 +97,9 @@ class DataStore( models.Model ) :
     def add_data(self,data):
         self.available=True
         self.fresh=True
-        cur = json.loads(self.current_data)
-        print "Appending to: ",  cur
+        cur = self.get_next_data()
         total = cur + data
-        print "Total: ", total
         totals = json.dumps(total)
-        print "Total String: ", totals
         self.current_data = totals
         self.save()
         
