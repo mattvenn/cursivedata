@@ -174,7 +174,7 @@ if __name__ == '__main__':
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
     parser.add_argument('--serial-timeout',
-        action='store', dest='timeout', type=int, default=1,
+        action='store', dest='timeout', type=int, default=10,
         help="timeout on serial read")
     parser.add_argument('--ms',
         action='store', dest='ms', type=int, default=0,
