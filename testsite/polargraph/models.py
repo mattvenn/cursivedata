@@ -23,8 +23,12 @@ class Generator( models.Model ) :
         return
     #Processes a given chunk of data to return some SVG
     def process_data( self, data, params, state ) :
-        #print "Processing data with",map(str,state.generatorstateparameter_set.all())
         return self.module.process(data,params,state)
+    
+    #Checks to see if the current data is enough to run
+    def can_run( self, data, params, state ) :
+        return self.module.can_run(data,params,state)
+    
     def __unicode__(self):
         return self.name
     @staticmethod
@@ -89,7 +93,7 @@ class DataStore( models.Model ) :
         self.save()
         
     #Returns the current next bit of data to be drawn
-    def get_next_data(self) : 
+    def get_current(self) : 
         current = json.loads(self.current_data)
         return current
     
@@ -103,6 +107,7 @@ class DataStore( models.Model ) :
         totals = json.dumps(total)
         self.current_data = totals
         self.save()
+        self.pipeline.update()
         
     def mark_stale(self):
         self.fresh=False
@@ -162,12 +167,10 @@ class Endpoint( models.Model ):
     name = models.CharField(max_length=200)
     device = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
-    full_svg_file = models.CharField(max_length=200)
     def add_svg(self,svg_file ):
-        # Add SVG to full output history
-        svg.append_svg_to_file( svg_file, self.full_svg_file )
-        gcode = svg.convert_svg_to_gcode(svg_file, svg.get_temp_filename("gcode"))
-        self.send_to_device(gcode)
+        gcode_file = svg.get_temp_filename("gcode")
+        svg.convert_svg_to_gcode(svg_file, gcode_file)
+        self.send_to_device(gcode_file)
         
     def send_to_device(self,gcode):
         print "Seinding gcode file",gcode,"to",self.device,"at",self.location
@@ -184,6 +187,7 @@ class Pipeline( models.Model ) :
     endpoint = models.ForeignKey( Endpoint )
     current_image = models.CharField(max_length=200)
     last_updated = models.DateTimeField("Last Updated")
+    full_svg_file = models.CharField(max_length=200,blank=True)
     def __unicode__(self):
         return self.name
 
@@ -192,15 +196,26 @@ class Pipeline( models.Model ) :
         params = self.state.params_to_dict();
         internal_state = self.state.read_internal_state()
         if self.generator.can_run( self.data_source, params, internal_state ):
-            svg = self.generator.process_data( self.data_source, params, internal_state )
-            self.data.clear_current()
+            svg_string = self.generator.process_data( self.data_source, params, internal_state )
+            print "Pipeline got data", str( svg_string )
+            
+            self.data_source.clear_current()
             self.state.write_state(internal_state)
             self.state.save()
             
-            svgfile = svg.write_temp_svg_file(svg)
-            self.endpoint.add_svg( svgfile )
+            svg_file = svg.write_temp_svg_file(svg_string)
+            print "Pipeline Got SVG file:",svg_file
+            
+            if self.full_svg_file is None or self.full_svg_file == "":
+                self.full_svg_file = svg.get_temp_filename("svg")
+                self.save
+                
+            # Add SVG to full output history
+            print "Pipeline got SVG file:",svg_file,", Appending to:",self.full_svg_file
+            svg.append_svg_to_file( svg_file, self.full_svg_file )
+        
+            self.endpoint.add_svg( svg_file )
             print str(self),"using",str(self.generator),"to send to endpoint", str(self.endpoint)
-            print "Sending data", str( svg  )
             return svg;
         return ""
 
@@ -222,6 +237,7 @@ def setup_test_data() :
     e1.save()
     #d1 = FileDataStore("resources/test_data.csv")
     d1 = DataStore()
+    print d1.id
     d1.save()
     p1 = Pipeline(name="Test Pipeline",data_source=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
     p1.save()
