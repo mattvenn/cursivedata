@@ -178,9 +178,9 @@ class Endpoint( models.Model ):
 #A complete pipeline from data source through to a running algorithm
 class Pipeline( models.Model ) :
     name = models.CharField(max_length=200)
-    generator = models.ForeignKey( Generator )
-    data_source = models.ForeignKey( DataStore )
-    state = models.ForeignKey( GeneratorState )
+    generator = models.OneToOneField( Generator )
+    data_source = models.OneToOneField( DataStore )
+    state = models.OneToOneField( GeneratorState )
     endpoint = models.ForeignKey( Endpoint )
     current_image = models.CharField(max_length=200)
     last_updated = models.DateTimeField("Last Updated")
