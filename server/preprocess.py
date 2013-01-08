@@ -73,7 +73,8 @@ def parse(args):
 
       outx = x+xoffset
       outy = ymax-y+yoffset #flip y because pycam outputs with 0,0 in the bottom left, but the robot's 0,0 is the top left
-      polar_code += "g%d,%d\n" %  (outx,outy) 
+      polar_code += "g%.1f,%.1f\n" %  (outx,outy) 
+#      polar_code += "g%d,%d\n" %  (outx,outy) 
       lastX = x
       lastY = y
 
