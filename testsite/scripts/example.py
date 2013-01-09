@@ -6,7 +6,7 @@ def process(data,params,internal_state) :
     it = internal_state.get("i",0) + 1
     internal_state["i"]=it
     print "Data: ", data.get_current()
-    return "Process Iteration "+str(it)
+    return "<pretendSVG><iteration>"+str(it)+"</iteration><data>"+str(data.get_current())+"</data></pretendSVG>\n"
 
 def get_params() :
     return  [ { "name":"Width" }, { "name":"Height" } ]

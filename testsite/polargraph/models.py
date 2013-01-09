@@ -102,7 +102,7 @@ class DataStore( models.Model ) :
     def add_data(self,data):
         self.available=True
         self.fresh=True
-        cur = self.get_next_data()
+        cur = self.get_current()
         total = cur + data
         totals = json.dumps(total)
         self.current_data = totals
@@ -115,6 +115,13 @@ class DataStore( models.Model ) :
     
     def __unicode__(self):
         return self.name
+
+class COSMEndpoint( models.Model ):
+    data_store = models.ForeignKey( DataStore )
+    cosm_url = models.CharField(max_length=400,default="not_set")
+    
+    def recieve_data(self,msg):
+        print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
 
 #This is a running instance of a generator. It has parameter values and a Dict to store internal state
 class GeneratorState( models.Model ):
@@ -182,7 +189,7 @@ class Endpoint( models.Model ):
 class Pipeline( models.Model ) :
     name = models.CharField(max_length=200)
     generator = models.OneToOneField( Generator )
-    data_source = models.OneToOneField( DataStore )
+    data_store = models.OneToOneField( DataStore )
     state = models.OneToOneField( GeneratorState )
     endpoint = models.ForeignKey( Endpoint )
     current_image = models.CharField(max_length=200)
@@ -195,11 +202,12 @@ class Pipeline( models.Model ) :
     def update( self ) :
         params = self.state.params_to_dict();
         internal_state = self.state.read_internal_state()
-        if self.generator.can_run( self.data_source, params, internal_state ):
-            svg_string = self.generator.process_data( self.data_source, params, internal_state )
+        self.generator.init()
+        if self.generator.can_run( self.data_store, params, internal_state ):
+            svg_string = self.generator.process_data( self.data_store, params, internal_state )
             print "Pipeline got data", str( svg_string )
             
-            self.data_source.clear_current()
+            self.data_store.clear_current()
             self.state.write_state(internal_state)
             self.state.save()
             
@@ -239,12 +247,14 @@ def setup_test_data() :
     d1 = DataStore()
     print d1.id
     d1.save()
-    p1 = Pipeline(name="Test Pipeline",data_source=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
+    p1 = Pipeline(name="Test Pipeline",data_store=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
     p1.save()
+    print "P1:",str(p1)
     g1.init()
     p1.update()
-    p1.update()
-    p1.update()
+    ce = COSMEndpoint(data_store=d1)
+    ce.save()
+    print "COSM:",ce.id
     return p1
 
 def testing() :

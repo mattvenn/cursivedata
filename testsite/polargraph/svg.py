@@ -28,6 +28,7 @@ def convert_svg_to_gcode( svgfile, gcodefile ):
             try :
                 with open( gcodefile, 'a+' ) as dest:
                     for line in source :
+                        line=line.replace("SVG","GCODE")
                         dest.write( line )
             except Exception as ex:
                 print "Coudlnt' create outputfile:",svgfile,ex
