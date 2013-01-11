@@ -7,8 +7,7 @@ Created on 6 Jan 2013
 from tastypie.resources import ModelResource
 from tastypie.authorization import Authorization
 from tastypie.serializers import Serializer
-from polargraph.models import DataStore
-from polargraph.cosm import COSMSource
+from polargraph.models import DataStore, COSMSource
 import django.core.serializers.json
 import json
 from django.utils import simplejson
