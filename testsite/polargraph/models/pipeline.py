@@ -19,6 +19,9 @@ from polargraph.models.endpoint import Endpoint
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
+import shutil
+import time
+import os
 
 
 #A complete pipeline from data source through to a running algorithm
@@ -29,6 +32,7 @@ class Pipeline( models.Model ) :
     data_store = models.OneToOneField( DataStore )
     state = models.OneToOneField( GeneratorState )
     endpoint = models.ForeignKey( Endpoint )
+    run_id = models.IntegerField(default=0)
     last_updated = models.DateTimeField("Last Updated")
     full_svg_file = models.CharField(max_length=200,blank=True)
     last_svg_file = models.CharField(max_length=200,blank=True)
@@ -81,31 +85,42 @@ class Pipeline( models.Model ) :
             self.save()
     
     def get_partial_svg_filename(self):
-        return svg.get_temp_filename("svg")
+        return self.get_filename("partial", "svg")
     def get_full_svg_filename(self):
-        return svg.get_temp_filename("svg")
+        return self.get_filename("complete", "svg")
     def get_partial_image_filename(self):
-        return svg.get_temp_filename("png")
+        return self.get_filename("partial", "png")
     def get_full_image_filename(self):
-        return svg.get_temp_filename("png")
+        return self.get_filename("complete", "png")
+    def get_filename(self,status,extension):
+        if not self.id > 0:
+            self.save()
+        return "data/working/pipeline_"+str(self.id)+"_"+status+"."+extension
+        
     def create_blank_svg(self,filename):
         doc = pysvg.structure.svg(width=self.img_width,height=self.img_height)
         build = pysvg.builders.ShapeBuilder()
         doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
         doc.save(filename)
+        
     def update_full_image(self):
         self.full_image_file = self.get_full_image_filename()
         svg.convert_svg_to_png(self.full_svg_file, self.full_image_file)
+        StoredOutput.get_output(self, "png", "complete").set_file(self.full_image_file)
+        StoredOutput.get_output(self, "svg", "complete").set_file(self.full_svg_file)
         
     def update_latest_image(self):
         self.last_image_file = self.get_partial_image_filename()
         svg.convert_svg_to_png(self.last_svg_file, self.last_image_file)
+        StoredOutput.get_output(self, "png", "partial").set_file(self.last_image_file)
+        StoredOutput.get_output(self, "svg", "partial").set_file(self.last_svg_file)
     
     def ensure_full_document(self,force=False):
         if self.full_svg_file is None or self.full_svg_file == "" or force:
             self.full_svg_file = self.get_full_svg_filename()
             self.create_blank_svg(self.full_svg_file)
             self.update_full_image()
+            
     def clear_latest_image(self):
         self.last_svg_file = self.get_partial_svg_filename()
         self.create_blank_svg(self.last_svg_file)
@@ -118,7 +133,41 @@ class Pipeline( models.Model ) :
         self.data_store.clear_all()
         self.state.write_state({})
         self.state.save()
+        self.run_id = self.run_id + 1
         self.save()
 
+    class Meta:
+        app_label = 'polargraph'
+
+class StoredOutput( models.Model ):
+    endpoint = models.ForeignKey( Endpoint )
+    pipeline = models.ForeignKey( Pipeline )
+    generator = models.ForeignKey( Generator )
+    run_id = models.IntegerField(default=0)
+    filetype = models.CharField(max_length=10,default="unknown") #svg or png
+    status = models.CharField(max_length=10,default="complete") #complete or partial
+    filename = models.CharField(max_length=200,default="output/none")
+    modified = models.DateTimeField(auto_now=True)
+    
+    @staticmethod
+    def get_output(pipeline,filetype,status):
+        try:
+            return StoredOutput.objects.get(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
+        except:
+            return StoredOutput(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
+    
+    def set_file(self,fn):
+        base,extension = os.path.splitext(fn)
+        if extension != "."+self.filetype:
+            print "Warning: got a "+extension+", but was expecting a "+self.filetype
+        self.filename = self.get_filename()
+        shutil.copy2(fn,self.filename)
+        self.save()
+    
+    def get_filename(self):
+        if not self.id > 0:
+            self.save()
+        return "data/output/"+str(self.id)+"_"+self.status+"."+self.filetype
+        
     class Meta:
         app_label = 'polargraph'
