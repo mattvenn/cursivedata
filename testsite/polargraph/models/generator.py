@@ -27,8 +27,8 @@ class Generator( models.Model ) :
         self.module = self.get_file( self.module_name )
         return
     #Processes a given chunk of data to return some SVG
-    def process_data( self, data, params, state ) :
-        return self.module.process(data,params,state)
+    def process_data( self, svg_document, data, params, state ) :
+        return self.module.process(svg_document, data,params,state)
     
     #Checks to see if the current data is enough to run
     def can_run( self, data, params, state ) :

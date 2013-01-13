@@ -53,7 +53,9 @@ class COSMSourceResource(ModelResource):
         print "ENDPOINT UPDATE!"
         store_id=int(request.path.split("/")[-2])
         ce = COSMSource.objects.get(id=store_id) #Uuuugh. Sorry!
+        print "COSM In:",request.raw_post_data
         data=json.loads(request.raw_post_data)
+        print "COSM DATA OK"
         ce.receive_data(data)
         return {"OK":"True"}
     

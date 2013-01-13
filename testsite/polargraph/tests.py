@@ -10,8 +10,15 @@ from django.contrib.auth.models import User
 from polargraph.models import *
 from django.utils import timezone
 
+from pysvg.structure import svg
+from pysvg.builders import ShapeBuilder
+from pysvg.text import text
 
-class SimpleTest(TestCase):
+from polargraph.svg import append_svg_to_file
+from pysvg.parser import parse
+
+#class SimpleTest(TestCase):
+class SimpleTest():
     def test_basic_addition(self):
         """
         Tests that 1 + 1 always equals 2.
@@ -44,4 +51,33 @@ class SimpleTest(TestCase):
 
     
     
- 
+class SVGTest():
+    def test_appending(self):
+        frag_file="tmp/b.svg"
+        main_file="tmp/a.svg"
+        main = svg()
+        frag = svg()
+        exp = svg()
+        sb = ShapeBuilder()
+        
+        main.addElement(sb.createRect(0, 0, "200px", "100px"))
+        exp.addElement(sb.createRect(0, 0, "200px", "100px"))
+        
+        frag.addElement(text("Hello World", x = 210, y = 110))
+        exp.addElement(text("Hello World", x = 210, y = 110))
+        main.save(main_file)
+        frag.save(frag_file)
+        append_svg_to_file(frag_file,main_file)
+        
+        svg_main = parse(main_file)
+        gotS =str(svg_main.getXML())
+        expS = str(exp.getXML())
+        print"Got:",gotS
+        print"Exp:",expS
+        #self.assertEqual(exp.getXML(), svg_main.getXML(), "Appended files are equal" )
+        if gotS != expS :
+            print "Different\nGot:\n",gotS,"\nExp:\n",expS
+        #self.assertEqual(exp.getXML(), svg_main.getXML(), "Appended files are equal" )
+        
+        
+        

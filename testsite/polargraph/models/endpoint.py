@@ -19,7 +19,11 @@ import requests
 class Endpoint( models.Model ):
     name = models.CharField(max_length=200)
     device = models.CharField(max_length=200)
+    width = models.CharField(max_length=200)
+    height = models.CharField(max_length=200)
+    url = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
+    
     def add_svg(self,svg_file ):
         gcode_file = svg.get_temp_filename("gcode")
         svg.convert_svg_to_gcode(svg_file, gcode_file)

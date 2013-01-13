@@ -15,6 +15,7 @@ def reset_superuser_pw() :
     su.save()
     
 def test_creating_pipeline():
+    reset_superuser_pw()
     g1 = Generator(name="Test Generator", description="This is a fake generator to test stuff with", image="No Image", module_name="example")
     g1.save()
     g1p = Parameter(name="Param 1",generator=g1)
@@ -32,13 +33,8 @@ def test_creating_pipeline():
     p1.save()
     print "P1:",str(p1)
     g1.init()
-    p1.update()
+    p1.update(d1)
     ce = COSMSource(data_store=d1)
     ce.save()
     print "COSM:",ce.id
-    return {"pipeline":p1, "data_source":d1, "cosm_source":ce }
-    su = User.objects.all()[0]
-    pw = 'admin'
-    su.set_password(pw)
-    print "Setting password on user ", su, " to ", pw
-    su.save()
+    return {"pipeline":p1, "data_store":d1, "cosm_source":ce }

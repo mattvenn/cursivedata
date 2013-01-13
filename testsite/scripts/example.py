@@ -1,12 +1,23 @@
+import pysvg.text
 
-def process(data,params,internal_state) :
-    print "Example Processing data with parameters",map(str,params)
-    print "Example internal state: ",internal_state
-    print "Internal State: ",internal_state.get("i","None")
-    it = internal_state.get("i",0) + 1
+def process(svg_document,data,params,internal_state) :
+    #print "Example Processing data with parameters",map(str,params)
+    #print "Example internal state: ",internal_state
+    #print "Internal State: ",internal_state.get("i","None")
+    it = internal_state.get("i",1) + 1
+    
+    svg_document.addElement(pysvg.text.text("GenRun", x = 50, y = 10))
+    for point in data.get_current():
+        xp = ((it)%10+0)*10
+        yp = ((it)/10+0)*10 
+        w = ((float(point['value'])/34000.0))*10
+        wp = str(w)+"%"
+        build = pysvg.builders.ShapeBuilder()
+        svg_document.addElement(build.createRect(str(xp)+"%", str(yp)+"%", width="10%", height="10%", fill = "rgb(0, 0, 0)"))
+        svg_document.addElement(build.createRect(str(xp)+"%", str(yp)+"%", width=wp, height=wp, fill = "rgb(255, 0, 0)"))
+        it = it+1
     internal_state["i"]=it
-    print "Data: ", data.get_current()
-    return "<pretendSVG><iteration>"+str(it)+"</iteration><data>"+str(data.get_current())+"</data></pretendSVG>\n"
+    return None
 
 def get_params() :
     return  [ { "name":"Width" }, { "name":"Height" } ]
@@ -15,4 +26,4 @@ def get_name() : return "Example Generator"
 def get_description() : return "Description of Example Generator"
 
 def can_run(data,params,internal_state):
-    return True
+    return len(data.get_current()) >= 2
