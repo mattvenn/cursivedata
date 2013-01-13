@@ -24,6 +24,7 @@ from django.utils.datetime_safe import datetime
 #A complete pipeline from data source through to a running algorithm
 class Pipeline( models.Model ) :
     name = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000,default="",blank=True)
     generator = models.OneToOneField( Generator )
     data_store = models.OneToOneField( DataStore )
     state = models.OneToOneField( GeneratorState )
@@ -103,10 +104,19 @@ class Pipeline( models.Model ) :
             self.full_svg_file = self.get_full_svg_filename()
             self.create_blank_svg(self.full_svg_file)
             self.update_full_image()
+    def clear_latest_image(self):
+        self.last_svg_file = self.get_partial_svg_filename()
+        self.create_blank_svg(self.last_svg_file)
+        self.update_latest_image()
+        self.save()
     
     def reset(self):
         self.ensure_full_document(True)
-        self.data_store.c
+        self.clear_latest_image()
+        self.data_store.clear_all()
+        self.state.write_state({})
+        self.state.save()
+        self.save()
 
     class Meta:
         app_label = 'polargraph'

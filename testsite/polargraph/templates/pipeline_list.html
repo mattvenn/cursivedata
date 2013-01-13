@@ -1,0 +1,19 @@
+<div style="font-family: helvetica">
+{% if pipeline_list %}
+	<h1>Pipelines</h1>
+    {% for pipeline in pipeline_list %}
+    	<div style="background: #ccc;margin: 20px; padding: 10px">
+    		<div style="display:inline-block; width=300px">
+				<h1><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></h1>
+				<h3>Using: {{pipeline.generator.name}}</h3>
+				<div style="font-style: italic"> {{pipeline.description}} </div>
+				Last Update: ({{pipeline.last_updated}})<br/>
+    		</div>
+			<img width="150" height="150" src="/{{pipeline.full_image_file}}"/>
+        </div>
+    {% endfor %}
+{% else %}
+    <h1>No pipelines are available.</h1>
+{% endif %}
+
+</div>

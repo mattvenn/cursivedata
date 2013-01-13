@@ -29,7 +29,9 @@ def test_creating_pipeline():
     d1 = DataStore()
     print d1.id
     d1.save()
-    p1 = Pipeline(name="Test Pipeline",data_store=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
+    num = Pipeline.objects.all().count() + 1
+    p1 = Pipeline(name="Test Pipeline " + str(num),data_store=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
+    p1.description = "Example pipeline created by test script. Number "+str(num)
     p1.save()
     print "P1:",str(p1)
     g1.init()

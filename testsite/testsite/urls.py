@@ -26,7 +26,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
      url(r'^admin/', include(admin.site.urls)),
 
-     url(r'^polargraph/', include('polargraph.urls')),
+     url(r'^polargraph/', include('polargraph.urls',namespace='polargraph',app_name='polargraph')),
      
      url(r'^api/', include(v1_api.urls)), #e.g. /api/v1/datastore/?format=json
      
