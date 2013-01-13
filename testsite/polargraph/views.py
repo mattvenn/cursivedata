@@ -16,9 +16,14 @@ def show_pipeline(request, pipelineID):
         act = request.POST.get('action',"none")
         if act == "Reset":
             pipeline.reset()
+        if act == "Update Parameters":
+            for (key, value) in request.POST.iteritems():
+                if key.startswith("param"):
+                    pipeline.state.params[key.replace("param","")]= float(value)
+            pipeline.state.save()
         elif act != "none":
             print "Unknown action:",act
-        context = {"pipeline":pipeline}
+        context = {"pipeline":pipeline, "params": pipeline.state.params }
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404

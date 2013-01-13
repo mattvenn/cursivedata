@@ -46,7 +46,7 @@ class Pipeline( models.Model ) :
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
     def update( self, data=None ) :
         data = data or self.data_store
-        params = self.state.params_to_dict();
+        params = self.state.params
         internal_state = self.state.read_internal_state()
         self.generator.init()
         print "Pipeline Data:",self.data_store.get_current()

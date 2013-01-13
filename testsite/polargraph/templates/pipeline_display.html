@@ -16,11 +16,25 @@
 	</div>
 	</div>
 	<div>
-	<h3>Controls</h3>
+	<div style="background: #ddd; padding: 10px"/>
 	<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
 		{% csrf_token %}
+		<div style="background: #ccffaa; display: inline-block;padding:10px;margin:10px;text-align:right">
+		<h3>Parameters</h3>
+		{% for k,v in params.items %}
+			<div>
+				<span>{{k}}</span>
+				<input type="text" name="param{{k}}" id="param{{k}}" value="{{v}}"/>
+			</div>
+		{% endfor %}
+		<input type="submit" value="Update Parameters" name="action"/>
+		</div>
+		<div style="background: #aaffcc; display: inline-block;padding:10px;margin:10px">
+		<h3>Controls</h3>
 		<input type="submit" value="Reset" name="action"/>
+		</div>
 	</form>
+	</div>
 	</div>
 {% else %}
     <h1>Pipeline not found</h1>
