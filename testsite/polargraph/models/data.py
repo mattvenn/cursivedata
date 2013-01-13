@@ -26,7 +26,7 @@ class DataStore( models.Model ) :
     name = models.CharField(max_length=200)
     current_data = models.CharField(max_length=20000,default=json.dumps([]))
     current = None
-    data_file = "tmp/data_store.json"
+    historic_data = models.CharField(max_length=200000,default=json.dumps([]))
     available = models.BooleanField(default=False)
     fresh=False
     
@@ -34,14 +34,12 @@ class DataStore( models.Model ) :
     def clear_current(self) : 
         current = json.loads(self.current_data)
         try:
-            with open(self.data_file, 'rb') as hist_file:
-                hist = json.load(hist_file)
+            hist = json.loads(self.historic_data)
         except Exception as e:
-            print "Couldn't open history file: ", e
+            print "Couldn't load history:", e
             hist = []
         try:
-            with open(self.data_file, 'wb') as hist_file:
-                json.dump(hist+current, hist_file)
+            self.historic_data=json.dumps(hist+current)
         except Exception as e:
             print "Couldn't save history",e
         self.current = []
@@ -61,6 +59,12 @@ class DataStore( models.Model ) :
             for entry in self.current :
                 self.deserialise_time(entry)
         return self.current
+    
+    def get_historic(self):
+        historic = json.loads(self.historic_data)
+        for entry in historic :
+            self.deserialise_time(entry)
+        return historic
     
     #Adds the data to the current data and sets available to true
     #Data must be a list of dicts 
@@ -86,7 +90,10 @@ class DataStore( models.Model ) :
         self.save()
         print "Saved:",self.current_data
     
-        
+    def clear_all(self):
+        self.historic_data = json.dumps([])
+        self.current_data = json.dumps([])
+        self.current = []
         
     def mark_stale(self):
         self.fresh=False
