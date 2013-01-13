@@ -128,12 +128,12 @@ class Pipeline( models.Model ) :
         self.save()
     
     def reset(self):
+        self.run_id = self.run_id + 1
         self.ensure_full_document(True)
         self.clear_latest_image()
         self.data_store.clear_all()
         self.state.write_state({})
         self.state.save()
-        self.run_id = self.run_id + 1
         self.save()
 
     class Meta:

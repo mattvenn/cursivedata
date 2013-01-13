@@ -17,7 +17,7 @@ def show_pipeline(request, pipelineID):
         act = request.POST.get('action',"none")
         if act == "Reset":
             pipeline.reset()
-        if act == "Update Parameters":
+        elif act == "Update Parameters":
             for (key, value) in request.POST.iteritems():
                 if key.startswith("param"):
                     pipeline.state.params[key.replace("param","")]= float(value)
@@ -29,8 +29,11 @@ def show_pipeline(request, pipelineID):
             params.append({"name":param.name,
                            "description":param.description,
                            "value":pipeline.state.params.get(param.name,param.default)})
-        print params
-        context = {"pipeline":pipeline, "params":params }
+        outputs = StoredOutput.objects \
+                .order_by('-modified') \
+                .filter(pipeline=pipeline,status="complete",filetype="png") \
+                .exclude(run_id= pipeline.run_id)[:8]
+        context = {"pipeline":pipeline, "params":params, "output":outputs }
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404

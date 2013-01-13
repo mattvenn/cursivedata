@@ -37,6 +37,17 @@
 	</form>
 	</div>
 	</div>
+	
+	<div>
+		<h1>Previous Output</h1>
+		{% for output in output %}
+			<div style="display:inline-block; background: #ccc; padding:10px">
+				<img src="/{{output.filename}}" width="150px" height="150px"/><br/>
+				{{output.modified}}
+			</div>
+		{% endfor %}
+	</div>	
+	
 {% else %}
     <h1>Pipeline not found</h1>
 {% endif %}
