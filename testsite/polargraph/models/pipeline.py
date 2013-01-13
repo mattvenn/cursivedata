@@ -38,6 +38,9 @@ class Pipeline( models.Model ) :
     img_height = models.IntegerField(default=500)
     def __unicode__(self):
         return self.name
+    def __init__(self, *args, **kwargs):
+        super(Pipeline, self).__init__(*args, **kwargs)
+        self.ensure_full_document()
     
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
