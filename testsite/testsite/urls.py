@@ -30,4 +30,7 @@ urlpatterns = patterns('',
      
      url(r'^api/', include(v1_api.urls)), #e.g. /api/v1/datastore/?format=json
      
+     (r'^tmp/(?P<path>.*)$', 'django.views.static.serve',
+        {'document_root': './tmp'}),
+     
 )

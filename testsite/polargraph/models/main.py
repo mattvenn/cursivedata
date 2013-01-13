@@ -18,6 +18,7 @@ from polargraph.models.data import DataStore
 from polargraph.models.endpoint import Endpoint
 import pysvg.structure
 import pysvg.builders
+from django.utils.datetime_safe import datetime
 
 
 #A complete pipeline from data source through to a running algorithm
@@ -37,10 +38,11 @@ class Pipeline( models.Model ) :
     img_height = models.IntegerField(default=500)
     def __unicode__(self):
         return self.name
-
+    
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
-    def update( self, data ) :
+    def update( self, data=None ) :
+        data = data or self.data_store
         params = self.state.params_to_dict();
         internal_state = self.state.read_internal_state()
         self.generator.init()
@@ -60,24 +62,20 @@ class Pipeline( models.Model ) :
             #Save the partial file and make a PNG of it
             self.last_svg_file = self.get_partial_svg_filename()
             svg_document.save(self.last_svg_file)
-            self.last_image_file = self.get_partial_image_filename()
-            svg.convert_svg_to_png(self.last_svg_file, self.last_image_file)
-            print "Saved update as:",self.last_image_file
+            self.update_latest_image()
             
-            if self.full_svg_file is None or self.full_svg_file == "":
-                self.full_svg_file = self.get_full_svg_filename()
-                self.create_blank_svg(self.full_svg_file)
-                
+            print "Saved update as:",self.last_image_file
+            self.ensure_full_document()
+            
             # Add SVG to full output history
-            print "Pipeline got SVG file:",self.last_svg_file,", Appending to:",self.full_svg_file
             svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
-            self.full_image_file = self.get_full_image_filename()
-            svg.convert_svg_to_png(self.full_svg_file, self.full_image_file)
+            self.update_full_image()
+            
             print "Saved whole image as:",self.full_image_file
-        
             #Send to endpoint
             self.endpoint.add_svg( self.last_svg_file )
             print str(self),"using",str(self.generator),"to send to endpoint", str(self.endpoint)
+            self.last_updated = datetime.now()
             self.save()
     
     def get_partial_svg_filename(self):
@@ -94,6 +92,23 @@ class Pipeline( models.Model ) :
         doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 128, 255)"))
         doc.addElement(pysvg.text.text("Doc Init", x = 0, y = 10))
         doc.save(filename)
+    def update_full_image(self):
+        self.full_image_file = self.get_full_image_filename()
+        svg.convert_svg_to_png(self.full_svg_file, self.full_image_file)
+        
+    def update_latest_image(self):
+        self.last_image_file = self.get_partial_image_filename()
+        svg.convert_svg_to_png(self.last_svg_file, self.last_image_file)
+    
+    def ensure_full_document(self,force=False):
+        if self.full_svg_file is None or self.full_svg_file == "" or force:
+            self.full_svg_file = self.get_full_svg_filename()
+            self.create_blank_svg(self.full_svg_file)
+            self.update_full_image()
+    
+    def reset(self):
+        self.ensure_full_document(True)
+        self.data_store.c
 
     class Meta:
         app_label = 'polargraph'

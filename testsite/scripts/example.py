@@ -10,11 +10,11 @@ def process(svg_document,data,params,internal_state) :
     for point in data.get_current():
         xp = ((it)%10+0)*10
         yp = ((it)/10+0)*10 
-        w = ((float(point['value'])/34000.0))*10
+        w = ((float(point['value'])/34000.0))*10/2
         wp = str(w)+"%"
         build = pysvg.builders.ShapeBuilder()
-        svg_document.addElement(build.createRect(str(xp)+"%", str(yp)+"%", width="10%", height="10%", fill = "rgb(0, 0, 0)"))
-        svg_document.addElement(build.createRect(str(xp)+"%", str(yp)+"%", width=wp, height=wp, fill = "rgb(255, 0, 0)"))
+        svg_document.addElement(build.createRect(str(xp)+"%", str(yp)+"%", width="10%", height="10%", fill = "rgb(200, 200, 200)"))
+        svg_document.addElement(build.createCircle(str(xp+5)+"%", str(yp+5)+"%", r=wp, fill = "rgb(255, 0, 0)"))
         it = it+1
     internal_state["i"]=it
     return None

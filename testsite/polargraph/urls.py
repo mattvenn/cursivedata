@@ -6,6 +6,7 @@ urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
 
 	 # ex: /polargraph/5/update/
+    url(r'^(?P<pipelineID>\d+)/$', views.show_pipeline, name='update'),
     url(r'^(?P<pipelineID>\d+)/update/$', views.update, name='update'),
 )
 
