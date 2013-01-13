@@ -59,8 +59,7 @@ class Generator( models.Model ) :
         s = GeneratorState( name=self.name, generator=self )
         s.save()
         for p in self.parameter_set.all():
-            ps = GeneratorStateParameter( parameter=p, state=s, value=p.default )
-            ps.save()
+            s.params[p.name] = p.default
         return s
     
     def add_or_update_param(self,param_spec):
@@ -109,7 +108,6 @@ class GeneratorState( models.Model ):
         for p in self.generator.parameter_set.all() :
             if not self.params.has_key(p.name):
                 self.params[p.name] = p.default
-        self.stored_params = json.dumps(self.params)
         
     def __unicode__(self):
         return self.name
@@ -119,17 +117,6 @@ class GeneratorState( models.Model ):
     
     def write_state( self, obj ) :
         self.state = json.dumps( obj )
-
-    class Meta:
-        app_label = 'polargraph'
-
-#Parameter values for a given GeneratorState
-class GeneratorStateParameter( models.Model ):
-    parameter = models.ForeignKey( Parameter )
-    state = models.ForeignKey( GeneratorState )
-    value = models.FloatField()
-    def __unicode__(self):
-        return self.parameter.name+"="+str(self.value)
 
     class Meta:
         app_label = 'polargraph'

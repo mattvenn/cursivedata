@@ -32,8 +32,6 @@ class SimpleTest():
         g1p.save()
         g1s = GeneratorState(name="Current",generator=g1)
         g1s.save()
-        g1p1s = GeneratorStateParameter(state=g1s,parameter=g1p,value=7)
-        g1p1s.save()
         e1 = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" )
         e1.save()
         d1 = DataStore()

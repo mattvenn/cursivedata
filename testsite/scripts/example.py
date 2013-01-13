@@ -8,7 +8,7 @@ def process(svg_document,data,params,internal_state) :
     it = internal_state.get("i",0) 
     
     for point in data.get_current():
-        num = params.get("Number",6)
+        num = int(params.get("Number",6))
         cell_width = (100.0/num)
         cws = str(cell_width)+"%"
         xp = ((it)%num)*cell_width
@@ -31,7 +31,10 @@ def process(svg_document,data,params,internal_state) :
     return None
 
 def get_params() :
-    return  [ { "name":"Number" }, { "name":"Saturation" }, {"name":"Level"} ]
+    return  [ 
+             { "name":"Number", "default": 10, "description":"The number of outputs to have horizontally and vertically" }, 
+             { "name":"Saturation", "default":100, "description":"Saturation of the colour" },
+             {"name":"Level", "default": 100, "description":"Level of the colour" } ]
 
 def get_name() : return "Example Generator"
 def get_description() : return "Description of Example Generator"
