@@ -28,7 +28,6 @@ class Pipeline( models.Model ) :
     data_store = models.OneToOneField( DataStore )
     state = models.OneToOneField( GeneratorState )
     endpoint = models.ForeignKey( Endpoint )
-    current_image = models.CharField(max_length=200)
     last_updated = models.DateTimeField("Last Updated")
     full_svg_file = models.CharField(max_length=200,blank=True)
     last_svg_file = models.CharField(max_length=200,blank=True)
@@ -89,8 +88,7 @@ class Pipeline( models.Model ) :
     def create_blank_svg(self,filename):
         doc = pysvg.structure.svg(width=self.img_width,height=self.img_height)
         build = pysvg.builders.ShapeBuilder()
-        doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 128, 255)"))
-        doc.addElement(pysvg.text.text("Doc Init", x = 0, y = 10))
+        doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
         doc.save(filename)
     def update_full_image(self):
         self.full_image_file = self.get_full_image_filename()

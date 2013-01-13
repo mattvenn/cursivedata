@@ -4,9 +4,8 @@ def process(svg_document,data,params,internal_state) :
     #print "Example Processing data with parameters",map(str,params)
     #print "Example internal state: ",internal_state
     #print "Internal State: ",internal_state.get("i","None")
-    it = internal_state.get("i",1) + 1
+    it = internal_state.get("i",1) 
     
-    svg_document.addElement(pysvg.text.text("GenRun", x = 50, y = 10))
     for point in data.get_current():
         xp = ((it)%10+0)*10
         yp = ((it)/10+0)*10 
