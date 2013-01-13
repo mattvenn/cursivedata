@@ -4,6 +4,7 @@ from django.http import HttpResponse, Http404
 from polargraph.models import *
 from django.shortcuts import render
 
+
 def index(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
     context = {"pipeline_list":latest_pipelines}
@@ -23,7 +24,13 @@ def show_pipeline(request, pipelineID):
             pipeline.state.save()
         elif act != "none":
             print "Unknown action:",act
-        context = {"pipeline":pipeline, "params": pipeline.state.params }
+        params = []
+        for param in pipeline.generator.parameter_set.all():
+            params.append({"name":param.name,
+                           "description":param.description,
+                           "value":pipeline.state.params.get(param.name,param.default)})
+        print params
+        context = {"pipeline":pipeline, "params":params }
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404

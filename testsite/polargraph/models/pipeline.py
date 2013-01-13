@@ -47,7 +47,7 @@ class Pipeline( models.Model ) :
     def update( self, data=None ) :
         data = data or self.data_store
         params = self.state.params
-        internal_state = self.state.read_internal_state()
+        internal_state = self.state.state
         self.generator.init()
         print "Pipeline Data:",self.data_store.get_current()
         print "Data:",data.get_current()
@@ -57,10 +57,9 @@ class Pipeline( models.Model ) :
             #Create a new document to write to
             svg_document = pysvg.structure.svg(width=self.img_width,height=self.img_height)
             self.generator.process_data( svg_document, data, params, internal_state )
+            self.state.save()
             
             data.clear_current()
-            self.state.write_state(internal_state)
-            self.state.save()
             
             #Save the partial file and make a PNG of it
             self.last_svg_file = self.get_partial_svg_filename()

@@ -1,4 +1,4 @@
-<div style="font-family: helvetica">
+<div style="font-family: helvetica; font-size: 20px">
 {% if pipeline %}
 	<h1>Pipeline: {{ pipeline.name }}</h1>
 	<h3>Generator: {{pipeline.generator.name}}</h3>
@@ -21,10 +21,11 @@
 		{% csrf_token %}
 		<div style="background: #ccffaa; display: inline-block;padding:10px;margin:10px;text-align:right">
 		<h3>Parameters</h3>
-		{% for k,v in params.items %}
+		{% for param in params %}
 			<div>
-				<span>{{k}}</span>
-				<input type="text" name="param{{k}}" id="param{{k}}" value="{{v}}"/>
+				<span>{{param.name}}</span>
+				<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}"/>
+				<div style="font-style: italic;font-size: 70%">{{param.description}}</div>
 			</div>
 		{% endfor %}
 		<input type="submit" value="Update Parameters" name="action"/>

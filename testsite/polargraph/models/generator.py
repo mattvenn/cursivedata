@@ -63,18 +63,19 @@ class Generator( models.Model ) :
         return s
     
     def add_or_update_param(self,param_spec):
-        try:
-            pr = self.get_param(param_spec['name'])
-        except Exception:
+        pr = self.get_param(param_spec['name'])
+        if not pr:
             pr = Parameter(generator=self)
         pr.name=param_spec['name']
-        pr.default=param_spec.get('default',0)
+        pr.default=param_spec.get('default',param_spec.get('default',0))
+        pr.description=param_spec.get('description',param_spec.get('description',"Unknown"))
         pr.save()
         
     def get_param(self,name):
-        pr = self.parameter_set.get(name=name)
-        if pr.count() > 0:
-            return pr.get(0)
+        #Should be doing a proper query here!
+        for p in self.parameter_set.all():
+            if p.name == name:
+                return p
         return None
             
     
@@ -98,7 +99,7 @@ class GeneratorState( models.Model ):
     name = models.CharField(max_length=200)
     generator = models.ForeignKey( Generator )
     params = jsonfield.JSONField(default={})
-    state = models.CharField(max_length=20000,default=json.dumps({"internal":"state"}))
+    state = jsonfield.JSONField(default={})
     
     def __init__(self, *args, **kwargs):
         super(GeneratorState, self).__init__(*args, **kwargs)
@@ -113,10 +114,10 @@ class GeneratorState( models.Model ):
         return self.name
     
     def read_internal_state(self) :
-        return json.loads( self.state )
+        return self.state
     
     def write_state( self, obj ) :
-        self.state = json.dumps( obj )
+        self.state = obj
 
     class Meta:
         app_label = 'polargraph'
