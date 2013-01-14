@@ -31,7 +31,7 @@ def show_pipeline(request, pipelineID):
                            "value":pipeline.state.params.get(param.name,param.default)})
         outputs = StoredOutput.objects \
                 .order_by('-modified') \
-                .filter(pipeline=pipeline,status="complete",filetype="png") \
+                .filter(pipeline=pipeline,status="complete",filetype="svg") \
                 .exclude(run_id= pipeline.run_id)[:8]
         context = {"pipeline":pipeline, "params":params, "output":outputs }
         return render(request,"pipeline_display.html",context)
