@@ -33,8 +33,8 @@ def process(svg_document,data,params,internal_state) :
 def get_params() :
     return  [ 
              { "name":"Number", "default": 10, "description":"The number of outputs to have horizontally and vertically" }, 
-             { "name":"Saturation", "default":100, "description":"Saturation of the colour" },
-             {"name":"Level", "default": 100, "description":"Level of the colour" } ]
+             { "name":"Saturation", "default":0.6, "description":"Saturation of the colour (0-1)" },
+             {"name":"Level", "default": 0.9, "description":"Brightness of the colour (0-1)" } ]
 
 def get_name() : return "Example Generator"
 def get_description() : return "Description of Example Generator"
