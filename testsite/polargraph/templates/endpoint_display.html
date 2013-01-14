@@ -1,0 +1,42 @@
+<div style="font-family: helvetica; font-size: 14px">
+{% if endpoint %}
+	<div style="padding:20px">
+		<div style="display:inline-block; border: 2pt solid grey;background: #ddd; padding:10px; vertical-align:top">
+			<h1>Endpoint: {{ endpoint.name }}</h1>
+			<div style="font-style: italic"> {{endpoint.description}} </div>
+			Location: {{endpoint.location}}<br/>
+			Device: {{endpoint.device}}<br/>
+			Size: {{endpoint.width}} by {{endpoint.height}}<br/>
+			URL: {{endpoint.url}}<br/>
+			<form action="{% url polargraph:show_endpoint endpoint.id %}" method="POST">
+				{% csrf_token %}
+				<div style="font-weight:bold">Controls</div>
+					<input type="submit" value="Calibrate" name="action"/>
+			</form>
+		</div>
+		<div style="display:inline-block">
+			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
+				<h3>Current Image:<h3>
+				<img width="300" height="300" src="/{{current_full.filename}}"/>
+			</div>
+			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
+				<h3>Last Update:<h3>
+				<img width="300" height="300" src="/{{current_update.filename}}"/>
+			</div>
+		</div>
+	</div>
+	
+	<div>
+		<h1>Previous Output</h1>
+		{% for output in previous %}
+			<div style="display:inline-block; background: #ccc; padding:10px">
+				<img src="/{{output.filename}}" width="150px" height="150px"/><br/>
+				{{output.modified}}
+			</div>
+		{% endfor %}
+	</div>	
+	
+{% else %}
+    <h1>Endpoint not found</h1>
+{% endif %}
+</div>

@@ -30,7 +30,7 @@ class Endpoint( models.Model ):
         self.send_to_device(gcode_file)
         
     def send_to_device(self,gcode):
-        print "Seinding gcode file",gcode,"to",self.device,"at",self.location
+        print "Sending gcode file",gcode,"to",self.device,"at",self.location
         
     def __unicode__(self):
         return self.name

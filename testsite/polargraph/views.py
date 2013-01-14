@@ -37,6 +37,30 @@ def show_pipeline(request, pipelineID):
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404
+
+def show_endpoint(request, endpointID):
+    try:
+        endpoint = Endpoint.objects.get(pk=endpointID)
+        act = request.POST.get('action',"none")
+        if act == "Calibrate":
+            print "Calibrating..."
+        elif act == "Update Parameters":
+            print "Update Params"
+        elif act != "none":
+            print "Unknown action:",act
+        previous = StoredOutput.objects \
+                .order_by('-modified') \
+                .filter(endpoint=endpoint,status="complete",filetype="svg")[1:8] 
+        current_full = StoredOutput.objects \
+                .order_by('-modified') \
+                .filter(endpoint=endpoint,status="complete",filetype="svg")[0]
+        current_update = StoredOutput.objects \
+                .order_by('-modified') \
+                .filter(endpoint=endpoint,status="partial",filetype="svg")[0]
+        context = {"endpoint":endpoint, "previous":previous, "current_full":current_full, "current_update":current_update}
+        return render(request,"endpoint_display.html",context)
+    except Endpoint.DoesNotExist:
+        raise Http404
         
 def update(request, pipelineID):
     try:
