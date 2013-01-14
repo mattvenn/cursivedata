@@ -1,41 +1,41 @@
-<div style="font-family: helvetica; font-size: 20px">
+<div style="font-family: helvetica; font-size: 14px">
 {% if pipeline %}
-	<h1>Pipeline: {{ pipeline.name }}</h1>
-	<h3>Generator: {{pipeline.generator.name}}</h3>
-	<div style="font-style: italic"> {{pipeline.generator.description}} </div>
-	<h3>Image size: {{pipeline.img_width}} by {{pipeline.img_height}}</h3>
-	<div>
-	<h3>Images</h3>
-	<div style="display: inline-block;border: 2pt solid grey;background: #aaaaff">
-		Full:<br/>
-		<img width="300" height="300" src="/{{pipeline.full_image_file}}"/>
-	</div>
-	<div style="display: inline-block;border: 2pt solid grey;background: #aaaaff">
-		Last Update: ({{pipeline.last_updated}})<br/>
-		<img width="300" height="300" src="/{{pipeline.last_image_file}}"/>
-	</div>
-	</div>
-	<div>
-	<div style="background: #ddd; padding: 10px"/>
-	<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
-		{% csrf_token %}
-		<div style="background: #ccffaa; display: inline-block;padding:10px;margin:10px;text-align:right">
-		<h3>Parameters</h3>
-		{% for param in params %}
-			<div>
-				<span>{{param.name}}</span>
-				<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}"/>
-				<div style="font-style: italic;font-size: 70%">{{param.description}}</div>
+	<div style="padding:20px">
+		<div style="display:inline-block; border: 2pt solid grey;background: #ddd; padding:10px; vertical-align:top">
+			<h1>Pipeline: {{ pipeline.name }}</h1>
+			<h3>Generator: {{pipeline.generator.name}}</h3>
+			<div style="font-style: italic"> {{pipeline.generator.description}} </div>
+			Image size: {{pipeline.img_width}} by {{pipeline.img_height}}<br/>
+			Last update: {{pipeline.last_updated}}<br/>
+			<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
+				{% csrf_token %}
+				<div style="background: #ccffaa; padding:10px;margin:10px;text-align:right">
+				<div style="font-weight:bold">Parameters</div>
+				{% for param in params %}
+					<div>
+						<span>{{param.name}}</span>
+						<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}"/>
+						<div style="font-style: italic;font-size: 70%">{{param.description}}</div>
+					</div>
+				{% endfor %}
+				<input type="submit" value="Update Parameters" name="action"/>
+				</div>
+				<div style="background: #aaffcc; padding:10px;margin:10px;text-align:right">
+				<div style="font-weight:bold">Controls</div>
+				<input type="submit" value="Reset" name="action"/>
+				</div>
+			</form>
+		</div>
+		<div style="display:inline-block">
+			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
+				<h3>Current Image:<h3>
+				<img width="300" height="300" src="/{{pipeline.full_image_file}}"/>
 			</div>
-		{% endfor %}
-		<input type="submit" value="Update Parameters" name="action"/>
+			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
+				<h3>Last Update:<h3>
+				<img width="300" height="300" src="/{{pipeline.last_image_file}}"/>
+			</div>
 		</div>
-		<div style="background: #aaffcc; display: inline-block;padding:10px;margin:10px">
-		<h3>Controls</h3>
-		<input type="submit" value="Reset" name="action"/>
-		</div>
-	</form>
-	</div>
 	</div>
 	
 	<div>
