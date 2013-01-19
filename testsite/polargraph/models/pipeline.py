@@ -52,10 +52,10 @@ class Pipeline( models.Model ) :
         params = self.state.params
         internal_state = self.state.state
         self.generator.init()
-        print "Pipeline Data:",self.data_store.get_current()
-        print "Data:",data.get_current()
-        print "Pipeline DataID:",self.data_store_id
-        print "Pipeline DHash:",hash(self.data_store)
+        #print "Pipeline Data:",self.data_store.get_current()
+        #print "Data:",data.get_current()
+        #print "Pipeline DataID:",self.data_store_id
+        #print "Pipeline DHash:",hash(self.data_store)
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
             svg_document = pysvg.structure.svg(width=self.img_width,height=self.img_height)
@@ -77,9 +77,8 @@ class Pipeline( models.Model ) :
             self.update_full_image()
             
             print "Saved whole image as:",self.full_image_file
-            #Send to endpoint, pass generator params so endpoint can query it
+            print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
             self.endpoint.add_svg( self.last_svg_file,params)
-            print str(self),"using",str(self.generator),"to send to endpoint", str(self.endpoint)
             self.last_updated = datetime.now()
             self.save()
     

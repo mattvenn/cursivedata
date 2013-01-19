@@ -37,7 +37,7 @@ do
     "at": "2009-09-07T12:16:02.000063Z",
     "value": 
     {
-      "current_value": "$RANDOM",
+      "value": "$RANDOM",
       "max_value": 9.99650150341,
       "min_value": 0.00471012639984
     }

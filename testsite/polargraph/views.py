@@ -1,8 +1,10 @@
 # Create your views here.
 
 from django.http import HttpResponse, Http404
+from django.core.servers.basehttp import FileWrapper
 from polargraph.models import *
 from django.shortcuts import render
+import os
 
 
 def index(request):
@@ -61,6 +63,22 @@ def show_endpoint(request, endpointID):
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
         raise Http404
+    
+def get_gcode(request, endpointID ):
+    endpoint = Endpoint.objects.get(pk=endpointID)
+    filename = endpoint.get_next_filename()
+    print "Filename",filename
+    if not filename:
+        raise Http404
+    consume =request.REQUEST.get('consume',False)
+    if consume:
+        print "Consuming..."
+        endpoint.consume()
+    wrapper = FileWrapper(file(filename))
+    response = HttpResponse(wrapper, content_type='text/plain')
+    response['Content-Length'] = os.path.getsize(filename)
+    return response
+        
         
 def update(request, pipelineID):
     try:
@@ -70,5 +88,4 @@ def update(request, pipelineID):
         raise Http404
     return HttpResponse(pipeline.update())
     
-
 

@@ -11,6 +11,7 @@ from polargraph.models import DataStore, COSMSource
 import django.core.serializers.json
 import json
 from django.utils import simplejson
+from django.http import QueryDict
 
 class CustomJSONSerializer(Serializer):
     
@@ -53,9 +54,15 @@ class COSMSourceResource(ModelResource):
         print "COSM UPDATE!"
         store_id=int(request.path.split("/")[-2])
         ce = COSMSource.objects.get(id=store_id) #Uuuugh. Sorry!
-        data = request.POST['body']
-        ds_data = json.loads(data)
-        print "COSM DATA:", ds_data
-        ce.receive_data(ds_data)
+        try:
+            print "Trying to get post stuff"
+            data_string = request.POST['body']
+            data = json.loads(data_string)
+        except Exception as e:
+            print "Trying raw data instead"
+            data = json.loads(request.raw_post_data)
+            print "Got data:",data
+        print "Data:",data
+        ce.receive_data(data)
         return {"OK":"True"}
     

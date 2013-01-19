@@ -32,7 +32,7 @@ def convert_svg_to_gcode( endpoint,generator_params,svgfile, polarfile ):
         result = subprocess.call(pycam_args)
         polargraph.parse_gcode.parse(endpoint,generator_params,gcodefile,polarfile)
     except Exception as e:
-        print "Coudlnt' read input file:",svgfile,e
+        print "Coudlnt' read input SVG file to make GCODE:",svgfile,e
 
 
 def convert_svg_to_png( svgfile, pngfilename ):
