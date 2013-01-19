@@ -1,5 +1,12 @@
 # Django settings for testsite project.
 
+# Try and import pycairo or fallback to cairocffi and install as cairo
+try:
+    import cairo
+except ImportError:
+    import cairocffi
+    cairocffi.install_as_pycairo()
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
