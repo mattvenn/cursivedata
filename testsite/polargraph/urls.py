@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     url(r'^pipeline/(?P<pipelineID>\d+)/$', views.show_pipeline, name='show_pipeline'),
     url(r'^pipeline/(?P<pipelineID>\d+)/update/$', views.update, name='update'),
     url(r'^pipeline/?$', views.index, name='list_pipelines'),
+    url(r'^endpoint_data/(?P<endpointID>\d+)/$', views.get_gcode, name='get_gcode'),
     url(r'^endpoint/(?P<endpointID>\d+)/$', views.show_endpoint, name='show_endpoint'),
 )
 

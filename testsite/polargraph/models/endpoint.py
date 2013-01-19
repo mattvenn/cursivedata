@@ -5,13 +5,7 @@ Created on 12 Jan 2013
 '''
 
 from django.db import models
-from django.utils import timezone
-from django.contrib.auth.models import User
-from imp import find_module, load_module
-import json
-import csv
 import polargraph.svg as svg
-import requests
 
 
 
@@ -25,9 +19,27 @@ class Endpoint( models.Model ):
     location = models.CharField(max_length=200)
     
     def add_svg(self,svg_file ):
-        gcode_file = svg.get_temp_filename("gcode")
-        svg.convert_svg_to_gcode(svg_file, gcode_file)
-        self.send_to_device(gcode_file)
+        print "Adding SVG"
+        so = GCodeOutput(endpoint=self)
+        so.save()
+        svg.convert_svg_to_gcode(svg_file, so.get_filename(), self)
+        
+    def get_next_filename(self):
+        n = self.get_next()
+        if n:
+            return n.get_filename()
+        return None
+    
+    def get_next(self):
+        try:
+            return GCodeOutput.objects.filter(endpoint=self,served=False).order_by('-modified')[:1].get()
+        except Exception as e:
+            return None
+        
+    def consume(self):
+        n = self.get_next( );
+        n.served = True;
+        n.save()
         
     def send_to_device(self,gcode):
         print "Sending gcode file",gcode,"to",self.device,"at",self.location
@@ -35,5 +47,18 @@ class Endpoint( models.Model ):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        app_label = 'polargraph'
+
+class GCodeOutput( models.Model ):
+    endpoint = models.ForeignKey(Endpoint)
+    served = models.BooleanField(default=False)
+    modified = models.DateTimeField(auto_now=True)
+    
+    def get_filename(self):
+        if not self.id > 0:
+            self.save()
+        return "data/output/gcode/"+str(self.id)+".gcode"
+    
     class Meta:
         app_label = 'polargraph'

@@ -24,7 +24,8 @@ def append_svg_to_file( fragment_file, main_file ):
 
 #Append an svg string to an svg file
 #NOTE: currently just copies one file to the other
-def convert_svg_to_gcode( svgfile, gcodefile ):
+def convert_svg_to_gcode( svgfile, gcodefile, endpoint ):
+    print "Creating GCode from"+svgfile+"->"+gcodefile+" to work with"+str(endpoint)
     try :
         with open( svgfile, 'rb' ) as source:
             try :
@@ -33,7 +34,7 @@ def convert_svg_to_gcode( svgfile, gcodefile ):
                         line=line.replace("SVG","GCODE")
                         dest.write( line )
             except Exception as ex:
-                print "Coudlnt' create outputfile:",svgfile,ex
+                print "Coudlnt' create outputfile:"+svgfile+"..."+str(ex)
     except Exception as e:
         print "Coudlnt' read input file:",svgfile,e
 
