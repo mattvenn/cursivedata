@@ -15,7 +15,6 @@ import requests
 import polargraph.models.cosm
 from polargraph.models.generator import Generator,GeneratorState
 from polargraph.models.data import DataStore
-from polargraph.models.endpoint import Endpoint
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
@@ -31,7 +30,7 @@ class Pipeline( models.Model ) :
     generator = models.OneToOneField( Generator )
     data_store = models.OneToOneField( DataStore )
     state = models.OneToOneField( GeneratorState )
-    endpoint = models.ForeignKey( Endpoint )
+    endpoint = models.ForeignKey( "Endpoint" )
     run_id = models.IntegerField(default=0)
     last_updated = models.DateTimeField("Last Updated")
     full_svg_file = models.CharField(max_length=200,blank=True)
@@ -78,8 +77,8 @@ class Pipeline( models.Model ) :
             self.update_full_image()
             
             print "Saved whole image as:",self.full_image_file
-            #Send to endpoint
-            self.endpoint.add_svg( self.last_svg_file )
+            #Send to endpoint, pass generator params so endpoint can query it
+            self.endpoint.add_svg( self.last_svg_file,params)
             print str(self),"using",str(self.generator),"to send to endpoint", str(self.endpoint)
             self.last_updated = datetime.now()
             self.save()
@@ -140,9 +139,9 @@ class Pipeline( models.Model ) :
         app_label = 'polargraph'
 
 class StoredOutput( models.Model ):
-    endpoint = models.ForeignKey( Endpoint )
-    pipeline = models.ForeignKey( Pipeline )
-    generator = models.ForeignKey( Generator )
+    endpoint = models.ForeignKey( "Endpoint", blank=True )
+    pipeline = models.ForeignKey( Pipeline, blank=True )
+    generator = models.ForeignKey( Generator, blank=True )
     run_id = models.IntegerField(default=0)
     filetype = models.CharField(max_length=10,default="unknown") #svg or png
     status = models.CharField(max_length=10,default="complete") #complete or partial
