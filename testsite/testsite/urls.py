@@ -1,5 +1,6 @@
 from os.path import join
 
+from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
@@ -33,6 +34,6 @@ urlpatterns = patterns('',
      url(r'^api/', include(v1_api.urls)), #e.g. /api/v1/datastore/?format=json
      
      (r'^data/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': join(PROJECT_ROOT, 'data')}),
+        {'document_root': join(settings.PROJECT_ROOT, 'data')}),
      
 )
