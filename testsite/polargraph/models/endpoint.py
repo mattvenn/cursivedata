@@ -6,6 +6,8 @@ Created on 12 Jan 2013
 
 from django.db import models
 import polargraph.svg as svg
+from polargraph.models.pipeline import StoredOutput
+import requests
 
 
 
@@ -13,16 +15,18 @@ import polargraph.svg as svg
 class Endpoint( models.Model ):
     name = models.CharField(max_length=200)
     device = models.CharField(max_length=200)
-    width = models.CharField(max_length=200)
-    height = models.CharField(max_length=200)
+    width = models.FloatField(max_length=200)
+    side_margin = models.FloatField(max_length=200)
+    top_margin = models.FloatField(max_length=200)
+    height = models.FloatField(max_length=200)
     url = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
     
-    def add_svg(self,svg_file ):
+    def add_svg(self,svg_file, generator_params ):
         print "Adding SVG"
         so = GCodeOutput(endpoint=self)
         so.save()
-        svg.convert_svg_to_gcode(svg_file, so.get_filename(), self)
+        svg.convert_svg_to_gcode(self,generator_params,svg_file,so.get_filename())
         
     def get_next_filename(self):
         n = self.get_next()

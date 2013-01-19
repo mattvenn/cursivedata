@@ -5,6 +5,7 @@ Created on 6 Jan 2013
 '''
 import time
 from pysvg.parser import parse
+import polargraph.parse_gcode
 import sys
 import subprocess
 import cairosvg
@@ -22,21 +23,15 @@ def append_svg_to_file( fragment_file, main_file ):
     except Exception as e:
         print "Coudlnt' read input file:",fragment_file,e
 
-#Append an svg string to an svg file
-#NOTE: currently just copies one file to the other
-def convert_svg_to_gcode( svgfile, gcodefile, endpoint ):
-    print "Creating GCode from"+svgfile+"->"+gcodefile+" to work with"+str(endpoint)
+#use pycam and parse_gcode to turn svg into robot style files
+def convert_svg_to_gcode( endpoint,generator_params,svgfile, polarfile ):
     try :
-        with open( svgfile, 'rb' ) as source:
-            try :
-                with open( gcodefile, 'a+' ) as dest:
-                    for line in source :
-                        line=line.replace("SVG","GCODE")
-                        dest.write( line )
-            except Exception as ex:
-                print "Coudlnt' create outputfile:"+svgfile+"..."+str(ex)
+        gcodefile="/tmp/tmp.gcode" #should be unique for process
+        pycam_args = ['/usr/bin/pycam', svgfile, "--export-gcode=" + gcodefile, "--process-path-strategy=engrave"]
+        result = subprocess.call(pycam_args)
+        polargraph.parse_gcode.parse(endpoint,generator_params,gcodefile,polarfile)
     except Exception as e:
-        print "Coudlnt' read input file:",svgfile,e
+        print "Coudlnt' read input SVG file to make GCODE:",svgfile,e
 
 
 def convert_svg_to_png( svgfile, pngfilename ):
