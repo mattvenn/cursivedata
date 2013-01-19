@@ -21,7 +21,7 @@ class COSMSource( models.Model ):
     stream_id = models.CharField(max_length=400,default="1")
     api_key = models.CharField(max_length=400,default="WsH6oBOmVbflt5ytsSYHYVGQzCaSAKw0Ti92WHZzajZHWT0g")
     cosm_trigger_id = models.CharField(max_length=50,blank=True)
-    url_base = models.CharField(max_length=200,default="http://mattvenn.org")
+    url_base = models.CharField(max_length=200,default="http://mattvenn.net:8080")
     cosm_url=models.CharField(max_length=200,default="http://api.cosm.com/v2/triggers/")
     
     #Extracts the data from the COSM trigger.
@@ -41,6 +41,7 @@ class COSMSource( models.Model ):
         url = self.get_url()
         data["url"]=url
         
+        print "Setting up COSM trigger",url,"for data_store",self.data_store_id," from feed:",self.feed_id,", stream:",self.stream_id
         r=requests.post(self.cosm_url,data=json.dumps(data),headers = headers)
         try:
             cosm_trigger_id=r.headers['location'].split("/")[-1]
