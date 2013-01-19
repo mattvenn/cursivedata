@@ -36,7 +36,7 @@ class Endpoint( models.Model ):
     
     def get_next(self):
         try:
-            return GCodeOutput.objects.filter(endpoint=self,served=False).order_by('-modified')[:1].get()
+            return GCodeOutput.objects.filter(endpoint=self,served=False).order_by('modified')[:1].get()
         except Exception as e:
             return None
         
