@@ -28,7 +28,7 @@ class COSMSource( models.Model ):
     #We could do something more clever here to stick datastreams together, but this works for now.
     def receive_data(self,msg):
         print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
-        value = msg["triggering_datastream"]["value"]["current_value"]
+        value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         self.data_store.add_data([{"time":time, "value":value}])
         
