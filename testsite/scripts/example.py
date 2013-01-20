@@ -35,6 +35,7 @@ def get_params() :
              { "name":"Number", "default": 10, "description":"The number of outputs to have horizontally and vertically" }, 
              { "name":"Saturation", "default":0.6, "description":"Saturation of the colour (0-1)" },
              {"name":"Level", "default": 0.9, "description":"Brightness of the colour (0-1)" }, 
+             #any way to make this be a float?
              {"name":"Width", "default": 200, "description":"width in mm" },
              {"name":"Height", "default": 200, "description":"height in mm" }, ]
 
