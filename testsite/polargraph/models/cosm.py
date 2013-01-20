@@ -60,6 +60,8 @@ class COSMSource( models.Model ):
             return "OK"
         except Exception as e:
             print "Coudln't setup COSM trigger:",e
+            print "Sent to url:",self.cosm_url
+            print "Sent data:",json.dumps(data)
             print "Response:",r
             print "Headers:",r.headers
             return r
