@@ -27,12 +27,12 @@ import os
 class Pipeline( models.Model ) :
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000,default="",blank=True)
-    generator = models.OneToOneField( Generator )
-    data_store = models.OneToOneField( DataStore )
-    state = models.OneToOneField( GeneratorState )
-    endpoint = models.ForeignKey( "Endpoint" )
+    generator = models.ForeignKey( Generator)
+    data_store = models.OneToOneField( DataStore)
+    state = models.OneToOneField( GeneratorState)
+    endpoint = models.ForeignKey( "Endpoint")
     run_id = models.IntegerField(default=0)
-    last_updated = models.DateTimeField("Last Updated")
+    last_updated = models.DateTimeField("Last Updated",default=datetime.now())
     full_svg_file = models.CharField(max_length=200,blank=True)
     last_svg_file = models.CharField(max_length=200,blank=True)
     full_image_file = models.CharField(max_length=200,blank=True)
@@ -43,7 +43,10 @@ class Pipeline( models.Model ) :
         return self.name
     def __init__(self, *args, **kwargs):
         super(Pipeline, self).__init__(*args, **kwargs)
-        self.ensure_full_document()
+        try:
+            self.ensure_full_document()
+        except Exception as e:
+            print "Coudln't make document ",e
     
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results

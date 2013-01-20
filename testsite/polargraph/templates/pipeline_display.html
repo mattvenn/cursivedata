@@ -1,8 +1,10 @@
-<div style="font-family: helvetica; font-size: 14px">
+<div style="font-family: helvetica; font-size: 16px">
 {% if pipeline %}
 	<div style="padding:20px">
 		<div style="display:inline-block; border: 2pt solid grey;background: #ddd; padding:10px; vertical-align:top">
+		<div style="display:inline-block; vertical-align:top">
 			<h1>Pipeline: {{ pipeline.name }}</h1>
+			<div style="font-style: italic"> {{pipeline.description}} </div>
 			<h3>Generator: {{pipeline.generator.name}}</h3>
 			<div style="font-style: italic"> {{pipeline.generator.description}} </div>
 			Image size: {{pipeline.img_width}} by {{pipeline.img_height}}<br/>
@@ -20,20 +22,63 @@
 				{% endfor %}
 				<input type="submit" value="Update Parameters" name="action"/>
 				</div>
+			</form>
+		</div>
+		<div style="display:inline-block;">
+			<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
+				{% csrf_token %}
 				<div style="background: #aaffcc; padding:10px;margin:10px;text-align:right">
 				<div style="font-weight:bold">Controls</div>
-				<input type="submit" value="Reset" name="action"/>
+					<input type="submit" value="Reset" name="action"/><br/>
+					<hr/>
+					<input type="text" name="pipeWidth" id="pipeWidth" value="{{pipeline.img_width}}"/>
+					<input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}"/>
+					<input type="submit" value="Update Size" name="action"/><br/>
+					<div style="font-style: italic;font-size: 70%">
+						Changing image size will reset the drawing
+					</div>
+					<hr/>
+			    		{{ cosm_form.as_p }}
+						<input type="submit" value="Create COSM" name="action" />
+					<hr/>
+					<h5>Existing COSM Triggers</h5>
+					{% for cosm in cosm_triggers %}
+					<div style="border: 1px solid grey; margin:3px;padding:3px">
+						<div style="width:230px">
+						Stream: <a href="https://cosm.com/feeds/{{cosm.feed_id}}">{{cosm.feed_id}}/{{cosm.stream_id}}</a>
+						</div>
+						<div style="width:230px; display:inline-block">
+						Updated: 
+						{% if cosm.last_updated %}
+							{{cosm.last_updated}}
+						{% else %}
+							Never updated
+						{% endif %}
+						</div>
+						<div style="width:130px; display:inline-block">
+						{% if cosm.is_running %}
+							<button type="submit" value="COSM Disable {{cosm.id}}" name="action">Disable</button>
+						{% else %}
+							<button type="submit" value="COSM Enable {{cosm.id}}" name="action">Enable</button>
+						{% endif %}
+						<button type="submit" value="COSM Delete {{cosm.id}}" name="action">Delete</button>
+						</div>
+					</div>
+				{% endfor %}
 				</div>
 			</form>
 		</div>
+		</div>
+		
+		
 		<div style="display:inline-block">
 			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
 				<h3>Current Image:<h3>
-				<img width="300" height="300" src="/{{pipeline.full_svg_file}}"/>
+				<img max-width="300" max-height="450" src="/{{pipeline.full_svg_file}}"/>
 			</div>
 			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
 				<h3>Last Update:<h3>
-				<img width="300" height="300" src="/{{pipeline.last_svg_file}}"/>
+				<img max-width="300" max-height="450" src="/{{pipeline.last_svg_file}}"/>
 			</div>
 		</div>
 	</div>
@@ -41,8 +86,8 @@
 	<div>
 		<h1>Previous Output</h1>
 		{% for output in output %}
-			<div style="display:inline-block; background: #ccc; padding:10px">
-				<img src="/{{output.filename}}" width="150px" height="150px"/><br/>
+			<div style="display:inline-block; background: #ccc; padding:10px; text-align:center;">
+				<img src="/{{output.filename}}" max-width="150px" height="150px"/><br/>
 				{{output.modified}}
 			</div>
 		{% endfor %}

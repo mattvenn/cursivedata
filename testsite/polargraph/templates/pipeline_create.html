@@ -1,0 +1,7 @@
+<div style="font-family: helvetica; font-size: 14px">
+	<form action="{% url polargraph:create_pipeline %}" method="POST">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<input type="submit" value="Submit" />
+	</form>
+</div>

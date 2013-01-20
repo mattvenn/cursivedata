@@ -13,6 +13,8 @@ import csv
 import polargraph.svg as svg
 import requests
 from polargraph.models.data import DataStore
+from django.utils.datetime_safe import datetime
+import re
 
 #Represents a COSM trigger, and maps it to a data_store, parsing any messages sent
 class COSMSource( models.Model ):
@@ -21,8 +23,9 @@ class COSMSource( models.Model ):
     stream_id = models.CharField(max_length=400,default="1")
     api_key = models.CharField(max_length=400,default="WsH6oBOmVbflt5ytsSYHYVGQzCaSAKw0Ti92WHZzajZHWT0g")
     cosm_trigger_id = models.CharField(max_length=50,blank=True)
-    url_base = models.CharField(max_length=200,default="http://invalid.org")
+    url_base = models.CharField(max_length=200,default="http://mattvenn.net:8080")
     cosm_url=models.CharField(max_length=200,default="http://api.cosm.com/v2/triggers/")
+    last_updated = models.DateTimeField("Last Updated",blank=True,null=True)
     
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
@@ -31,6 +34,8 @@ class COSMSource( models.Model ):
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         self.data_store.add_data([{"time":time, "value":value}])
+        self.last_updated = datetime.now()
+        self.save()
         
     def start_trigger(self):
         headers= {'content-type': 'application/json'}
@@ -39,18 +44,24 @@ class COSMSource( models.Model ):
         data["environment_id"]=self.feed_id
         data["stream_id"]=self.stream_id 
         url = self.get_url()
+        if not re.match("^http://",url):
+            url = "http://"+url
         data["url"]=url
         
+        print "Setting up COSM trigger for data_store",self.data_store_id,\
+            " from feed:",self.feed_id,", stream:",self.stream_id,", API Key: ",self.api_key
+        print "Pointing to URL:",data['url']
         r=requests.post(self.cosm_url,data=json.dumps(data),headers = headers)
         try:
             cosm_trigger_id=r.headers['location'].split("/")[-1]
-            print "Setting up COSM trigger",url,"for data_store",self.data_store_id,"with id:",cosm_trigger_id
-            print "Pointing to URL:",data['url']
+            print "Setup with id:",cosm_trigger_id
             self.cosm_trigger_id=cosm_trigger_id
             self.save()
             return "OK"
         except Exception as e:
             print "Coudln't setup COSM trigger:",e
+            print "Response:",r
+            print "Headers:",r.headers
             return r
         
     def stop_trigger(self):
@@ -61,6 +72,10 @@ class COSMSource( models.Model ):
             self.save()
         else:
             print "Trigger not set"
+    def is_running(self):
+        if self.cosm_trigger_id:
+            return True
+        return False
         
     def get_url(self):
         return self.url_base+"/api/v1/cosm/"+str(self.id)+"/"
