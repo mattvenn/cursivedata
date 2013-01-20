@@ -3,7 +3,8 @@
 TIME=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 VALUE=$RANDOM
 
-API="http://localhost:8080/api/v1/cosm"
+API="http://localhost:8000/api/v1/cosm"
+#API="http://mattvenn.net:8080/api/v1/cosm"
 COSM_ID=$1
 
 echo usage cosm_stream ID NUM_MESSAGES INTERVAL_SECONDS

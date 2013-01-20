@@ -1,10 +1,13 @@
 # Create your views here.
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from polargraph.models import *
 from django.shortcuts import render
 import os
+from django.forms.models import ModelForm
+from django.forms.widgets import Textarea, TextInput
+from django.utils.datetime_safe import datetime
 
 
 def index(request):
@@ -18,6 +21,10 @@ def show_pipeline(request, pipelineID):
         pipeline = Pipeline.objects.get(pk=pipelineID)
         act = request.POST.get('action',"none")
         if act == "Reset":
+            pipeline.reset()
+        elif act == "Update Size":
+            pipeline.img_width = int(request.POST.get('pipeWidth',pipeline.img_width))
+            pipeline.img_height = int(request.POST.get('pipeHeight',pipeline.img_height))
             pipeline.reset()
         elif act == "Update Parameters":
             for (key, value) in request.POST.iteritems():
@@ -88,4 +95,32 @@ def update(request, pipelineID):
         raise Http404
     return HttpResponse(pipeline.update())
     
+def create_pipeline( request ):
+    if request.method == 'POST': # If the form has been submitted...
+        form = PipelineCreation(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            pipeline = form.save(commit=False);
+            ds = DataStore(name="Data for"+str(pipeline.name))
+            gs = GeneratorState(name="Data for"+str(pipeline.name), generator=pipeline.generator)
+            ds.save()
+            gs.save()
+            pipeline.data_store = ds
+            pipeline.state = gs
+            pipeline.last_updated = datetime.now()
+            pipeline.save()
+            return HttpResponseRedirect('/polargraph/pipeline/'+str(pipeline.id)+"/") # Redirect after POST
+    else:
+        form = PipelineCreation() # An unbound form
 
+    return render(request, 'pipeline_create.html', {
+        'form': form,
+    })
+
+class PipelineCreation(ModelForm):
+    class Meta:
+        model = Pipeline
+        fields = ( 'name', 'description', 'generator', 'endpoint', 'img_width', 'img_height' )
+        widgets = {
+            'description': Textarea(attrs={'cols': 60, 'rows': 10}),
+            'name': TextInput(attrs={'size': 60}),
+        }
