@@ -6,13 +6,14 @@ from django.contrib import admin
 admin.autodiscover()
 
 from polargraph import views
-from polargraph.api import DataStoreResource, COSMSourceResource
+from polargraph.api import DataStoreResource, COSMSourceResource, EndpointResource
 
 from tastypie.api import Api
 
 v1_api = Api(api_name='v1')
 v1_api.register(DataStoreResource())
 v1_api.register(COSMSourceResource())
+v1_api.register(EndpointResource())
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin

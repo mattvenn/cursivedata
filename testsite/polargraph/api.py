@@ -7,7 +7,7 @@ Created on 6 Jan 2013
 from tastypie.resources import ModelResource
 from tastypie.authorization import Authorization
 from tastypie.serializers import Serializer
-from polargraph.models import DataStore, COSMSource
+from polargraph.models import DataStore, COSMSource, Endpoint
 import django.core.serializers.json
 import json
 from django.utils import simplejson
@@ -66,3 +66,10 @@ class COSMSourceResource(ModelResource):
         ce.receive_data(data)
         return {"OK":"True"}
     
+class EndpointResource(ModelResource):
+    class Meta:
+        queryset = Endpoint.objects.all()
+        resource_name = 'endpoint'
+        authorization = Authorization()
+        serializer = CustomJSONSerializer()
+        allowed_methods = ['get','patch']
