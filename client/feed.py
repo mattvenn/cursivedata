@@ -76,7 +76,7 @@ def fetch_data():
                 print gcodes
             return gcodes.splitlines()
         else:
-            print "failed with ", r.status_code
+            print "failed with", r.status_code
 
     except requests.exceptions.ConnectionError, e:
         print >>sys.stderr, e.code
@@ -85,10 +85,9 @@ def fetch_data():
 
 
 def finish_serial():
-#  import pdb; pdb.set_trace()
   if serial_port:
       print "closing serial"
-      print serial_port
+      #print serial_port
       serial_port.close()
 
 """
@@ -214,7 +213,7 @@ if __name__ == '__main__':
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
     parser.add_argument('--serial-timeout',
-        action='store', dest='timeout', type=int, default=1,
+        action='store', dest='timeout', type=int, default=10,
         help="timeout on serial read")
     parser.add_argument('--ms',
         action='store', dest='ms', type=int, default=0,
@@ -228,7 +227,7 @@ if __name__ == '__main__':
         gcodes = readFile()
     #send a command
     if args.command:
-        gcodes=[args.command+"\n"]
+        gcodes=[args.command]
     #use a remote server 
     if args.server:
         gcodes = fetch_data()
@@ -242,19 +241,21 @@ if __name__ == '__main__':
     if args.sendstatus and not args.norobot:
         update_robot_status()
 
-    if not 'gclodes' in locals():
+    try:
+        print "got %d gcodes" % len(gcodes)
+
+	if not args.norobot:
+	    if args.setup_robot:
+	      setup_robot()
+
+	    response = send_robot_commands(gcodes)
+
+	    if args.store_file:
+	      store=open(args.store_file,'w+')
+	      store.write(response)
+
+    except TypeError:
         print >>sys.stderr, "no gcodes given"
-        exit(1)
-
-    if not args.norobot:
-        if args.setup_robot:
-          setup_robot()
-
-        response = send_robot_commands(gcodes)
-
-        if args.store_file:
-          store=open(args.store_file,'w+')
-          store.write(response)
-
-    finish_serial()
+    finally:
+        finish_serial()
 
