@@ -16,7 +16,10 @@ import serial
 import requests
 
 
-def send_status(response):
+def update_robot_dimensions():
+    status_commands=["u"]
+    response = send_robot_commands(status_commands)
+
     m=re.search('^top margin: ([0-9.]+)mm',response,re.M)
     top_margin=m.group(1)
     m=re.search('^side margin: ([0-9.]+)mm',response,re.M)
@@ -25,12 +28,32 @@ def send_status(response):
     height=m.group(1)
     m=re.search('^w: ([0-9.]+)mm',response,re.M)
     width=m.group(1)
+
     payload = {
         'width': width,
         "height": height,
         "side_margin": side_margin,
         "top_margin": top_margin,
         }
+
+    #fix this
+    url = 'http://mattvenn.net:8080/api/v1/endpoint/1/' 
+    headers = {'content-type': 'application/json'}
+    r = requests.patch(url, data=json.dumps(payload),headers=headers)
+    print r.status_code
+    if r.status_code == 202:
+        print "updated ok"
+    else:
+        print "failed to update"
+
+def update_robot_status():
+    status_commands=["q"]
+    response = send_robot_commands(status_commands)
+
+    payload = {
+        'url': response,
+        }
+
     #fix this
     url = 'http://mattvenn.net:8080/api/v1/endpoint/1/' 
     headers = {'content-type': 'application/json'}
@@ -156,6 +179,9 @@ if __name__ == '__main__':
     group.add_argument('--command', action='store', dest='command', help="command to send")
     group.add_argument('--file', action='store', dest='file', help="file to open")
     group.add_argument('--server', action='store', dest='server', help="server to check")
+    group.add_argument('--update-dimensions',
+        action='store_const', const=True, dest='updatedimensions', default=False,
+        help="update the server with this robot's dimensions")
 
     parser.add_argument('--baud',
         action='store', dest='baud', type=int, default='57600',
@@ -207,21 +233,20 @@ if __name__ == '__main__':
     if args.server:
         gcodes = fetch_data()
 
-    if args.sendstatus and args.server and not args.norobot:
+    if not args.norobot:
         serial_port = setup_serial()
-        status_commands=["u\n"]
-        response = send_robot_commands(status_commands)
-        finish_serial()
-        send_status(response)
 
-    if not gcodes:
-        print >>sys.stderr, "no gcodes found"
+    if args.updatedimensions and not args.norobot:
+        update_robot_dimensions()
+
+    if args.sendstatus and not args.norobot:
+        update_robot_status()
+
+    if not 'gclodes' in locals():
+        print >>sys.stderr, "no gcodes given"
         exit(1)
 
     if not args.norobot:
-        time.sleep(1)
-        serial_port = setup_serial()
-
         if args.setup_robot:
           setup_robot()
 
@@ -231,5 +256,5 @@ if __name__ == '__main__':
           store=open(args.store_file,'w+')
           store.write(response)
 
-        finish_serial()
+    finish_serial()
 
