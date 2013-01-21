@@ -109,8 +109,11 @@ def show_endpoint(request, endpointID):
         raise Http404
     
 def get_gcode(request, endpointID ):
-    endpoint = Endpoint.objects.get(pk=endpointID)
-    filename = endpoint.get_next_filename()
+    try:
+        endpoint = Endpoint.objects.get(pk=endpointID)
+        filename = endpoint.get_next_filename()
+    except Endpoint.DoesNotExist:
+        raise Http404
     print "Filename",filename
     if not filename:
         raise Http404
