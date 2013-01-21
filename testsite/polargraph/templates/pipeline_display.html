@@ -6,9 +6,10 @@
 			<h1>Pipeline: {{ pipeline.name }}</h1>
 			<div style="font-style: italic"> {{pipeline.description}} </div>
 			<h3>Generator: {{pipeline.generator.name}}</h3>
+			
 			<div style="font-style: italic"> {{pipeline.generator.description}} </div>
 			<h3>Endpoint: {{pipeline.endpoint.name}}</h3>
-			<div style="font-style: italic"> {{pipeline.endpoint.description}} </div>
+			<div style="font-style: italic"> <a href="/polargraph/endpoint/{{pipeline.endpoint.id}}/">{{pipeline.endpoint.name}}</a> </div>
 			Image size: {{pipeline.img_width}} by {{pipeline.img_height}}<br/>
 			Last update: {{pipeline.last_updated}}<br/>
 			<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
