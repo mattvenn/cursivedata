@@ -7,6 +7,8 @@
 			Location: {{endpoint.location}}<br/>
 			Device: {{endpoint.device}}<br/>
 			Size: {{endpoint.width}} by {{endpoint.height}}<br/>
+			Side margin: {{endpoint.side_margin}}<br/>
+			Top margin: {{endpoint.top_margin}}<br/>
 			URL: {{endpoint.url}}<br/>
 			Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a> </div>
 			<form action="{% url polargraph:show_endpoint endpoint.id %}" method="POST">
