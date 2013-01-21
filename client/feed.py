@@ -195,7 +195,7 @@ if __name__ == '__main__':
         action='store_const', const=True, dest='verbose', default=False,
         help="verbose")
     parser.add_argument('--send-status',
-        action='store_const', const=True, dest='sendstatus', default=False,
+        action='store_const', const=True, dest='sendstatus', default=True,
         help="send current status of the robot to the server")
     parser.add_argument('--no-robot',
         action='store_const', const=True, dest='norobot', default=False,
