@@ -2,8 +2,9 @@
 
 TIME=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 VALUE=$RANDOM
+echo $VALUE
 
-API="http://localhost:8000/api/v1/cosm"
+API="http://localhost:8080/api/v1/cosm"
 #API="http://mattvenn.net:8080/api/v1/cosm"
 COSM_ID=$1
 
@@ -38,7 +39,7 @@ do
     "at": "2009-09-07T12:16:02.000063Z",
     "value": 
     {
-      "value": "$RANDOM",
+      "value": "$VALUE",
       "max_value": 9.99650150341,
       "min_value": 0.00471012639984
     }
