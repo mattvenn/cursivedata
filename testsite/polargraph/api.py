@@ -7,7 +7,7 @@ Created on 6 Jan 2013
 from tastypie.resources import ModelResource
 from tastypie.authorization import Authorization
 from tastypie.serializers import Serializer
-from polargraph.models import DataStore, COSMSource, Endpoint
+from polargraph.models import DataStore, COSMSource, Endpoint, Pipeline
 import django.core.serializers.json
 import json
 from django.utils import simplejson
@@ -73,3 +73,13 @@ class EndpointResource(ModelResource):
         authorization = Authorization()
         serializer = CustomJSONSerializer()
         allowed_methods = ['get','patch']
+
+    def obj_update(self, bundle, request=None, **kwargs):
+        res = super(EndpointResource, self).obj_update(bundle, request, **kwargs)
+        endpoint = bundle.obj
+        width = endpoint.width
+        height = endpoint.height
+        print "Width: ",width," Height:",height
+        for p in Pipeline.objects.filter(endpoint=endpoint):
+            p.update_size(width,height)
+        return res
