@@ -36,5 +36,7 @@ urlpatterns = patterns('',
      
      (r'^data/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': join(settings.PROJECT_ROOT, 'data')}),
+     (r'^media/(?P<path>.*)$', 'django.views.static.serve',
+        {'document_root': join(settings.PROJECT_ROOT, 'media')}),
      
 )
