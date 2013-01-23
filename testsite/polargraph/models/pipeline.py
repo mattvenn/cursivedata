@@ -98,6 +98,11 @@ class Pipeline( models.Model ) :
             self.save()
         return "data/working/pipeline_"+str(self.id)+"_"+status+"."+extension
         
+    def update_size(self,width,height):
+        self.img_width = width
+        self.img_height = height
+        self.reset()
+        
     def create_blank_svg(self,filename):
         doc = pysvg.structure.svg(width=self.img_width,height=self.img_height)
         build = pysvg.builders.ShapeBuilder()
