@@ -240,4 +240,3 @@ if __name__ == '__main__':
   if newfile:
     exit(0)
   exit(1)
-
