@@ -5,11 +5,17 @@
 		<div style="display:inline-block; vertical-align:top">
 			<h1>Pipeline: {{ pipeline.name }}</h1>
 			<div style="font-style: italic"> {{pipeline.description}} </div>
-			<h3>Generator: {{pipeline.generator.name}}</h3>
+			<div style="font-style: italic">(Data Store: {{pipeline.data_store_id}})</div>
+			<h3>Generator: {{pipeline.generator.name}} ({{pipeline.generator_id}})</h3>
 			
 			<div style="font-style: italic"> {{pipeline.generator.description}} </div>
-			<h3>Endpoint: {{pipeline.endpoint.name}}</h3>
-			<div style="font-style: italic"> <a href="/polargraph/endpoint/{{pipeline.endpoint.id}}/">{{pipeline.endpoint.name}}</a> </div>
+			<h3><a href="/polargraph/endpoint/{{pipeline.endpoint.id}}/">Endpoint: {{pipeline.endpoint.name}}</a></h3>
+			<div style="font-style: italic">
+				{{pipeline.endpoint.name}} (id: {{pipeline.endpoint_id}}) is a 
+				{{pipeline.endpoint.device}} at
+				{{pipeline.endpoint.location}}
+				 
+			</div>
 			Image size: {{pipeline.img_width}} by {{pipeline.img_height}}<br/>
 			Last update: {{pipeline.last_updated}}<br/>
 			<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
