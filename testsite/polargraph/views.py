@@ -35,9 +35,8 @@ def show_pipeline(request, pipelineID):
         if act == "Reset":
             pipeline.reset()
         elif act == "Update Size":
-            pipeline.img_width = int(request.POST.get('pipeWidth',pipeline.img_width))
-            pipeline.img_height = int(request.POST.get('pipeHeight',pipeline.img_height))
-            pipeline.reset()
+            pipeline.update_size( int(request.POST.get('pipeWidth',pipeline.img_width)),
+                    int(request.POST.get('pipeHeight',pipeline.img_height)))
         elif act == "Update Parameters":
             for (key, value) in request.POST.iteritems():
                 if key.startswith("param"):
@@ -97,12 +96,18 @@ def show_endpoint(request, endpointID):
         previous = StoredOutput.objects \
                 .order_by('-modified') \
                 .filter(endpoint=endpoint,status="complete",filetype="svg")[1:8] 
-        current_full = StoredOutput.objects \
+        try:
+            current_full = StoredOutput.objects \
                 .order_by('-modified') \
                 .filter(endpoint=endpoint,status="complete",filetype="svg")[0]
-        current_update = StoredOutput.objects \
+        except Exception as e:
+            current_full = None
+        try:
+            current_update = StoredOutput.objects \
                 .order_by('-modified') \
                 .filter(endpoint=endpoint,status="partial",filetype="svg")[0]
+        except Exception as e:
+            current_update = None
         context = {"endpoint":endpoint, "previous":previous, "current_full":current_full, "current_update":current_update}
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
