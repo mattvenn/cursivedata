@@ -57,7 +57,7 @@ if __name__ == '__main__':
         action='store', dest='pipeline', type=int, default='1',
         help="pipeline")
     parser.add_argument('--value',
-        action='store', dest='value', type=int, default='1',
+        action='store', dest='value', type=float, default='1',
         help="value")
     parser.add_argument('--url',
         action='store', dest='url', default=default_url,
