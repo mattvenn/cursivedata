@@ -36,18 +36,25 @@ def process(svg_document,data,params,internal_state) :
 
     aggregate = internal_state.get("aggregate",0) 
     square_num = int(internal_state.get("square_num",0))
+    xdiv = params.get("Xdiv")
+    ydiv = params.get("Ydiv")
 
     for point in data.get_current():
       aggregate += float(point['value'])
       #allow user to determine how fast the graph is drawn again
       number = get_minute(point['time'])
       #work out where to draw
-      startx = ( params.get("Width") / params.get("Xdiv")) * number % params.get("Xdiv") + params.get("Width") / (params.get("Xdiv") * 2)
-      #should last width be height?
-      starty = ( params.get("Width") / params.get("Ydiv")) * math.ceil(number / params.get("Ydiv")) + params.get("Width") / (params.get("Ydiv") * 2 ) 
+      cell_width = params.get("Width") / xdiv
+      cell_height = params.get("Height") / ydiv
+      startx = (number % xdiv) * cell_width
+      starty = math.ceil(number / ydiv) * cell_height
+      startx += cell_width / 2
+      starty += cell_height / 2
       #if we move to a new cell, start small again
-      if startx != internal_state.get("last_x",0):
+      if startx != internal_state.get("last_x",0) or starty != internal_state.get("last_y",0):
           internal_state["last_x"] = startx
+          internal_state["last_y"] = starty
+          print "reset square num"
           square_num = 0
         
       print "number:%d\naggregate:%d" % (number, aggregate)
