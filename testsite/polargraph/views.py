@@ -108,7 +108,8 @@ def show_endpoint(request, endpointID):
                 .filter(endpoint=endpoint,status="partial",filetype="svg")[0]
         except Exception as e:
             current_update = None
-        context = {"endpoint":endpoint, "previous":previous, "current_full":current_full, "current_update":current_update}
+        files_left = endpoint.get_num_files_to_serve()
+        context = {"endpoint":endpoint, "previous":previous, "current_full":current_full, "current_update":current_update,"files_left":files_left}
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
         raise Http404

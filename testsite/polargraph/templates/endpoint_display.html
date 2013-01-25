@@ -10,7 +10,9 @@
 			Side margin: {{endpoint.side_margin}}<br/>
 			Top margin: {{endpoint.top_margin}}<br/>
 			URL: {{endpoint.url}}<br/>
-			Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a> </div>
+			Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a><br/>
+			Files left to serve: {{files_left}}<br/> 
+            </div>
 			<form action="{% url polargraph:show_endpoint endpoint.id %}" method="POST">
 				{% csrf_token %}
 				<div style="font-weight:bold">Controls</div>

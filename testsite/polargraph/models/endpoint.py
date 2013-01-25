@@ -36,6 +36,12 @@ class Endpoint( models.Model ):
             return n.get_filename()
         return None
     
+    def get_num_files_to_serve(self):
+        try:
+            return len(GCodeOutput.objects.filter(endpoint=self,served=False))
+        except Exception as e:
+            return None
+
     def get_next(self):
         try:
             return GCodeOutput.objects.filter(endpoint=self,served=False).order_by('modified')[:1].get()
