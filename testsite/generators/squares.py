@@ -34,7 +34,7 @@ def get_minute(date):
 
 def process(svg_document,data,params,internal_state) :
 
-    aggregate = internal_state.get("aggregate",0) 
+    aggregate = internal_state.get("aggregate",0)
     square_num = int(internal_state.get("square_num",0))
     xdiv = params.get("Xdiv")
     ydiv = params.get("Ydiv")
@@ -57,7 +57,7 @@ def process(svg_document,data,params,internal_state) :
           print "reset square num"
           square_num = 0
         
-      print "number:%d\naggregate:%d" % (number, aggregate)
+      print "number:%d\naggregate:%.2f" % (number, aggregate)
       print "x:%d y:%d" % ( startx, starty )
 
       #if we have aggregated enough values to draw a square
