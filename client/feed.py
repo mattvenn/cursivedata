@@ -66,22 +66,22 @@ def update_robot_status():
 
 def fetch_data():
     if args.verbose:
-        print "fetching from ", args.server
+      print "fetching from ", args.server
     try:
-	r = requests.get(args.server)
-        if r.status_code == 200:
-	    gcodes = r.text
-	    if args.verbose:
-                print "got answer from server:"
-                print gcodes
-            return gcodes.splitlines()
+      r = requests.get(args.server)
+      if r.status_code == 200:
+        gcodes = r.text
+        if args.verbose:
+          print "got answer from server:"
+          print gcodes
+          return gcodes.splitlines()
         else:
-            print "failed with", r.status_code
+          print "failed with", r.status_code
 
     except requests.exceptions.ConnectionError, e:
-        print >>sys.stderr, e.code
-        print >>sys.stderr, e.read()
-        return None
+      print >>sys.stderr, e.code
+      print >>sys.stderr, e.read()
+      return None
 
 
 def finish_serial():
@@ -178,6 +178,7 @@ if __name__ == '__main__':
     group.add_argument('--command', action='store', dest='command', help="command to send")
     group.add_argument('--file', action='store', dest='file', help="file to open")
     group.add_argument('--server', action='store', dest='server', help="server to check")
+    group.add_argument('--log', action='store_const', const=True, dest='log', help="just print responses")
     group.add_argument('--update-dimensions',
         action='store_const', const=True, dest='updatedimensions', default=False,
         help="update the server with this robot's dimensions")
@@ -220,7 +221,7 @@ if __name__ == '__main__':
         help="micro step: 0,1,2,3")
 
     args = parser.parse_args()
-
+    gcodes = []
 
     #send a file   
     if args.file:
@@ -235,27 +236,28 @@ if __name__ == '__main__':
     if not args.norobot:
         serial_port = setup_serial()
 
-    if args.updatedimensions and not args.norobot:
-        update_robot_dimensions()
-
-    if args.sendstatus and not args.norobot:
-        update_robot_status()
-
     try:
-        print "got %d gcodes" % len(gcodes)
+      if args.updatedimensions and not args.norobot:
+          update_robot_dimensions()
+      if args.sendstatus and not args.norobot:
+          update_robot_status()
 
-	if not args.norobot:
-	    if args.setup_robot:
-	      setup_robot()
+      if not args.norobot:
+        if args.setup_robot:
+          setup_robot()
 
-	    response = send_robot_commands(gcodes)
+      if len(gcodes):
+        response = send_robot_commands(gcodes)
+      elif args.log:
+        while True:
+          response = read_serial_response()
 
-	    if args.store_file:
-	      store=open(args.store_file,'w+')
-	      store.write(response)
+      if args.store_file:
+        store=open(args.store_file,'w+')
+        store.write(response)
 
-    except TypeError:
-        print >>sys.stderr, "no gcodes given"
+    except Exception, e:
+        print >>sys.stderr, e
     finally:
         finish_serial()
 
