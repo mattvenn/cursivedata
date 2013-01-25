@@ -9,7 +9,11 @@ import argparse
 def push_data():
     headers= {'content-type': 'application/json'}
     print "value: ", args.value
-      #how much of this can be got rid of?
+    data = {
+        "input_data": [{"value":args.value,"time":timestamp}],
+        "name": "UPDATED!"
+        }
+    """
     data = {
       "environment": 
       {
@@ -42,8 +46,9 @@ def push_data():
       "type": "gte",
       "url": "http:\/\/api.cosm.com\/v2\/triggers\/1"
     }
-
     r = requests.post(args.url + str(args.cosmsourceid) + "/",headers=headers,data=json.dumps(data))
+    """
+    r = requests.patch(args.url + str(args.datastore) + "/",headers=headers,data=json.dumps(data))
     print r.status_code
     try:
         pprint.pprint(json.loads(r.text))
@@ -63,13 +68,13 @@ def calculate_datetime_from_minute():
 
 if __name__ == '__main__':
 
-    default_url = 'http://localhost:8080/api/v1/cosm/'
+    default_url = 'http://localhost:8080/api/v1/datastore/'
 #    'http://mattvenn.net:8080/api/v1/cosm'
 
     parser = argparse.ArgumentParser(description="feed polar files to polargraph robot")
-    parser.add_argument('--cosmsourceid',
-        action='store', dest='cosmsourceid', type=int, default='1',
-        help="the id of the cosm source (not the pipeline)")
+    parser.add_argument('--datastore',
+        action='store', dest='datastore', type=int, default='1',
+        help="the id of the datastore (not the pipeline)")
     parser.add_argument('--value',
         action='store', dest='value', type=float, default='1',
         help="value")
