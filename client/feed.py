@@ -68,7 +68,7 @@ def update_robot_status():
         print "failed to update"
 
 def fetch_data():
-    url = args.endpointurl + str(args.robot_id) + "/"
+    url = args.endpointurl + str(args.robot_id) + "/?consume=true"
     if args.verbose:
       print "fetching from ", url
     try:
@@ -248,7 +248,6 @@ if __name__ == '__main__':
 
     if not args.norobot:
         serial_port = setup_serial()
-
     if args.updatedimensions and not args.norobot:
         update_robot_dimensions()
     if args.sendstatus and not args.norobot:
