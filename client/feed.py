@@ -37,7 +37,7 @@ def update_robot_dimensions():
         }
 
     #fix this
-    url = 'http://mattvenn.net:8080/api/v1/endpoint/1/' 
+    url = args.apiurl + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -55,7 +55,7 @@ def update_robot_status():
         }
 
     #fix this
-    url = 'http://mattvenn.net:8080/api/v1/endpoint/1/' 
+    url = args.apiurl + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -189,15 +189,18 @@ if __name__ == '__main__':
     parser.add_argument('--serialport',
         action='store', dest='serialport', default='/dev/ttyACM0',
         help="serial port to listen on")
+    parser.add_argument('--apiurl',
+        action='store', dest='apiurl', default='http://mattvenn.net:8080/api/v1/endpoint/',
+        help="api url, must end in a /")
     parser.add_argument('--store',
         action='store', dest='store_file', 
         help="file to write robot responses in")
     parser.add_argument('--verbose',
         action='store_const', const=True, dest='verbose', default=False,
         help="verbose")
-    parser.add_argument('--send-status',
-        action='store_const', const=True, dest='sendstatus', default=True,
-        help="send current status of the robot to the server")
+    parser.add_argument('--no-send-status',
+        action='store_const', const=False, dest='sendstatus', default=True,
+        help="don't send current status of the robot to the server")
     parser.add_argument('--no-robot',
         action='store_const', const=True, dest='norobot', default=False,
         help="no robot connected, for testing")
@@ -210,6 +213,9 @@ if __name__ == '__main__':
     parser.add_argument('--pwm',
         action='store', dest='pwm', type=int, default=80,
         help="pwm to draw")
+    parser.add_argument('--robot-id',
+        action='store', dest='robot_id', type=int, default=1,
+        help="robot's endpoint id")
     parser.add_argument('--speed',
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
