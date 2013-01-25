@@ -8,6 +8,7 @@ import argparse
 
 def push_data():
     headers= {'content-type': 'application/json'}
+    print "value: ", args.value
       #how much of this can be got rid of?
     data = {
       "environment": 
@@ -51,9 +52,12 @@ def push_data():
 
 def calculate_datetime_from_minute():
    now = datetime.datetime.now()
-   hours = int(args.minute / 60)
-   mins = args.minute % 60
-   then = datetime.datetime(now.year,now.month,now.day,hours,mins,0)
+   if args.minute:
+       hours = int(args.minute / 60)
+       mins = args.minute % 60
+       then = datetime.datetime(now.year,now.month,now.day,hours,mins,0) 
+   else:
+       then = now
    return then.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -78,7 +82,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     print args.url
-    if args.minute:
-        timestamp = calculate_datetime_from_minute()
-        print timestamp
+    timestamp = calculate_datetime_from_minute()
     push_data()
