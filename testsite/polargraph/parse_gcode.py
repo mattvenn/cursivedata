@@ -8,7 +8,6 @@ def parse(endpoint,generator_params,infile,outfile):
   except:
     print "bad file"
     exit( 1 )
-
   xmin = 0
   ymin = 0
   #these should be validated as floats somewhere
@@ -27,8 +26,11 @@ def parse(endpoint,generator_params,infile,outfile):
     print "gcodes y too large for robot"
     exit(1)
 
-  xoffset = (available_x - xmax) / 2 + endpoint.side_margin
-  yoffset = endpoint.top_margin
+  #hack for centering for now
+  xoffset = endpoint.width/2 - xmax/2
+  yoffset = endpoint.height/2 - ymax/2
+  if yoffset < endpoint.top_margin:
+    yoffset = endpoint.top_margin
 
   startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
   contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
@@ -77,4 +79,5 @@ def parse(endpoint,generator_params,infile,outfile):
   """
 
   file = open(outfile,"w")
+  print "writing polar file to ", outfile
   file.write(polar_code)
