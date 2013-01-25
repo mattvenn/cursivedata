@@ -93,5 +93,11 @@ def get_description() : return "every 10 minutes start drawing squares about a c
 
 def can_run(data,params,internal_state):
     #run every time
-    return len(data.get_current()) >= 1
+    aggregate = internal_state.get("aggregate",0)
+    for point in data.get_current():
+      aggregate += float(point['value'])
+      if aggregate > params.get("Value"):
+        return True
+    print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
+    return False
 
