@@ -9,7 +9,7 @@
 				<div style="font-style: italic"> {{endpoint.description}} </div>
 				Last Update: ({{endpoint.last_updated}})<br/>
     		</div>
-			<img width="150" height="150" src="/{{endpoint.full_svg_file}}"/>
+			<img style="max-width:250px; max-height:250px;" src="/{{endpoint.full_svg_file}}"/>
         </div>
     {% endfor %}
 {% else %}
