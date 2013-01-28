@@ -37,6 +37,11 @@ def show_pipeline(request, pipelineID):
         elif act == "Update Size":
             pipeline.update_size( int(request.POST.get('pipeWidth',pipeline.img_width)),
                     int(request.POST.get('pipeHeight',pipeline.img_height)))
+        elif act == "Update Print Location":
+            pipeline.print_top_left_x = request.POST.get("xOffset")
+            pipeline.print_top_left_y = request.POST.get("yOffset")
+            pipeline.print_width = request.POST.get("printWidth")
+            pipeline.save()
         elif act == "Update Parameters":
             for (key, value) in request.POST.iteritems():
                 if key.startswith("param"):

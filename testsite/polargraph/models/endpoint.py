@@ -32,7 +32,7 @@ class Endpoint( models.Model ):
     run_id = models.IntegerField(default=0)
     last_updated = models.DateTimeField("Last Updated",default=datetime.now())
     
-    def add_svg(self,svg_file, generator_params ):
+    def add_svg(self,svg_file, generator_params, pipeline ):
         print "Adding SVG"
         try:
             #Should specify mm for document size
@@ -40,8 +40,19 @@ class Endpoint( models.Model ):
             #Should do transforming here
             try:
                 svg_data = parse(svg_file)
+                xoffset = pipeline.print_top_left_x
+                yoffset = pipeline.print_top_left_y
+                scale = pipeline.print_width / pipeline.img_width
+                tr = pysvg.builders.TransformBuilder()
+                tr.setScaling(scale)
+                trans = str(xoffset) + " " + str(yoffset) 
+                tr.setTranslation( trans )
+                group = pysvg.structure.g()
+                print "Transform:"+tr.getTransform()
+                group.set_transform(tr.getTransform())
                 for element in svg_data.getAllElements():
-                    current_drawing.addElement(element)
+                    group.addElement(element)
+                current_drawing.addElement(group)
             except Exception as e:
                 print "Couldn't read SVG file passed in:",svg_file,e
                 

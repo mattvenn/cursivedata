@@ -39,6 +39,10 @@ class Pipeline( models.Model ) :
     last_image_file = models.CharField(max_length=200,blank=True)
     img_width = models.IntegerField(default=500)
     img_height = models.IntegerField(default=500)
+    print_top_left_x = models.FloatField(default=0)
+    print_top_left_y = models.FloatField(default=0)
+    print_width = models.FloatField( default=200 )
+    
     def __unicode__(self):
         return self.name
     def __init__(self, *args, **kwargs):
@@ -81,7 +85,7 @@ class Pipeline( models.Model ) :
             
             print "Saved whole image as:",self.full_image_file
             print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
-            self.endpoint.add_svg( self.last_svg_file,params)
+            self.endpoint.add_svg( self.last_svg_file,params,self)
             self.last_updated = datetime.now()
             self.save()
     

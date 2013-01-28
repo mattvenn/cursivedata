@@ -40,11 +40,24 @@
 				<div style="font-weight:bold">Controls</div>
 					<input type="submit" value="Reset" name="action"/><br/>
 					<hr/>
-					<input type="text" name="pipeWidth" id="pipeWidth" value="{{pipeline.img_width}}"/>
-					<input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}"/>
+					<h5>Image Size</h5>
+					<div style="display:inline-block">
+					Width:<input type="text" name="pipeWidth" id="pipeWidth" value="{{pipeline.img_width}}"/><br/>
+					Height:<input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}"/><br/>
+					</div>
 					<input type="submit" value="Update Size" name="action"/><br/>
 					<div style="font-style: italic;font-size: 70%">
 						Changing image size will reset the drawing
+					</div>
+					<h5>Location on the page</h5>
+					<div style="display:inline-block">
+					X Offset: <input type="text" name="xOffset" id="xOffset" value="{{pipeline.print_top_left_x}}"/><br/>
+					Y Offset: <input type="text" name="yOffset" id="yOffset" value="{{pipeline.print_top_left_y}}"/><br/>
+					Width: <input type="text" name="printWidth" id="printWidth" value="{{pipeline.print_width}}"/>
+					</div>
+					<input type="submit" value="Update Print Location" name="action"/><br/>
+					<div style="font-style: italic;font-size: 70%">
+						Endpoint drawing area is: {{pipeline.endpoint.width}}mm by {{pipeline.endpoint.height}}mm
 					</div>
 					<hr/>
 			    		{{ cosm_form.as_p }}
