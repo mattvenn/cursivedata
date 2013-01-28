@@ -148,9 +148,9 @@ class Pipeline( models.Model ) :
         app_label = 'polargraph'
 
 class StoredOutput( models.Model ):
-    endpoint = models.ForeignKey( "Endpoint", blank=True )
-    pipeline = models.ForeignKey( Pipeline, blank=True )
-    generator = models.ForeignKey( Generator, blank=True )
+    endpoint = models.ForeignKey( "Endpoint", blank=True, null=True )
+    pipeline = models.ForeignKey( Pipeline, blank=True, null=True )
+    generator = models.ForeignKey( Generator, blank=True, null=True )
     run_id = models.IntegerField(default=0)
     filetype = models.CharField(max_length=10,default="unknown") #svg or png
     status = models.CharField(max_length=10,default="complete") #complete or partial
@@ -163,7 +163,8 @@ class StoredOutput( models.Model ):
             return StoredOutput.objects.get(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
         except:
             return StoredOutput(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-    
+        
+        
     def set_file(self,fn):
         base,extension = os.path.splitext(fn)
         if extension != "."+self.filetype:

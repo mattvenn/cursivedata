@@ -11,7 +11,7 @@ from django.utils.datetime_safe import datetime
 import re
 
 
-def index(request):
+def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
     context = {"pipeline_list":latest_pipelines}
     return render(request,"pipeline_list.html",context)
@@ -82,6 +82,12 @@ def show_pipeline(request, pipelineID):
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404
+    
+def list_endpoints(request):
+    latest_endpoints = Endpoint.objects.order_by('-last_updated')[:50]
+    context = {"endpoint_list":latest_endpoints}
+    return render(request,"endpoint_list.html",context)
+
 
 def show_endpoint(request, endpointID):
     try:
@@ -89,27 +95,17 @@ def show_endpoint(request, endpointID):
         act = request.POST.get('action',"none")
         if act == "Calibrate":
             print "Calibrating..."
+        if act == "Reset":
+            print endpoint.reset()
         elif act == "Update Parameters":
             print "Update Params"
         elif act != "none":
             print "Unknown action:",act
         previous = StoredOutput.objects \
                 .order_by('-modified') \
-                .filter(endpoint=endpoint,status="complete",filetype="svg")[1:8] 
-        try:
-            current_full = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(endpoint=endpoint,status="complete",filetype="svg")[0]
-        except Exception as e:
-            current_full = None
-        try:
-            current_update = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(endpoint=endpoint,status="partial",filetype="svg")[0]
-        except Exception as e:
-            current_update = None
+                .filter(endpoint=endpoint,pipeline=None,status="complete",filetype="svg")[1:8] 
         files_left = endpoint.get_num_files_to_serve()
-        context = {"endpoint":endpoint, "previous":previous, "current_full":current_full, "current_update":current_update,"files_left":files_left}
+        context = {"endpoint":endpoint, "previous":previous,"files_left":files_left}
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
         raise Http404

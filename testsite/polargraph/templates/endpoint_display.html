@@ -17,16 +17,17 @@
 				{% csrf_token %}
 				<div style="font-weight:bold">Controls</div>
 					<input type="submit" value="Calibrate" name="action"/>
+					<input type="submit" value="Reset" name="action"/>
 			</form>
 		</div>
 		<div style="display:inline-block">
 			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
 				<h3>Current Image:<h3>
-				<img width="300" height="300" src="/{% if current_full %}{{current_full.filename}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+				<img style="max-width:300px;max-height:300px" src="/{% if endpoint.full_svg_file %}{{endpoint.full_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
 			</div>
 			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
 				<h3>Last Update:<h3>
-				<img width="300" height="300" src="/{% if current_update %}{{current_update.filename}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+				<img style="max-width:300px;max-height:300px" src="/{% if endpoint.last_svg_file %}{{endpoint.last_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
 			</div>
 		</div>
 	</div>
@@ -35,7 +36,7 @@
 		<h1>Previous Output</h1>
 		{% for output in previous %}
 			<div style="display:inline-block; background: #ccc; padding:10px">
-				<img src="/{{output.filename}}" width="150px" height="150px"/><br/>
+				<img src="/{{output.filename}}" style="max-width:150px;max-height:400px"/><br/>
 				{{output.modified}}
 			</div>
 		{% endfor %}

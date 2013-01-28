@@ -27,7 +27,7 @@ def append_svg_to_file( fragment_file, main_file ):
 def convert_svg_to_gcode( endpoint,generator_params,svgfile, polarfile ):
     try :
         gcodefile="/tmp/tmp.gcode" #should be unique for process
-	pycam="/home/polarsite/pycam-0.5.1/pycam"
+        pycam="/home/polarsite/pycam-0.5.1/pycam"
         pycam_args = [pycam, svgfile, "--export-gcode=" + gcodefile, "--process-path-strategy=engrave"]
         result = subprocess.call(pycam_args)
         polargraph.parse_gcode.parse(endpoint,generator_params,gcodefile,polarfile)

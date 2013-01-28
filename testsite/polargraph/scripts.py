@@ -23,7 +23,7 @@ def test_creating_pipeline():
     g1s = g1.get_state()
     g1s.name = "Generator State for Pipeline " + str(num)
     g1s.save()
-    e1 = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=500, height=500, top_margin=100, side_margin=100)
+    e1 = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=500, height=1500, top_margin=100, side_margin=100)
     e1.save()
     d1 = DataStore()
     print d1.id

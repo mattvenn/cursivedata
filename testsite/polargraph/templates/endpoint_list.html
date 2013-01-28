@@ -1,0 +1,19 @@
+<div style="font-family: helvetica">
+{% if endpoint_list %}
+	<h1>Endpoints</h1>
+    {% for endpoint in endpoint_list %}
+    	<div style="background: #ccc;margin: 20px; padding: 10px">
+    		<div style="display:inline-block; width=300px">
+				<h1><a href="{% url polargraph:show_endpoint endpoint.id %}">{{ endpoint.name }}</a></h1>
+				<h3>Location: {{endpoint.location}}</h3>
+				<div style="font-style: italic"> {{endpoint.description}} </div>
+				Last Update: ({{endpoint.last_updated}})<br/>
+    		</div>
+			<img width="150" height="150" src="/{{endpoint.full_svg_file}}"/>
+        </div>
+    {% endfor %}
+{% else %}
+    <h1>No endpoints are available.</h1>
+{% endif %}
+
+</div>
