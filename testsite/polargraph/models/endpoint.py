@@ -20,7 +20,7 @@ class Endpoint( models.Model ):
     top_margin = models.FloatField(max_length=200)
     height = models.FloatField(max_length=200)
     #add this to db, using url for now
-    #status = models.CharField(max_length=200)
+    status = models.CharField(max_length=200)
     url = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
     
