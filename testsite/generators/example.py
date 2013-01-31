@@ -9,12 +9,12 @@ def process(svg_document,data,params,internal_state) :
     
     for point in data.get_current():
         num = int(params.get("Number",6))
-        cell_width = (100.0/num)
-        cws = str(cell_width)+"%"
+        cell_width = float(svg_document.get_width())/num
+        cws = str(cell_width)
         xp = ((it)%num)*cell_width
         yp = (((it)/num)%num)*cell_width
         w = ((float(point['value'])/34000.0))*cell_width/2
-        wp = str(w)+"%"
+        wp = str(w)
         hue = float(point['value'])/34000.0
         sat = params.get("Saturation",1.0)
         lev = params.get("Level",0.5)
@@ -24,8 +24,8 @@ def process(svg_document,data,params,internal_state) :
         print "RGBs:",rgbs
         build = pysvg.builders.ShapeBuilder()
         svg_document.addElement(build.createRect(
-            str(xp)+"%", str(yp)+"%", width=cws, height=cws, fill="none", stroke="grey", strokewidth=1) )
-        svg_document.addElement(build.createCircle(str(xp+cell_width/2)+"%", str(yp+cell_width/2)+"%", r=wp, fill=rgbs))
+            str(xp), str(yp), width=cws, height=cws, fill="none", stroke="grey", strokewidth=1) )
+        svg_document.addElement(build.createCircle(str(xp+cell_width/2), str(yp+cell_width/2), r=wp, fill=rgbs))
         it = it+1
     internal_state["i"]=it
     return None

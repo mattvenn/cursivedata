@@ -8,6 +8,10 @@ from django.db import models
 import polargraph.svg as svg
 from polargraph.models.pipeline import StoredOutput
 import requests
+import pysvg.structure
+import pysvg.builders
+from pysvg.parser import parse
+from django.utils.datetime_safe import datetime
 
 
 
@@ -19,16 +23,58 @@ class Endpoint( models.Model ):
     side_margin = models.FloatField(max_length=200)
     top_margin = models.FloatField(max_length=200)
     height = models.FloatField(max_length=200)
+    full_svg_file = models.CharField(max_length=200,blank=True)
+    last_svg_file = models.CharField(max_length=200,blank=True)
     #add this to db, using url for now
     status = models.CharField(max_length=200)
     url = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
+    run_id = models.IntegerField(default=0)
+    last_updated = models.DateTimeField("Last Updated",default=datetime.now())
     
-    def add_svg(self,svg_file, generator_params ):
+    def add_svg(self,svg_file, generator_params, pipeline ):
         print "Adding SVG"
-        so = GCodeOutput(endpoint=self)
-        so.save()
-        svg.convert_svg_to_gcode(self,generator_params,svg_file,so.get_filename())
+        try:
+            #Should specify mm for document size
+            current_drawing = pysvg.structure.svg(width=self.width,height=self.height)
+            #Should do transforming here
+            try:
+                svg_data = parse(svg_file)
+                xoffset = pipeline.print_top_left_x
+                yoffset = pipeline.print_top_left_y
+                scale = pipeline.print_width / pipeline.img_width
+                tr = pysvg.builders.TransformBuilder()
+                tr.setScaling(scale)
+                trans = str(xoffset) + " " + str(yoffset) 
+                tr.setTranslation( trans )
+                group = pysvg.structure.g()
+                print "Transform:"+tr.getTransform()
+                group.set_transform(tr.getTransform())
+                for element in svg_data.getAllElements():
+                    group.addElement(element)
+                current_drawing.addElement(group)
+            except Exception as e:
+                print "Couldn't read SVG file passed in:",svg_file,e
+                
+            #Save the partial file and make a PNG of it
+            self.last_svg_file = self.get_partial_svg_filename()
+            current_drawing.save(self.last_svg_file)
+            self.update_latest_image()
+                
+            print "Saved update as:",self.last_svg_file
+            self.ensure_full_document()
+                
+            # Add SVG to full output history
+            svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
+            self.update_full_image()  
+            
+            so = GCodeOutput(endpoint=self)
+            so.save()
+            svg.convert_svg_to_gcode(self,generator_params,self.last_svg_file,so.get_filename())
+            self.last_updated = datetime.now()
+            self.save()
+        except Exception as e:
+            print "Problem updating SVG in endpoint:",e
         
     def get_next_filename(self):
         n = self.get_next()
@@ -52,10 +98,67 @@ class Endpoint( models.Model ):
         n = self.get_next( );
         n.served = True;
         n.save()
+    def update_size(self,width,height):
+        changed = self.img_width != width or self.img_height != height
+        self.img_width = width
+        self.img_height = height
+        if changed:
+            self.reset()
+                  
+    def create_blank_svg(self,filename):
+        doc = pysvg.structure.svg(width=self.width,height=self.height)
+        build = pysvg.builders.ShapeBuilder()
+        doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
+        doc.save(filename)
+    
+    def update_full_image(self):
+        print "Update latest image"
+        #self.full_image_file = self.get_full_image_filename()
+        #svg.convert_svg_to_png(self.full_svg_file, self.full_image_file)
+        #StoredOutput.get_output(self, "png", "complete").set_file(self.full_image_file)
+        self.get_stored_output().set_file(self.full_svg_file)
         
-    def send_to_device(self,gcode):
-        print "Sending gcode file",gcode,"to",self.device,"at",self.location
+    def update_latest_image(self):
+        print "Update latest image"
+        #self.last_image_file = self.get_partial_image_filename()
+        #svg.convert_svg_to_png(self.last_svg_file, self.last_image_file)
+        #StoredOutput.get_output(self, "png", "partial").set_file(self.last_image_file)
+        #StoredOutput.get_output(self, "svg", "partial").set_file(self.last_svg_file)
+    
+    def ensure_full_document(self,force=False):
+        if self.full_svg_file is None or self.full_svg_file == "" or force:
+            self.full_svg_file = self.get_full_svg_filename()
+            self.create_blank_svg(self.full_svg_file)
+            self.update_full_image()
+            
+    def clear_latest_image(self):
+        self.last_svg_file = self.get_partial_svg_filename()
+        self.create_blank_svg(self.last_svg_file)
+        self.update_latest_image()
+        self.save()
+    
+    def reset(self):
+        self.run_id = self.run_id + 1
+        self.ensure_full_document(True)
+        self.clear_latest_image()
+        self.save()
         
+    def get_stored_output(self):
+        try:
+            return StoredOutput.objects.get(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype="svg",status="complete")
+        except:
+            return StoredOutput(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype="svg",status="complete")
+
+        
+    def get_partial_svg_filename(self):
+        return self.get_filename("partial", "svg")
+    def get_full_svg_filename(self):
+        return self.get_filename("complete", "svg")
+    def get_filename(self,status,extension):
+        if not self.id > 0:
+            self.save()
+        return "data/working/endpoint"+str(self.id)+"_"+status+"."+extension
+      
     def __unicode__(self):
         return self.name
 
