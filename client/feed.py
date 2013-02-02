@@ -34,10 +34,10 @@ def update_robot_dimensions():
       
     
     payload = {
-        'width': width,
-        "height": height,
-        "side_margin": side_margin,
-        "top_margin": top_margin,
+        'width': float(width),
+        "height": float(height),
+        "side_margin": float(side_margin) + 10, #hack, robot should return larger than needed
+        "top_margin": float(top_margin) + 100, #hack, robot should be  ypdated
         }
 
     url = args.apiurl + "endpoint/" + str(args.robot_id) + "/"
@@ -227,7 +227,7 @@ if __name__ == '__main__':
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
     parser.add_argument('--serial-timeout',
-        action='store', dest='timeout', type=int, default=10,
+        action='store', dest='timeout', type=int, default=20,
         help="timeout on serial read")
     parser.add_argument('--ms',
         action='store', dest='ms', type=int, default=0,
