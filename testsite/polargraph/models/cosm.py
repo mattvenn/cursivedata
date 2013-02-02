@@ -25,6 +25,14 @@ class COSMSource( models.Model ):
     cosm_trigger_id = models.CharField(max_length=50,blank=True)
     url_base = models.CharField(max_length=200,default="http://mattvenn.net:8080")
     cosm_url=models.CharField(max_length=200,default="http://api.cosm.com/v2/triggers/")
+    #Add in the lat/lon to any data recieved
+    add_location = models.BooleanField(default=False)
+    #Use the id of the stream as the variable name
+    use_stream_id = models.BooleanField(default=False)
+    #Add the title of the feed to the data
+    add_feed_title = models.BooleanField(default=False)
+    #Add the id of the feed to the data
+    add_feed_id = models.BooleanField(default=False)
     last_updated = models.DateTimeField("Last Updated",blank=True,null=True)
     
     #Extracts the data from the COSM trigger.
@@ -33,7 +41,21 @@ class COSMSource( models.Model ):
         print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
-        self.data_store.add_data([{"time":time, "value":value}])
+        datapoint = {"time":time}
+        if self.add_location :
+            datapoint['location'] = {}
+            datapoint['location']['lat'] = msg["environment"]["location"]["lat"]
+            datapoint['location']['lon'] = msg["environment"]["location"]["lng"]
+        if self.use_stream_id :
+            stream_id = msg["triggering_datastream"]["id"]
+            datapoint[stream_id] = value
+        else:
+            datapoint['value'] = value
+        if self.add_feed_id :
+            datapoint["feed_id"] = msg["environment"]["id"]
+        if self.add_feed_id :
+            datapoint["feed_title"] = msg["environment"]["title"]
+        self.data_store.add_data([datapoint])
         self.last_updated = datetime.now()
         self.save()
         
