@@ -3,3 +3,4 @@ testsite/db/testsite.sqlite
 .project
 .pydevproject
 testsite/tmp/*
+*.swp
