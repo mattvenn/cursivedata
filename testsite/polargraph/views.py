@@ -34,9 +34,9 @@ def show_pipeline(request, pipelineID):
         act = request.POST.get('action',"none")
         if act == "Reset":
             pipeline.reset()
-        if act == "Begin":
+        elif act == "Begin":
             pipeline.begin()
-        if act == "End":
+        elif act == "End":
             pipeline.end()
         elif act == "Update Size":
             pipeline.update_size( int(request.POST.get('pipeWidth',pipeline.img_width)),
