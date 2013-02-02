@@ -81,7 +81,7 @@ class Endpoint( DrawingState ):
             so.delete()
             
     def transform_svg(self, svg_file, pipeline):
-        current_drawing = self.create_svg_doc( self.img_width, self.img_height )
+        current_drawing = self.create_svg_doc()
         try:
             svg_data = parse(svg_file)
             xoffset = pipeline.print_top_left_x

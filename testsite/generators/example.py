@@ -1,5 +1,8 @@
-import pysvg.text
+import pysvg.text as txt
+import pysvg
 import colorsys
+from django.utils.datetime_safe import datetime
+
 
 def process(svg_document,data,params,internal_state) :
     print "Example Processing data with parameters",map(str,params)
@@ -9,7 +12,7 @@ def process(svg_document,data,params,internal_state) :
     
     for point in data.get_current():
         num = int(params.get("Number",6))
-        cell_width = float(svg_document.get_width())/num
+        cell_width = doc_width(svg_document)/num
         cws = str(cell_width)
         xp = ((it)%num)*cell_width
         yp = (((it)/num)%num)*cell_width
@@ -30,12 +33,26 @@ def process(svg_document,data,params,internal_state) :
     internal_state["i"]=it
     return None
 
+def doc_width(svg_document):
+        return float(str(svg_document.get_width()).replace("mm",""))
+def doc_height(svg_document):
+        return float(str(svg_document.get_height()).replace("mm",""))
+
 def begin(svg_document,params,internal_state) :
     print "Starting example drawing with params: ",map(str,params)
+    text = txt.text(content="Started at " + str(datetime.now()),x=10,y=10,fill="blue")
+    text.set_font_size(10);
+    text.set_font_family("Verdana")
+    svg_document.addElement( text )
     
 def end(svg_document,params,internal_state) :
     print "Ending exmaple drawing with params:",map(str,params)
-
+    content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("i",0)) + " updates"
+    text = txt.text(content=content,x=10,y=doc_height(svg_document)-10,fill="red")
+    text.set_font_size(10);
+    text.set_font_family("Verdana")
+    svg_document.addElement( text )
+    
 def get_params() :
     return  [ 
              { "name":"Number", "default": 10, "description":"The number of outputs to have horizontally and vertically" }, 

@@ -57,12 +57,33 @@ class Pipeline( DrawingState ) :
         self.generator.init()
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
-            svg_document = pysvg.structure.svg(width=self.img_width,height=self.img_height)
+            svg_document = self.create_svg_doc()
             self.generator.process_data( svg_document, data, params, internal_state )
             self.state.save()
             data.clear_current()
-
             self.add_svg( svg_document )
+    
+    def begin(self):
+        self.reset();
+        self.generator.init()
+        try:
+            svg_document = self.create_svg_doc()
+            self.generator.begin_drawing( svg_document, self.state.params, self.state.state )
+            self.state.save()
+            self.add_svg( svg_document )
+        except Exception as e:
+            print "Couldn't begin document:",e
+    
+    def end(self):
+        self.generator.init()
+        try:
+            svg_document = self.create_svg_doc()
+            self.generator.end_drawing( svg_document, self.state.params, self.state.state )
+            self.state.save()
+            self.add_svg( svg_document )
+        except Exception as e:
+            print "Couldn't end document:",e
+ 
 
     def add_svg(self, svg_document ):
         super(Pipeline, self).add_svg(svg_document)
