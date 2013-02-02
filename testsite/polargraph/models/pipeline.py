@@ -23,6 +23,7 @@ import shutil
 import time
 import os
 
+from polargraph.drawing import Drawing
 
 
 
@@ -58,7 +59,7 @@ class Pipeline( DrawingState ) :
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
             svg_document = self.create_svg_doc()
-            self.generator.process_data( svg_document, data, params, internal_state )
+            self.generator.process_data( Drawing(svg_document), data, params, internal_state )
             self.state.save()
             data.clear_current()
             self.add_svg( svg_document )
@@ -68,7 +69,7 @@ class Pipeline( DrawingState ) :
         self.generator.init()
         try:
             svg_document = self.create_svg_doc()
-            self.generator.begin_drawing( svg_document, self.state.params, self.state.state )
+            self.generator.begin_drawing( Drawing(svg_document), self.state.params, self.state.state )
             self.state.save()
             self.add_svg( svg_document )
         except Exception as e:
@@ -78,7 +79,7 @@ class Pipeline( DrawingState ) :
         self.generator.init()
         try:
             svg_document = self.create_svg_doc()
-            self.generator.end_drawing( svg_document, self.state.params, self.state.state )
+            self.generator.end_drawing( Drawing(svg_document), self.state.params, self.state.state )
             self.state.save()
             self.add_svg( svg_document )
         except Exception as e:

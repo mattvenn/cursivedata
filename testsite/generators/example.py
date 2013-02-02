@@ -4,7 +4,7 @@ import colorsys
 from django.utils.datetime_safe import datetime
 
 
-def process(svg_document,data,params,internal_state) :
+def process(drawing,data,params,internal_state) :
     print "Example Processing data with parameters",map(str,params)
     #print "Example internal state: ",internal_state
     #print "Internal State: ",internal_state.get("i","None")
@@ -12,7 +12,7 @@ def process(svg_document,data,params,internal_state) :
     
     for point in data.get_current():
         num = int(params.get("Number",6))
-        cell_width = doc_width(svg_document)/num
+        cell_width = drawing.width/num
         cws = str(cell_width)
         xp = ((it)%num)*cell_width
         yp = (((it)/num)%num)*cell_width
@@ -21,14 +21,9 @@ def process(svg_document,data,params,internal_state) :
         hue = float(point['value'])/34000.0
         sat = params.get("Saturation",1.0)
         lev = params.get("Level",0.5)
-        rgb = colorsys.hsv_to_rgb(hue, sat, lev)
-        rgbs = 'rgb('+str(int(rgb[0]*255.0))+','+str(int(rgb[1]*255.0))+','+str(int(rgb[2]*255.0))+')'
-        print "RGB:",rgb
-        print "RGBs:",rgbs
-        build = pysvg.builders.ShapeBuilder()
-        svg_document.addElement(build.createRect(
-            str(xp), str(yp), width=cws, height=cws, fill="none", stroke="grey", strokewidth=1) )
-        svg_document.addElement(build.createCircle(str(xp+cell_width/2), str(yp+cell_width/2), r=wp, fill=rgbs))
+        rgbs = drawing.hsv_to_color(hue,sat,lev)
+        drawing.rect(xp,yp,cws, cws)
+        drawing.circle(xp+cell_width/2, yp+cell_width/2, wp, fill=rgbs )
         it = it+1
     internal_state["i"]=it
     return None
