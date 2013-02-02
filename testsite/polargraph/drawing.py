@@ -6,6 +6,7 @@ Created on 2 Feb 2013
 import pysvg
 import colorsys
 import pysvg.text as txt
+import math
 
 class Drawing:
     doc = None
@@ -23,17 +24,30 @@ class Drawing:
         rgb = colorsys.hsv_to_rgb(hue, sat, lev)
         return self.rgb_to_color(rgb)
     
-    def rect(self,x,y,width,height,fill="none",stroke="grey", strokewidth=1):
-        self.doc.addElement(self.shapes.createRect(
-            self.dc(x), self.dc(y), width=self.dc(width), height=self.dc(height), fill=fill, stroke=stroke, strokewidth=strokewidth) )
+    #Draws a rectangle with the given x,y as top left, and the given height and width
+    def rect(self,x,y,width,height,fill="none",stroke="grey", strokewidth=1,transform=None,id=None):
+        rect = self.shapes.createRect( self.dc(x), self.dc(y), width=self.dc(width), height=self.dc(height),
+                                        fill=fill, stroke=stroke, strokewidth=strokewidth) 
+        if transform :
+            rect.set_transform( transform )
+        if id :
+            rect.set_id(id)
+        self.doc.addElement( rect )
     
-    def circle(self,x,y,radius,fill="none",stroke="grey"):
-        self.doc.addElement(self.shapes.createCircle(self.dc(x), self.dc(y), r=self.dc(radius), fill=fill, stroke=stroke))
+    def circle(self,x,y,radius,fill="none",stroke="grey",transform=None,id=None):
+        circ = self.shapes.createCircle(self.dc(x), self.dc(y), r=self.dc(radius), fill=fill, stroke=stroke)
+        if transform :
+            circ.set_transform( transform )
+        if id :
+            circ.set_id(id)
+        self.doc.addElement( circ )
     
-    def text(self,content,x,y,size=10,family="Helvetica",fill="black"):
+    def text(self,content,x,y,size=10,family="Helvetica",fill="black",transform=None,id=None):
         text = txt.text(content=content,x=x,y=y,fill=fill)
         text.set_font_size(size);
         text.set_font_family(family)
+        if id :
+            text.set_id(id)
         self.doc.addElement(text)
         
     #Draws text in the top left corner
@@ -43,6 +57,60 @@ class Drawing:
     def bl_text(self,content,margin=5,size=10,family="Helvetica",fill="black"):
         self.text(content,margin,self.height-margin,size=size,family=family,fill=fill)
     
+    def get_grid(self,nx=None,ny=None ):
+        return Grid(self,nx,ny)
+    
     #Takes a number, and turns it into document coordinates. At the moment, just makes a string, but could e.g. add "mm" if necessary
     def dc(self,coord):
         return str(coord)
+
+class Grid:
+    def __init__(self, drawing, nx=None, ny=None ):
+        self.drawing = drawing
+        w = drawing.width
+        h = drawing.height
+        if nx and ny:
+            #Figure out scales for both, use smaller, set offset
+            #Use nx to set size, and do ny to fit
+            self.size_x = min( w/nx, h/ny )
+            self.size_y = min( w/nx, h/ny )
+            self.nx = math.floor(w/self.size_x)
+            self.ny = math.floor(h/self.size_y)
+        elif nx:
+            #Use nx to set size, and do ny to fit
+            self.size_x = w/nx
+            self.size_y = w/nx
+            self.nx = nx;
+            self.ny = math.floor(h/self.size_y)
+        elif ny:
+            #Use ny to set size, and do nx to fit
+            self.size_x = w/ny
+            self.size_y = w/ny
+            self.nx = math.floor(w/self.size_x)
+            self.ny = ny
+        self.offset_x = (w - (self.nx * self.size_x ) ) / 2
+        self.offset_y = (h - (self.ny * self.size_y ) ) / 2
+    
+    def index_to_xy(self,i):
+        return( i%self.nx,(i/self.nx)%self.ny )
+        
+    def cell(self,index):
+        x,y = self.index_to_xy(int(index))
+        return self.cell_xy(x,y)
+    
+    #Returns the top left corner of the cell
+    def cell_xy(self,x,y):
+        return Cell(self.offset_x+x*self.size_x,self.offset_y+y*self.size_y,self.size_x,self.size_y)
+    
+class Cell:
+    def __init__(self, x, y, xsize,ysize ):
+        self.x = x;
+        self.y = y;
+        self.width = xsize;
+        self.height = ysize;
+    def tl(self):
+        return (self.x,self.y)
+    def br(self):
+        return (self.x+self.width,self.y+self.height)
+    def cent(self):
+        return (self.x+self.width/2,self.y+self.height/2)
