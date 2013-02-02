@@ -39,9 +39,11 @@ class Endpoint( models.Model ):
         self.available_y = self.height - self.top_margin
         self.x_min = self.side_margin
         self.y_min = self.top_margin
+        self.x_max = self.side_margin + self.available_x
+        self.y_max = self.top_margin + self.available_y
    
    
-    def add_svg(self,svg_file, generator_params, pipeline ):
+    def add_svg(self,svg_file, pipeline ):
         print "Adding SVG"
         try:
             #Should specify mm for document size
@@ -84,9 +86,12 @@ class Endpoint( models.Model ):
             svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
             self.update_full_image()  
             
-            so = GCodeOutput(endpoint=self)
-            so.save()
-            svg.convert_svg_to_gcode(self,generator_params,self.last_svg_file,so.get_filename())
+            try:
+                so = GCodeOutput(endpoint=self)
+                so.save()
+                svg.convert_svg_to_gcode(self,self.last_svg_file,so.get_filename())
+            except Exception as e:
+                print "Coudldn't make GCode:",e
             self.last_updated = datetime.now()
             self.save()
         except Exception as e:

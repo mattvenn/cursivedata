@@ -184,4 +184,4 @@ class PipelineCreation(ModelForm):
 class COSMSourceCreation(ModelForm):
     class Meta:
         model = COSMSource
-        fields = ( 'cosm_url', 'feed_id', 'stream_id', 'api_key', 'url_base')
+        fields = ( 'cosm_url', 'feed_id', 'stream_id', 'api_key', 'url_base', 'add_location', 'use_stream_id', 'add_feed_title', 'add_feed_id')
