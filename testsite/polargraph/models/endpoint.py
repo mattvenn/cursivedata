@@ -32,7 +32,15 @@ class Endpoint( models.Model ):
     location = models.CharField(max_length=200)
     run_id = models.IntegerField(default=0)
     last_updated = models.DateTimeField("Last Updated",default=datetime.now())
-    
+
+    def __init__(self, *args, **kwargs):
+        super(Endpoint, self).__init__(*args, **kwargs)
+        self.available_x = self.width - self.side_margin * 2
+        self.available_y = self.height - self.top_margin
+        self.x_min = self.side_margin
+        self.y_min = self.top_margin
+   
+   
     def add_svg(self,svg_file, generator_params, pipeline ):
         print "Adding SVG"
         try:
@@ -41,6 +49,7 @@ class Endpoint( models.Model ):
             heightmm = "%fmm" % self.height
 
             current_drawing = pysvg.structure.svg(width=widthmm,height=heightmm)
+            current_drawing.set_viewBox("0 0 %s %s" % (self.width, self.height))
             #Should do transforming here
             try:
                 svg_data = parse(svg_file)
@@ -63,6 +72,9 @@ class Endpoint( models.Model ):
             #Save the partial file and make a PNG of it
             self.last_svg_file = self.get_partial_svg_filename()
             current_drawing.save(self.last_svg_file)
+            print widthmm
+            print heightmm
+            print self.last_svg_file
             self.update_latest_image()
                 
             print "Saved update as:",self.last_svg_file
