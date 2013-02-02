@@ -1,30 +1,30 @@
-import pysvg.text as txt
-import pysvg
-import colorsys
 from django.utils.datetime_safe import datetime
 
 
 def process(drawing,data,params,internal_state) :
     print "Example Processing data with parameters",map(str,params)
-    #print "Example internal state: ",internal_state
-    #print "Internal State: ",internal_state.get("i","None")
-    it = internal_state.get("i",0) 
     
+    #Read in parameters
+    it = internal_state.get("i",0) 
+    sat = params.get("Saturation",1.0)
+    lev = params.get("Level",0.5)
+    
+    #Set up variables which stay constant for each point
+    grid = drawing.get_grid(nx=int(params.get("Number",6)))
+    w = grid.size_x
+    
+    #Run through all the data points
     for point in data.get_current():
-        num = int(params.get("Number",6))
-        cell_width = drawing.width/num
-        cws = str(cell_width)
-        xp = ((it)%num)*cell_width
-        yp = (((it)/num)%num)*cell_width
-        w = ((float(point['value'])/34000.0))*cell_width/2
-        wp = str(w)
-        hue = float(point['value'])/34000.0
-        sat = params.get("Saturation",1.0)
-        lev = params.get("Level",0.5)
-        rgbs = drawing.hsv_to_color(hue,sat,lev)
-        drawing.rect(xp,yp,cws, cws)
-        drawing.circle(xp+cell_width/2, yp+cell_width/2, wp, fill=rgbs )
+        val = ((float(point['value'])/34000.0))
+        cell = grid.cell(it)
+        tlx, tly = cell.tl()
+        cx, cy = cell.cent()
+        radius = val*w/2
+        drawing.rect(tlx,tly,w, w)
+        drawing.circle(cx, cy, radius, fill=drawing.hsv_to_color(val,sat,lev) )
         it = it+1
+        
+    #Write back any state we want to keep track of
     internal_state["i"]=it
     return None
 
