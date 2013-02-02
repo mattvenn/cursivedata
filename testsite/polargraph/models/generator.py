@@ -37,6 +37,14 @@ class Generator( models.Model ) :
     def can_run( self, data, params, state ) :
         return self.module.can_run(data,params,state)
     
+    #Processes a given chunk of data to return some SVG
+    def begin_drawing( self, svg_document, params, state ) :
+        return self.module.begin(svg_document, params,state)
+    
+    #Processes a given chunk of data to return some SVG
+    def end_drawing( self, svg_document, params, state ) :
+        return self.module.end(svg_document, params,state)
+    
     def __unicode__(self):
         return self.name
     @staticmethod
