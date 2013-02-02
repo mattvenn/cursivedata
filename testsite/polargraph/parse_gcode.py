@@ -1,7 +1,7 @@
 import re
 
 
-def parse(endpoint,generator_params,infile,outfile):
+def parse(endpoint,infile,outfile):
 
   try:
     gcode = open(infile)

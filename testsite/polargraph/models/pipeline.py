@@ -68,26 +68,28 @@ class Pipeline( models.Model ) :
             svg_document = pysvg.structure.svg(width=self.img_width,height=self.img_height)
             self.generator.process_data( svg_document, data, params, internal_state )
             self.state.save()
-            
             data.clear_current()
+            self.add_svg( svg_document )
+        
+    def add_svg(self, svg_document ):
+        #Save the partial file and make a PNG of it
+        self.last_svg_file = self.get_partial_svg_filename()
+        svg_document.save(self.last_svg_file)
+        self.update_latest_image()
             
-            #Save the partial file and make a PNG of it
-            self.last_svg_file = self.get_partial_svg_filename()
-            svg_document.save(self.last_svg_file)
-            self.update_latest_image()
+        print "Saved update as:",self.last_image_file
+        self.ensure_full_document()
             
-            print "Saved update as:",self.last_image_file
-            self.ensure_full_document()
+        # Add SVG to full output history
+        svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
+        self.update_full_image()
             
-            # Add SVG to full output history
-            svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
-            self.update_full_image()
-            
-            print "Saved whole image as:",self.full_image_file
-            print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
-            self.endpoint.add_svg( self.last_svg_file,params,self)
-            self.last_updated = datetime.now()
-            self.save()
+        print "Saved whole image as:",self.full_image_file
+        self.last_updated = datetime.now()
+        self.save()
+        print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
+        self.endpoint.add_svg( self.last_svg_file,self)
+        
     
     def get_partial_svg_filename(self):
         return self.get_filename("partial", "svg")
@@ -138,6 +140,7 @@ class Pipeline( models.Model ) :
         self.create_blank_svg(self.last_svg_file)
         self.update_latest_image()
         self.save()
+    
     
     def reset(self):
         self.run_id = self.run_id + 1
