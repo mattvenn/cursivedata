@@ -51,7 +51,7 @@ def update_robot_status():
     response = send_robot_commands(status_commands)
 
     payload = {
-        'url': response,
+        'status': response,
         }
 
     #fix this
@@ -221,7 +221,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-
+    print "started ", datetime.datetime.now()
     #send a file   
     if args.file:
         gcodes = readFile()
