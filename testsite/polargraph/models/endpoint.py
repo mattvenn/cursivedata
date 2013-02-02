@@ -76,6 +76,7 @@ class Endpoint( DrawingState ):
             svg.convert_svg_to_gcode(self,self.last_svg_file,so.get_filename())
         except Exception as e:
             print "Coudldn't make GCode:",e
+            so.delete()
             
     def transform_svg(self, svg_file, pipeline):
         current_drawing = self.create_svg_doc( self.img_width, self.img_height )
