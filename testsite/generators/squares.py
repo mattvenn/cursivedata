@@ -42,7 +42,7 @@ def process(drawing,data,params,internal_state) :
                 rotate = int(square_num*params.get("Rotate")) % 360 
                 transform = "rotate(%d,%d,%d)" % (rotate,cx,cy)
             hWidth = width/2
-            drawing.rect(cx-hWidth,cy-hWidth,width,width,id=id,fill="none",stroke="#000",transform = transform)
+            drawing.rect(cx-hWidth,cy-hWidth,width,width,id=id,transform = transform)
             aggregate -= params.get("Value")
             #increment squares
             square_num += 1
@@ -53,12 +53,12 @@ def process(drawing,data,params,internal_state) :
 
 def begin(drawing,params,internal_state) :
     print "Starting drawing squares: ",map(str,params)
-    drawing.tl_text("Started at " + str(datetime.now()),fill="blue",size=5)
+    drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
     
 def end(drawing,params,internal_state) :
     print "Ending exmaple drawing with params:",map(str,params)
     content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("last_cell",0)) + " sets of squares"
-    drawing.bl_text(content,fill="red",size="5")
+    drawing.bl_text(content,stroke="red",size=15)
     
 def get_params() :
     return  [ 
