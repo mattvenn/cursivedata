@@ -25,7 +25,7 @@ class Drawing:
         return self.rgb_to_color(rgb)
     
     #Draws a rectangle with the given x,y as top left, and the given height and width
-    def rect(self,x,y,width,height,fill="none",stroke="grey", strokewidth=1,transform=None,id=None):
+    def rect(self,x,y,width,height,fill="none",stroke="#000", strokewidth=1,transform=None,id=None):
         rect = self.shapes.createRect( self.dc(x), self.dc(y), width=self.dc(width), height=self.dc(height),
                                         fill=fill, stroke=stroke, strokewidth=strokewidth) 
         if transform :
@@ -34,7 +34,7 @@ class Drawing:
             rect.set_id(id)
         self.doc.addElement( rect )
     
-    def circle(self,x,y,radius,fill="none",stroke="grey",transform=None,id=None):
+    def circle(self,x,y,radius,fill="none",stroke="#000",transform=None,id=None):
         circ = self.shapes.createCircle(self.dc(x), self.dc(y), r=self.dc(radius), fill=fill, stroke=stroke)
         if transform :
             circ.set_transform( transform )
@@ -42,20 +42,22 @@ class Drawing:
             circ.set_id(id)
         self.doc.addElement( circ )
     
-    def text(self,content,x,y,size=10,family="Helvetica",fill="black",transform=None,id=None):
-        text = txt.text(content=content,x=x,y=y,fill=fill)
+    def text(self,content,x,y,size=10,family="Helvetica",fill="none",stroke="#000",transform=None,id=None):
+        text = txt.text(content=content,x=x,y=y,fill=fill,stroke=stroke)
         text.set_font_size(size);
         text.set_font_family(family)
+        if transform :
+            text.set_transform( transform )
         if id :
             text.set_id(id)
         self.doc.addElement(text)
         
     #Draws text in the top left corner
-    def tl_text(self,content,margin=5,size=10,family="Helvetica",fill="black"):
-        self.text(content,margin,margin+size,size=size,family=family,fill=fill)
+    def tl_text(self,content,margin=5,size=10,family="Helvetica",fill="none",stroke="#000"):
+        self.text(content,margin,margin+size,size=size,family=family,fill=fill,stroke=stroke)
     #Draws text in the top left corner
-    def bl_text(self,content,margin=5,size=10,family="Helvetica",fill="black"):
-        self.text(content,margin,self.height-margin,size=size,family=family,fill=fill)
+    def bl_text(self,content,margin=5,size=10,family="Helvetica",fill="none",stroke="#000"):
+        self.text(content,margin,self.height-margin,size=size,family=family,fill=fill,stroke=stroke)
     
     def get_grid(self,nx=None,ny=None ):
         return Grid(self,nx,ny)
