@@ -61,8 +61,9 @@ class Pipeline( DrawingState ) :
             self.generator.process_data( svg_document, data, params, internal_state )
             self.state.save()
             data.clear_current()
+
             self.add_svg( svg_document )
-        
+
     def add_svg(self, svg_document ):
         super(Pipeline, self).add_svg(svg_document)
         print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)

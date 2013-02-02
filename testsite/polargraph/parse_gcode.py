@@ -11,13 +11,6 @@ def parse(endpoint,infile,outfile):
 
   gcodes = gcode.readlines()
 
-  xmax = endpoint.width
-  ymax = endpoint.height
-  xmin = endpoint.side_margin
-  ymin = endpoint.top_margin
-  available_x = endpoint.width - endpoint.side_margin * 2
-  available_y = endpoint.height - endpoint.top_margin
-
   startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
   contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
   
@@ -53,9 +46,9 @@ def parse(endpoint,infile,outfile):
       outy = endpoint.height-y + endpoint.y_min #flip y because pycam outputs with 0,0 in the bottom left, but the robot's 0,0 is the top left
 
       #validate
-      if outx > endpoint.available_x:
+      if outx > endpoint.x_max:
         raise Exception("gcode x too large %f" % outx)
-      if outy > endpoint.available_y:
+      if outy > endpoint.y_max:
         raise Exception("gcode y too large %f" % outy)
       if outx < endpoint.x_min:
         raise Exception("gcode x too small %f" % outx)
