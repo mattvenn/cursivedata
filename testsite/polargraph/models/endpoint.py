@@ -39,6 +39,8 @@ class Endpoint( models.Model ):
         self.available_y = self.height - self.top_margin
         self.x_min = self.side_margin
         self.y_min = self.top_margin
+        self.x_max = self.side_margin + self.available_x
+        self.y_max = self.top_margin + self.available_y
    
    
     def add_svg(self,svg_file, generator_params, pipeline ):
