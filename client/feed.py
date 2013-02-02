@@ -58,7 +58,7 @@ def update_robot_status():
         'status': response,
         }
 
-    url = args.apiurl + "endpoint/" + str(args.robot_id) + "/"
+    url = args.url + '/api/v1/endpoint/' + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -81,7 +81,7 @@ def fetch_data():
                 new_codes = r.text.splitlines()
                 if args.verbose:
                     print "%d: got %d gcodes from server" % ( count, len(new_codes) )
-                gcodes.append(new_codes)
+                gcodes = gcodes + new_codes
             elif r.status_code == 404:
                 #end of the gcodes
                 return gcodes
@@ -90,8 +90,7 @@ def fetch_data():
                 return None
 
         except requests.exceptions.ConnectionError, e:
-            print >>sys.stderr, e.code
-            print >>sys.stderr, e.read()
+            print >>sys.stderr, e
             return None
 
 
