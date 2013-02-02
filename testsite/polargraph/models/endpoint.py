@@ -52,14 +52,14 @@ class Endpoint( DrawingState ):
     def __init__(self, *args, **kwargs):
         super(Endpoint, self).__init__(*args, **kwargs)
         #Set the actual size of the drawing area based on the size of the robot and the margins
+        #Used to make the SVG images
         self.img_width = self.width - self.side_margin * 2
         self.img_height = self.height - self.top_margin
-        #Not sure this is used
+        #Used by the GCode parser to check sizes
         self.x_min = self.side_margin
         self.y_min = self.top_margin
-        self.x_max = self.side_margin + self.available_x
-        self.y_max = self.top_margin + self.available_y
-   
+        self.x_max = self.side_margin + self.img_width
+        self.y_max = self.top_margin + self.img_height
    
     def input_svg(self,svg_file, pipeline ):
         print "Adding SVG"
