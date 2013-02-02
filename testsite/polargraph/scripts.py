@@ -17,8 +17,11 @@ def reset_superuser_pw() :
 def test_creating_pipeline():
     reset_superuser_pw()
     num = Pipeline.objects.all().count() + 1
-    g1 = Generator(name="Test Generator", description="This is a generator to test stuff with", image="No Image", module_name="example")
-    g1.save()
+    gsq = Generator(name="Squares generator", description="Squares generator", image="No Image", module_name="squares")
+    gsq.save()
+    gex = Generator(name="Example generator", description="Example generator", image="No Image", module_name="example")
+    gex.save()
+    g1 = gex
     g1.init()
     g1s = g1.get_state()
     g1s.name = "Generator State for Pipeline " + str(num)
