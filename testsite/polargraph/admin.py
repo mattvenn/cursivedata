@@ -5,6 +5,7 @@ admin.site.register(Pipeline)
 admin.site.register(DataStore)
 admin.site.register(GeneratorState)
 admin.site.register(Endpoint)
+admin.site.register(COSMSource)
 
 class ParameterInline(admin.TabularInline):
     model = Parameter
