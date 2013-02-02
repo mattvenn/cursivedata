@@ -92,6 +92,11 @@ class Endpoint( models.Model ):
         except Exception as e:
             return None
 
+    def mark_all_gcode_served(self):
+        for gcode in GCodeOutput.objects.filter(endpoint=self,served=False):
+            gcode.served = True
+            gcode.save()
+
     def get_next(self):
         try:
             return GCodeOutput.objects.filter(endpoint=self,served=False).order_by('modified')[:1].get()
@@ -99,9 +104,10 @@ class Endpoint( models.Model ):
             return None
         
     def consume(self):
-        n = self.get_next( );
-        n.served = True;
+        n = self.get_next()
+        n.served = True
         n.save()
+
     def update_size(self,width,height):
         changed = self.img_width != width or self.img_height != height
         self.img_width = width
@@ -151,6 +157,7 @@ class Endpoint( models.Model ):
         
     def reset(self):
         self.run_id = self.run_id + 1
+        self.mark_all_gcode_served()
         self.ensure_full_document(True)
         self.clear_latest_image()
         self.save()
