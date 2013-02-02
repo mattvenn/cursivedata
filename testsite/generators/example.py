@@ -28,25 +28,14 @@ def process(drawing,data,params,internal_state) :
     internal_state["i"]=it
     return None
 
-def doc_width(svg_document):
-        return float(str(svg_document.get_width()).replace("mm",""))
-def doc_height(svg_document):
-        return float(str(svg_document.get_height()).replace("mm",""))
-
-def begin(svg_document,params,internal_state) :
+def begin(drawing,params,internal_state) :
     print "Starting example drawing with params: ",map(str,params)
-    text = txt.text(content="Started at " + str(datetime.now()),x=10,y=10,fill="blue")
-    text.set_font_size(10);
-    text.set_font_family("Verdana")
-    svg_document.addElement( text )
+    drawing.tl_text("Started at " + str(datetime.now()),fill="blue",size=15)
     
-def end(svg_document,params,internal_state) :
+def end(drawing,params,internal_state) :
     print "Ending exmaple drawing with params:",map(str,params)
     content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("i",0)) + " updates"
-    text = txt.text(content=content,x=10,y=doc_height(svg_document)-10,fill="red")
-    text.set_font_size(10);
-    text.set_font_family("Verdana")
-    svg_document.addElement( text )
+    drawing.bl_text(content,fill="red",size="30")
     
 def get_params() :
     return  [ 
