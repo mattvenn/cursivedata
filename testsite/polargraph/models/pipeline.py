@@ -66,7 +66,7 @@ class Pipeline( DrawingState ) :
     def add_svg(self, svg_document ):
         super(Pipeline, self).add_svg(svg_document)
         print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
-        self.endpoint.add_svg( self.last_svg_file,self)
+        self.endpoint.input_svg( self.last_svg_file,self)
     
     def reset(self):
         super(Pipeline, self).reset()

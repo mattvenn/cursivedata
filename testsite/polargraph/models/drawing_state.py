@@ -52,10 +52,20 @@ class DrawingState( models.Model ):
         
     #Creates a blank svg file with the given filename
     def create_blank_svg(self,filename):
-        doc = pysvg.structure.svg(width=self.img_width,height=self.img_height)
-        build = pysvg.builders.ShapeBuilder()
-        doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
+        doc = self.create_svg_doc(self.img_width, self.img_height, True)
         doc.save(filename)
+    
+    #Create an empty svg doc with the given width and height
+    def create_svg_doc(self,width,height,createRect=False):
+        #Should specify mm for document size
+        widthmm = "%fmm" % width
+        heightmm = "%fmm" % height
+        doc = pysvg.structure.svg(width=widthmm,height=heightmm)
+        doc.set_viewBox("0 0 %s %s" % (width, height))
+        if createRect:
+            build = pysvg.builders.ShapeBuilder()
+            doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
+        return doc
         
     #Updates the full image, by creating a PNG from the full SVG, and storing the SVG and PNG in the history
     def update_full_image(self):
@@ -134,14 +144,6 @@ class StoredOutput( models.Model ):
     filename = models.CharField(max_length=200,default="output/none")
     modified = models.DateTimeField(auto_now=True)
     
-    @staticmethod
-    def get_output(pipeline,filetype,status):
-        try:
-            return StoredOutput.objects.get(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-        except:
-            return StoredOutput(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-        
-        
     def set_file(self,fn):
         base,extension = os.path.splitext(fn)
         if extension != "."+self.filetype:
