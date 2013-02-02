@@ -91,6 +91,7 @@ class Endpoint( models.Model ):
             self.save()
         except Exception as e:
             print "Problem updating SVG in endpoint:",e
+            #so remove the saved gcode output
         
     def get_next_filename(self):
         n = self.get_next()
