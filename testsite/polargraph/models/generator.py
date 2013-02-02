@@ -21,7 +21,7 @@ class Generator( models.Model ) :
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000,default="Unknown")
     image = models.CharField(max_length=200,default="No Image")
-    file_path = models.CharField(max_length=200,default="./scripts")
+    file_path = models.CharField(max_length=200,default="./generators")
     module_name = models.CharField(max_length=200)
     module = None
     def init(self) :
@@ -52,7 +52,7 @@ class Generator( models.Model ) :
             
     @staticmethod
     def get_file(module_name) : #No error checking yet!))
-        f, filename, data = find_module(module_name, ["./scripts"])
+        f, filename, data = find_module(module_name, ["./generators"])
         return load_module(module_name, f, filename, data)
 
     def get_state( self ) :

@@ -11,7 +11,7 @@ from django.utils.datetime_safe import datetime
 import re
 
 
-def index(request):
+def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
     context = {"pipeline_list":latest_pipelines}
     return render(request,"pipeline_list.html",context)
@@ -35,9 +35,13 @@ def show_pipeline(request, pipelineID):
         if act == "Reset":
             pipeline.reset()
         elif act == "Update Size":
-            pipeline.img_width = int(request.POST.get('pipeWidth',pipeline.img_width))
-            pipeline.img_height = int(request.POST.get('pipeHeight',pipeline.img_height))
-            pipeline.reset()
+            pipeline.update_size( int(request.POST.get('pipeWidth',pipeline.img_width)),
+                    int(request.POST.get('pipeHeight',pipeline.img_height)))
+        elif act == "Update Print Location":
+            pipeline.print_top_left_x = request.POST.get("xOffset")
+            pipeline.print_top_left_y = request.POST.get("yOffset")
+            pipeline.print_width = request.POST.get("printWidth")
+            pipeline.save()
         elif act == "Update Parameters":
             for (key, value) in request.POST.iteritems():
                 if key.startswith("param"):
@@ -83,6 +87,12 @@ def show_pipeline(request, pipelineID):
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404
+    
+def list_endpoints(request):
+    latest_endpoints = Endpoint.objects.order_by('-last_updated')[:50]
+    context = {"endpoint_list":latest_endpoints}
+    return render(request,"endpoint_list.html",context)
+
 
 def show_endpoint(request, endpointID):
     try:
@@ -90,20 +100,23 @@ def show_endpoint(request, endpointID):
         act = request.POST.get('action',"none")
         if act == "Calibrate":
             print "Calibrating..."
+        elif act == "Reset":
+            print endpoint.reset()
+        elif act == "Resume":
+            print "resume"
+            endpoint.resume()
+        elif act == "Pause":
+            print "pause"
+            print endpoint.pause()
         elif act == "Update Parameters":
             print "Update Params"
         elif act != "none":
             print "Unknown action:",act
         previous = StoredOutput.objects \
                 .order_by('-modified') \
-                .filter(endpoint=endpoint,status="complete",filetype="svg")[1:8] 
-        current_full = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(endpoint=endpoint,status="complete",filetype="svg")[0]
-        current_update = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(endpoint=endpoint,status="partial",filetype="svg")[0]
-        context = {"endpoint":endpoint, "previous":previous, "current_full":current_full, "current_update":current_update}
+                .filter(endpoint=endpoint,pipeline=None,status="complete",filetype="svg")[1:8] 
+        files_left = endpoint.get_num_files_to_serve()
+        context = {"endpoint":endpoint, "previous":previous,"files_left":files_left}
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
         raise Http404
@@ -113,6 +126,9 @@ def get_gcode(request, endpointID ):
         endpoint = Endpoint.objects.get(pk=endpointID)
         filename = endpoint.get_next_filename()
     except Endpoint.DoesNotExist:
+        raise Http404
+    if endpoint.paused:
+        print "endpoint is paused"
         raise Http404
     print "Filename",filename
     if not filename:

@@ -19,16 +19,20 @@ import requests
 def update_robot_dimensions():
     status_commands=["u"]
     response = send_robot_commands(status_commands)
-
-    m=re.search('^top margin: ([0-9.]+)mm',response,re.M)
-    top_margin=m.group(1)
-    m=re.search('^side margin: ([0-9.]+)mm',response,re.M)
-    side_margin=m.group(1)
-    m=re.search('^h: ([0-9.]+)mm',response,re.M)
-    height=m.group(1)
-    m=re.search('^w: ([0-9.]+)mm',response,re.M)
-    width=m.group(1)
-
+    try:
+      m=re.search('^top margin: ([0-9.]+)mm',response,re.M)
+      top_margin=m.group(1)
+      m=re.search('^side margin: ([0-9.]+)mm',response,re.M)
+      side_margin=m.group(1)
+      m=re.search('^h: ([0-9.]+)mm',response,re.M)
+      height=m.group(1)
+      m=re.search('^w: ([0-9.]+)mm',response,re.M)
+      width=m.group(1)
+    except:
+      print "couldn't parse robot's output:", response
+      return
+      
+    
     payload = {
         'width': width,
         "height": height,
@@ -36,8 +40,7 @@ def update_robot_dimensions():
         "top_margin": top_margin,
         }
 
-    #fix this
-    url = 'http://mattvenn.net:8080/api/v1/endpoint/1/' 
+    url = args.apiurl + "endpoint/" + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -45,6 +48,7 @@ def update_robot_dimensions():
         print "updated ok"
     else:
         print "failed to update"
+        print r.text.replace("\\n","\n")
 
 def update_robot_status():
     status_commands=["q"]
@@ -54,8 +58,7 @@ def update_robot_status():
         'status': response,
         }
 
-    #fix this
-    url = 'http://mattvenn.net:8080/api/v1/endpoint/1/' 
+    url = args.apiurl + "endpoint/" + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -65,23 +68,24 @@ def update_robot_status():
         print "failed to update"
 
 def fetch_data():
+    url = args.endpointurl + str(args.robot_id) + "/?consume=true"
     if args.verbose:
-        print "fetching from ", args.server
+      print "fetching from ", url
     try:
-	r = requests.get(args.server)
-        if r.status_code == 200:
-	    gcodes = r.text
-	    if args.verbose:
-                print "got answer from server:"
-                print gcodes
-            return gcodes.splitlines()
-        else:
-            print "failed with", r.status_code
+      r = requests.get(url)
+      if r.status_code == 200:
+        gcodes = r.text
+        if args.verbose:
+          print "got answer from server:"
+          print gcodes
+        return gcodes.splitlines()
+      else:
+        raise Exception( "failed with", r.status_code )
 
     except requests.exceptions.ConnectionError, e:
-        print >>sys.stderr, e.code
-        print >>sys.stderr, e.read()
-        return None
+      print >>sys.stderr, e.code
+      print >>sys.stderr, e.read()
+      return None
 
 
 def finish_serial():
@@ -167,7 +171,7 @@ def send_robot_commands(gcodes):
       print "skipping line:", line
     elif not line == None:
       print "-> %s" % line,
-      serial_port.write(line)
+      serial_port.write(str(line)) #str added because we get unicode from the server
       response += read_serial_response()
   return response
 
@@ -177,7 +181,8 @@ if __name__ == '__main__':
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--command', action='store', dest='command', help="command to send")
     group.add_argument('--file', action='store', dest='file', help="file to open")
-    group.add_argument('--server', action='store', dest='server', help="server to check")
+    group.add_argument('--server', action='store_const', const="True", dest='server', help="fetch gcodes from server (set by apiurl and robotid)")
+    group.add_argument('--log', action='store_const', const=True, dest='log', help="just print responses")
     group.add_argument('--update-dimensions',
         action='store_const', const=True, dest='updatedimensions', default=False,
         help="update the server with this robot's dimensions")
@@ -188,15 +193,21 @@ if __name__ == '__main__':
     parser.add_argument('--serialport',
         action='store', dest='serialport', default='/dev/ttyACM0',
         help="serial port to listen on")
+    parser.add_argument('--endpointurl',
+        action='store', dest='endpointurl', default='http://mattvenn.net:8080/polargraph/endpoint_data/',
+        help="endpoint url, must end with /")
+    parser.add_argument('--apiurl',
+        action='store', dest='apiurl', default='http://mattvenn.net:8080/api/v1/',
+        help="api url, must end in a /")
     parser.add_argument('--store',
         action='store', dest='store_file', 
         help="file to write robot responses in")
     parser.add_argument('--verbose',
         action='store_const', const=True, dest='verbose', default=False,
         help="verbose")
-    parser.add_argument('--send-status',
-        action='store_const', const=True, dest='sendstatus', default=True,
-        help="send current status of the robot to the server")
+    parser.add_argument('--no-send-status',
+        action='store_const', const=False, dest='sendstatus', default=True,
+        help="don't send current status of the robot to the server")
     parser.add_argument('--no-robot',
         action='store_const', const=True, dest='norobot', default=False,
         help="no robot connected, for testing")
@@ -209,6 +220,9 @@ if __name__ == '__main__':
     parser.add_argument('--pwm',
         action='store', dest='pwm', type=int, default=80,
         help="pwm to draw")
+    parser.add_argument('--robot-id',
+        action='store', dest='robot_id', type=int, default=1,
+        help="robot's endpoint id")
     parser.add_argument('--speed',
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
@@ -222,6 +236,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print "started ", datetime.datetime.now()
+    gcodes = []
+
     #send a file   
     if args.file:
         gcodes = readFile()
@@ -234,28 +250,27 @@ if __name__ == '__main__':
 
     if not args.norobot:
         serial_port = setup_serial()
-
     if args.updatedimensions and not args.norobot:
         update_robot_dimensions()
-
     if args.sendstatus and not args.norobot:
         update_robot_status()
 
-    try:
-        print "got %d gcodes" % len(gcodes)
+    if not args.norobot:
+      if args.setup_robot:
+        setup_robot()
 
-	if not args.norobot:
-	    if args.setup_robot:
-	      setup_robot()
+    if len(gcodes):
+      response = send_robot_commands(gcodes)
+    elif args.log:
+      while True:
+        response = read_serial_response()
+    else:
+      print "no gcodes found"
 
-	    response = send_robot_commands(gcodes)
+    if args.store_file:
+      store=open(args.store_file,'w+')
+      store.write(response)
 
-	    if args.store_file:
-	      store=open(args.store_file,'w+')
-	      store.write(response)
+    finish_serial()
 
-    except TypeError:
-        print >>sys.stderr, "no gcodes given"
-    finally:
-        finish_serial()
 

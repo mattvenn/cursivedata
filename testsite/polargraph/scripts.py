@@ -17,13 +17,13 @@ def reset_superuser_pw() :
 def test_creating_pipeline():
     reset_superuser_pw()
     num = Pipeline.objects.all().count() + 1
-    g1 = Generator(name="Test Generator", description="This is a fake generator to test stuff with", image="No Image", module_name="example")
+    g1 = Generator(name="Test Generator", description="This is a generator to test stuff with", image="No Image", module_name="test_shape")
     g1.save()
     g1.init()
     g1s = g1.get_state()
     g1s.name = "Generator State for Pipeline " + str(num)
     g1s.save()
-    e1 = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=500, height=500, top_margin=100, side_margin=100)
+    e1 = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=500, height=400, top_margin=100, side_margin=100)
     e1.save()
     d1 = DataStore()
     print d1.id

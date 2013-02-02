@@ -88,7 +88,7 @@ class DataStore( models.Model ) :
         total = cur + data
         self.store_current(total)
         self.save()
-        print "Saved:",self.current_data
+        print "Saved data:",self.current_data
     
     def clear_all(self):
         self.historic_data = json.dumps([])
@@ -120,7 +120,7 @@ class DataStore( models.Model ) :
             del entry['time']
     
     def deserialise_time(self,entry):
-        date_str = entry.get('time_ser',timezone.now().isoformat())
+        date_str = entry.get('time',timezone.now().isoformat())
         entry['time'] = dateutil.parser.parse(date_str)
         if entry.has_key('time_ser'):
             del entry['time_ser']

@@ -39,6 +39,10 @@ class Pipeline( models.Model ) :
     last_image_file = models.CharField(max_length=200,blank=True)
     img_width = models.IntegerField(default=500)
     img_height = models.IntegerField(default=500)
+    print_top_left_x = models.FloatField(default=0)
+    print_top_left_y = models.FloatField(default=0)
+    print_width = models.FloatField( default=200 )
+    
     def __unicode__(self):
         return self.name
     def __init__(self, *args, **kwargs):
@@ -81,7 +85,7 @@ class Pipeline( models.Model ) :
             
             print "Saved whole image as:",self.full_image_file
             print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
-            self.endpoint.add_svg( self.last_svg_file,params)
+            self.endpoint.add_svg( self.last_svg_file,params,self)
             self.last_updated = datetime.now()
             self.save()
     
@@ -97,6 +101,13 @@ class Pipeline( models.Model ) :
         if not self.id > 0:
             self.save()
         return "data/working/pipeline_"+str(self.id)+"_"+status+"."+extension
+        
+    def update_size(self,width,height):
+        changed = self.img_width != width or self.img_height != height
+        self.img_width = width
+        self.img_height = height
+        if changed:
+            self.reset()
         
     def create_blank_svg(self,filename):
         doc = pysvg.structure.svg(width=self.img_width,height=self.img_height)
@@ -141,9 +152,9 @@ class Pipeline( models.Model ) :
         app_label = 'polargraph'
 
 class StoredOutput( models.Model ):
-    endpoint = models.ForeignKey( "Endpoint", blank=True )
-    pipeline = models.ForeignKey( Pipeline, blank=True )
-    generator = models.ForeignKey( Generator, blank=True )
+    endpoint = models.ForeignKey( "Endpoint", blank=True, null=True )
+    pipeline = models.ForeignKey( Pipeline, blank=True, null=True )
+    generator = models.ForeignKey( Generator, blank=True, null=True )
     run_id = models.IntegerField(default=0)
     filetype = models.CharField(max_length=10,default="unknown") #svg or png
     status = models.CharField(max_length=10,default="complete") #complete or partial
@@ -156,7 +167,8 @@ class StoredOutput( models.Model ):
             return StoredOutput.objects.get(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
         except:
             return StoredOutput(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-    
+        
+        
     def set_file(self,fn):
         base,extension = os.path.splitext(fn)
         if extension != "."+self.filetype:

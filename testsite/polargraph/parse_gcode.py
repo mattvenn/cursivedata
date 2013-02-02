@@ -9,26 +9,14 @@ def parse(endpoint,generator_params,infile,outfile):
     print "bad file"
     exit( 1 )
 
-  xmin = 0
-  ymin = 0
-  #these should be validated as floats somewhere
-  xmax = float(generator_params.get("Width"))
-  ymax = float(generator_params.get("Height"))
-
   gcodes = gcode.readlines()
 
+  xmax = endpoint.width
+  ymax = endpoint.height
+  xmin = endpoint.side_margin
+  ymin = endpoint.top_margin
   available_x = endpoint.width - endpoint.side_margin * 2
-  if float(xmax) > available_x:
-    print "gcodes x too large for robot"
-    exit(1)
-
   available_y = endpoint.height - endpoint.top_margin
-  if ymax > available_y:
-    print "gcodes y too large for robot"
-    exit(1)
-
-  xoffset = (available_x - xmax) / 2 + endpoint.side_margin
-  yoffset = endpoint.top_margin
 
   startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
   contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
@@ -61,8 +49,19 @@ def parse(endpoint,generator_params,infile,outfile):
   #    z = float(c.group(3))
   #    print line
 
-      outx = x+xoffset
-      outy = ymax-y+yoffset #flip y because pycam outputs with 0,0 in the bottom left, but the robot's 0,0 is the top left
+      outx = x + endpoint.x_min
+      outy = endpoint.height-y + endpoint.y_min #flip y because pycam outputs with 0,0 in the bottom left, but the robot's 0,0 is the top left
+
+      #validate
+      if outx > endpoint.available_x:
+        raise Exception("gcode x too large %f" % outx)
+      if outy > endpoint.available_y:
+        raise Exception("gcode y too large %f" % outy)
+      if outx < endpoint.x_min:
+        raise Exception("gcode x too small %f" % outx)
+      if outy < endpoint.y_min:
+        raise Exception("gcode y too large %f" % outx)
+
       polar_code += "g%.1f,%.1f\n" %  (outx,outy) 
 #      polar_code += "g%d,%d\n" %  (outx,outy) 
       lastX = x
@@ -77,4 +76,5 @@ def parse(endpoint,generator_params,infile,outfile):
   """
 
   file = open(outfile,"w")
+  print "writing polar file to ", outfile
   file.write(polar_code)

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 TIME=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
-VALUE=$RANDOM
 
-API="http://localhost:8000/api/v1/cosm"
+API="http://localhost:8080/api/v1/cosm"
 #API="http://mattvenn.net:8080/api/v1/cosm"
 COSM_ID=$1
 
@@ -12,7 +11,8 @@ echo Sending to:  $API/$COSM_ID/
 
 for (( i=1; i<=$2; i++ ))
 do
-	echo Sending $i
+	VALUE=$RANDOM
+	echo Value $i: $VALUE
 	curl --dump-header - -H 'Content-Type: application/json' -X POST --data @- $API/$COSM_ID/ <<END_DOC
 {
   "environment": 
@@ -38,7 +38,7 @@ do
     "at": "2009-09-07T12:16:02.000063Z",
     "value": 
     {
-      "value": "$RANDOM",
+      "value": "$VALUE",
       "max_value": 9.99650150341,
       "min_value": 0.00471012639984
     }
