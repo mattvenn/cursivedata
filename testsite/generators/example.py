@@ -30,17 +30,20 @@ def process(svg_document,data,params,internal_state) :
     internal_state["i"]=it
     return None
 
+def begin(svg_document,params,internal_state) :
+    print "Starting example drawing with params: ",map(str,params)
+    
+def end(svg_document,params,internal_state) :
+    print "Ending exmaple drawing with params:",map(str,params)
+
 def get_params() :
     return  [ 
              { "name":"Number", "default": 10, "description":"The number of outputs to have horizontally and vertically" }, 
              { "name":"Saturation", "default":0.6, "description":"Saturation of the colour (0-1)" },
-             {"name":"Level", "default": 0.9, "description":"Brightness of the colour (0-1)" }, 
-             #any way to make this be a float?
-             {"name":"Width", "default": 200, "description":"width in mm" },
-             {"name":"Height", "default": 200, "description":"height in mm" }, ]
+             {"name":"Level", "default": 0.9, "description":"Brightness of the colour (0-1)" }] 
 
 def get_name() : return "Example Generator"
 def get_description() : return "Description of Example Generator"
 
 def can_run(data,params,internal_state):
-    return len(data.get_current()) >= 2
+    return True;
