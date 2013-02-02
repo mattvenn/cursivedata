@@ -15,7 +15,7 @@ import requests
 import polargraph.models.cosm
 from polargraph.models.generator import Generator,GeneratorState
 from polargraph.models.data import DataStore
-from polargraph.models.drawing_state import DrawingState
+from polargraph.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
@@ -77,43 +77,13 @@ class Pipeline( DrawingState ) :
     def get_output_name(self):
         return "pipeline"
 
-    def get_stored_output(self,output_type,state):
-        return StoredOutput.get_output(self, output_type, state)
+    def get_stored_output(self,output_type,status):
+        try:
+            return StoredOutput.objects.get(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
+        except:
+            return StoredOutput(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
         
     class Meta:
         app_label = 'polargraph'
         
 
-class StoredOutput( models.Model ):
-    endpoint = models.ForeignKey( "Endpoint", blank=True, null=True )
-    pipeline = models.ForeignKey( Pipeline, blank=True, null=True )
-    generator = models.ForeignKey( Generator, blank=True, null=True )
-    run_id = models.IntegerField(default=0)
-    filetype = models.CharField(max_length=10,default="unknown") #svg or png
-    status = models.CharField(max_length=10,default="complete") #complete or partial
-    filename = models.CharField(max_length=200,default="output/none")
-    modified = models.DateTimeField(auto_now=True)
-    
-    @staticmethod
-    def get_output(pipeline,filetype,status):
-        try:
-            return StoredOutput.objects.get(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-        except:
-            return StoredOutput(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-        
-        
-    def set_file(self,fn):
-        base,extension = os.path.splitext(fn)
-        if extension != "."+self.filetype:
-            print "Warning: got a "+extension+", but was expecting a "+self.filetype
-        self.filename = self.get_filename()
-        shutil.copy2(fn,self.filename)
-        self.save()
-    
-    def get_filename(self):
-        if not self.id > 0:
-            self.save()
-        return "data/output/"+str(self.id)+"_"+self.status+"."+self.filetype
-        
-    class Meta:
-        app_label = 'polargraph'
