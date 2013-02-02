@@ -21,18 +21,19 @@ def append_svg_to_file( fragment_file, main_file ):
             svg_main.addElement( e )
         svg_main.save(main_file)
     except Exception as e:
-        print "Coudlnt' read input file:",fragment_file,e
+        print "Couldnt' read input file:",fragment_file,e
 
 #use pycam and parse_gcode to turn svg into robot style files
 def convert_svg_to_gcode( endpoint,generator_params,svgfile, polarfile ):
     try :
         gcodefile="/tmp/tmp.gcode" #should be unique for process
-        pycam="/home/polarsite/pycam-0.5.1/pycam"
+        pycam="/usr/bin/pycam"
+        #pycam="/home/polarsite/pycam-0.5.1/pycam"
         pycam_args = [pycam, svgfile, "--export-gcode=" + gcodefile, "--process-path-strategy=engrave"]
         result = subprocess.call(pycam_args)
         polargraph.parse_gcode.parse(endpoint,generator_params,gcodefile,polarfile)
     except Exception as e:
-        print "Coudlnt' read input SVG file to make GCODE:",svgfile,e
+        print "Couldnt' read input SVG file to make GCODE:",svgfile,e
 
 
 def convert_svg_to_png( svgfile, pngfilename ):

@@ -25,6 +25,7 @@ class Endpoint( models.Model ):
     height = models.FloatField(max_length=200)
     full_svg_file = models.CharField(max_length=200,blank=True)
     last_svg_file = models.CharField(max_length=200,blank=True)
+    paused = models.BooleanField(default=False)
     #add this to db, using url for now
     status = models.CharField(max_length=200)
     url = models.CharField(max_length=200)
@@ -36,7 +37,10 @@ class Endpoint( models.Model ):
         print "Adding SVG"
         try:
             #Should specify mm for document size
-            current_drawing = pysvg.structure.svg(width=self.width,height=self.height)
+            widthmm = "%fmm" % self.width
+            heightmm = "%fmm" % self.height
+
+            current_drawing = pysvg.structure.svg(width=widthmm,height=heightmm)
             #Should do transforming here
             try:
                 svg_data = parse(svg_file)
@@ -137,6 +141,14 @@ class Endpoint( models.Model ):
         self.update_latest_image()
         self.save()
     
+    def resume(self):
+        self.paused = False
+        self.save()
+
+    def pause(self):
+        self.paused = True
+        self.save()
+        
     def reset(self):
         self.run_id = self.run_id + 1
         self.ensure_full_document(True)

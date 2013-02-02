@@ -100,8 +100,14 @@ def show_endpoint(request, endpointID):
         act = request.POST.get('action',"none")
         if act == "Calibrate":
             print "Calibrating..."
-        if act == "Reset":
+        elif act == "Reset":
             print endpoint.reset()
+        elif act == "Resume":
+            print "resume"
+            endpoint.resume()
+        elif act == "Pause":
+            print "pause"
+            print endpoint.pause()
         elif act == "Update Parameters":
             print "Update Params"
         elif act != "none":
@@ -120,6 +126,9 @@ def get_gcode(request, endpointID ):
         endpoint = Endpoint.objects.get(pk=endpointID)
         filename = endpoint.get_next_filename()
     except Endpoint.DoesNotExist:
+        raise Http404
+    if endpoint.paused:
+        print "endpoint is paused"
         raise Http404
     print "Filename",filename
     if not filename:

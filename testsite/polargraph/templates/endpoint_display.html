@@ -9,6 +9,8 @@
 			Size: {{endpoint.width}} by {{endpoint.height}}<br/>
 			Side margin: {{endpoint.side_margin}}<br/>
 			Top margin: {{endpoint.top_margin}}<br/>
+			Status: {{endpoint.status}}<br/>
+			Paused: {{endpoint.paused}}<br/>
 			URL: {{endpoint.url}}<br/>
 			Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a><br/>
 			Files left to serve: {{files_left}}<br/> 
@@ -18,6 +20,11 @@
 				<div style="font-weight:bold">Controls</div>
 					<input type="submit" value="Calibrate" name="action"/>
 					<input type="submit" value="Reset" name="action"/>
+                    {% if endpoint.paused %}
+					<input type="submit" value="Resume" name="action"/>
+                    {% else %}
+					<input type="submit" value="Pause" name="action"/>
+                    {% endif %}
 			</form>
 		</div>
 		<div style="display:inline-block">
