@@ -40,7 +40,7 @@ def update_robot_dimensions():
         "top_margin": float(top_margin) + 100, #hack, robot should be  ypdated
         }
 
-    url = args.apiurl + "endpoint/" + str(args.robot_id) + "/"
+    url = args.url + '/api/v1/endpoint/' + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -66,33 +66,42 @@ def update_robot_status():
         print "updated ok"
     else:
         print "failed to update"
-
+    
 def fetch_data():
-    url = args.endpointurl + str(args.robot_id) + "/?consume=true"
+    url = args.url + '/polargraph/endpoint_data/' + str(args.robot_id) + "/?consume=true"
     if args.verbose:
-      print "fetching from ", url
-    try:
-      r = requests.get(url)
-      if r.status_code == 200:
-        gcodes = r.text
-        if args.verbose:
-          print "got answer from server:"
-          print gcodes
-        return gcodes.splitlines()
-      else:
-        raise Exception( "failed with", r.status_code )
+        print "fetching from", url
+    gcodes = []
+    count = 0
+    while True:
+        count += 1
+        try:
+            r = requests.get(url)
+            if r.status_code == 200:
+                new_codes = r.text.splitlines()
+                if args.verbose:
+                    print "%d: got %d gcodes from server" % ( count, len(new_codes) )
+                gcodes.append(new_codes)
+            elif r.status_code == 404:
+                #end of the gcodes
+                return gcodes
+            else:
+                print "unexpected server response ", r.status_code 
+                return None
 
-    except requests.exceptions.ConnectionError, e:
-      print >>sys.stderr, e.code
-      print >>sys.stderr, e.read()
-      return None
+        except requests.exceptions.ConnectionError, e:
+            print >>sys.stderr, e.code
+            print >>sys.stderr, e.read()
+            return None
 
 
 def finish_serial():
-  if serial_port:
-      print "closing serial"
-      #print serial_port
-      serial_port.close()
+    try:
+        if args.verbose:
+            print "closing serial"
+        serial_port.close()
+    except:
+        pass
 
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
@@ -193,12 +202,9 @@ if __name__ == '__main__':
     parser.add_argument('--serialport',
         action='store', dest='serialport', default='/dev/ttyACM0',
         help="serial port to listen on")
-    parser.add_argument('--endpointurl',
-        action='store', dest='endpointurl', default='http://mattvenn.net:8080/polargraph/endpoint_data/',
-        help="endpoint url, must end with /")
-    parser.add_argument('--apiurl',
-        action='store', dest='apiurl', default='http://mattvenn.net:8080/api/v1/',
-        help="api url, must end in a /")
+    parser.add_argument('--url',
+        action='store', dest='url', default='http://mattvenn.net:8080',
+        help="url of the server")
     parser.add_argument('--store',
         action='store', dest='store_file', 
         help="file to write robot responses in")
@@ -250,27 +256,24 @@ if __name__ == '__main__':
 
     if not args.norobot:
         serial_port = setup_serial()
-    if args.updatedimensions and not args.norobot:
         update_robot_dimensions()
-    if args.sendstatus and not args.norobot:
         update_robot_status()
 
-    if not args.norobot:
-      if args.setup_robot:
-        setup_robot()
+        if args.setup_robot:
+            setup_robot()
 
-    if len(gcodes):
-      response = send_robot_commands(gcodes)
-    elif args.log:
-      while True:
-        response = read_serial_response()
-    else:
-      print "no gcodes found"
+        if len(gcodes):
+            response = send_robot_commands(gcodes)
+        elif args.log:
+            while True:
+                response = read_serial_response()
+        else:
+            print "no gcodes found"
 
-    if args.store_file:
-      store=open(args.store_file,'w+')
-      store.write(response)
+        if args.store_file:
+            store=open(args.store_file,'w+')
+            store.write(response)
 
-    finish_serial()
+        finish_serial()
 
 
