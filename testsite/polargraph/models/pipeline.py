@@ -15,6 +15,7 @@ import requests
 import polargraph.models.cosm
 from polargraph.models.generator import Generator,GeneratorState
 from polargraph.models.data import DataStore
+from polargraph.models.drawing_state import DrawingState
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
@@ -23,22 +24,17 @@ import time
 import os
 
 
+
+
 #A complete pipeline from data source through to a running algorithm
-class Pipeline( models.Model ) :
+class Pipeline( DrawingState ) :
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000,default="",blank=True)
     generator = models.ForeignKey( Generator)
     data_store = models.OneToOneField( DataStore)
     state = models.OneToOneField( GeneratorState)
     endpoint = models.ForeignKey( "Endpoint")
-    run_id = models.IntegerField(default=0)
-    last_updated = models.DateTimeField("Last Updated",default=datetime.now())
-    full_svg_file = models.CharField(max_length=200,blank=True)
-    last_svg_file = models.CharField(max_length=200,blank=True)
-    full_image_file = models.CharField(max_length=200,blank=True)
-    last_image_file = models.CharField(max_length=200,blank=True)
-    img_width = models.IntegerField(default=500)
-    img_height = models.IntegerField(default=500)
+
     print_top_left_x = models.FloatField(default=0)
     print_top_left_y = models.FloatField(default=0)
     print_width = models.FloatField( default=200 )
@@ -59,10 +55,6 @@ class Pipeline( models.Model ) :
         params = self.state.params
         internal_state = self.state.state
         self.generator.init()
-        #print "Pipeline Data:",self.data_store.get_current()
-        #print "Data:",data.get_current()
-        #print "Pipeline DataID:",self.data_store_id
-        #print "Pipeline DHash:",hash(self.data_store)
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
             svg_document = pysvg.structure.svg(width=self.img_width,height=self.img_height)
@@ -72,87 +64,25 @@ class Pipeline( models.Model ) :
             self.add_svg( svg_document )
         
     def add_svg(self, svg_document ):
-        #Save the partial file and make a PNG of it
-        self.last_svg_file = self.get_partial_svg_filename()
-        svg_document.save(self.last_svg_file)
-        self.update_latest_image()
-            
-        print "Saved update as:",self.last_image_file
-        self.ensure_full_document()
-            
-        # Add SVG to full output history
-        svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
-        self.update_full_image()
-            
-        print "Saved whole image as:",self.full_image_file
-        self.last_updated = datetime.now()
-        self.save()
+        super(Pipeline, self).add_svg(svg_document)
         print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
         self.endpoint.add_svg( self.last_svg_file,self)
-        
-    
-    def get_partial_svg_filename(self):
-        return self.get_filename("partial", "svg")
-    def get_full_svg_filename(self):
-        return self.get_filename("complete", "svg")
-    def get_partial_image_filename(self):
-        return self.get_filename("partial", "png")
-    def get_full_image_filename(self):
-        return self.get_filename("complete", "png")
-    def get_filename(self,status,extension):
-        if not self.id > 0:
-            self.save()
-        return "data/working/pipeline_"+str(self.id)+"_"+status+"."+extension
-        
-    def update_size(self,width,height):
-        changed = self.img_width != width or self.img_height != height
-        self.img_width = width
-        self.img_height = height
-        if changed:
-            self.reset()
-        
-    def create_blank_svg(self,filename):
-        doc = pysvg.structure.svg(width=self.img_width,height=self.img_height)
-        build = pysvg.builders.ShapeBuilder()
-        doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
-        doc.save(filename)
-        
-    def update_full_image(self):
-        self.full_image_file = self.get_full_image_filename()
-        svg.convert_svg_to_png(self.full_svg_file, self.full_image_file)
-        StoredOutput.get_output(self, "png", "complete").set_file(self.full_image_file)
-        StoredOutput.get_output(self, "svg", "complete").set_file(self.full_svg_file)
-        
-    def update_latest_image(self):
-        self.last_image_file = self.get_partial_image_filename()
-        svg.convert_svg_to_png(self.last_svg_file, self.last_image_file)
-        StoredOutput.get_output(self, "png", "partial").set_file(self.last_image_file)
-        StoredOutput.get_output(self, "svg", "partial").set_file(self.last_svg_file)
-    
-    def ensure_full_document(self,force=False):
-        if self.full_svg_file is None or self.full_svg_file == "" or force:
-            self.full_svg_file = self.get_full_svg_filename()
-            self.create_blank_svg(self.full_svg_file)
-            self.update_full_image()
-            
-    def clear_latest_image(self):
-        self.last_svg_file = self.get_partial_svg_filename()
-        self.create_blank_svg(self.last_svg_file)
-        self.update_latest_image()
-        self.save()
-    
     
     def reset(self):
-        self.run_id = self.run_id + 1
-        self.ensure_full_document(True)
-        self.clear_latest_image()
+        super(Pipeline, self).reset()
         self.data_store.clear_all()
         self.state.write_state({})
         self.state.save()
-        self.save()
+        
+    def get_output_name(self):
+        return "pipeline"
 
+    def get_stored_output(self,output_type,state):
+        return StoredOutput.get_output(self, output_type, state)
+        
     class Meta:
         app_label = 'polargraph'
+        
 
 class StoredOutput( models.Model ):
     endpoint = models.ForeignKey( "Endpoint", blank=True, null=True )
