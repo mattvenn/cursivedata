@@ -80,6 +80,6 @@ class EndpointResource(ModelResource):
         width = endpoint.width
         height = endpoint.height
         print "Width: ",width," Height:",height
-        for p in Pipeline.objects.filter(endpoint=endpoint):
-            p.update_size(width,height)
+        #for p in Pipeline.objects.filter(endpoint=endpoint):
+        #    p.update_size(width,height)
         return res
