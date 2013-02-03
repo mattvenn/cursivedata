@@ -19,7 +19,8 @@ def list_pipelines(request):
 
 def show_pipeline(request, pipelineID):
     try:
-        if request.method == 'POST': # If the form has been submitted...
+        act = request.POST.get('action',"none")
+        if request.method == 'POST' and act == "Create COSM": # If the form has been submitted...
             cosm_form = COSMSourceCreation(request.POST) # A form bound to the POST data
         else:
             cosm_form = COSMSourceCreation( {
@@ -31,7 +32,6 @@ def show_pipeline(request, pipelineID):
                     }) # An unbound form
         
         pipeline = Pipeline.objects.get(pk=pipelineID)
-        act = request.POST.get('action',"none")
         if act == "Reset":
             pipeline.reset()
         elif act == "Begin":
