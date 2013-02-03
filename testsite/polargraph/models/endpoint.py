@@ -252,6 +252,11 @@ class Endpoint( DrawingState ):
     def pause(self):
         self.paused = True
         self.save()
+    
+    def reset(self):
+        super(Endpoint, self).reset()
+        for gcode in GCodeOutput.objects.filter(endpoint=self,served=False):
+            gcode.delete()
         
     def get_stored_output(self,output_type,status):
         try:
@@ -281,6 +286,10 @@ class GCodeOutput( models.Model ):
         if not self.id > 0:
             self.save()
         return "data/output/gcode/"+str(self.id)+".gcode"
+    
+    def delete(self):
+        os.remove(self.get_filename())
+        super(GCodeOutput, self).delete()
     
     class Meta:
         app_label = 'polargraph'
