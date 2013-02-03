@@ -11,6 +11,10 @@ from polargraph.models.drawing_state import DrawingState
 import pysvg.structure
 import pysvg.builders
 from pysvg.parser import parse
+import re
+import tempfile
+import subprocess
+import os
 
 
 
@@ -75,31 +79,120 @@ class Endpoint( DrawingState ):
         try:
             so = GCodeOutput(endpoint=self)
             so.save()
-            svg.convert_svg_to_gcode(self,self.last_svg_file,so.get_filename())
+            self.convert_svg_to_gcode(svg_file,so.get_filename())
         except Exception as e:
             print "Coudldn't make GCode:",e
             so.delete()
-            
-    def transform_svg(self, svg_file, pipeline):
-        current_drawing = self.create_svg_doc()
+
+    #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
+    def transform_svg(self, svg_file, pipeline): 
+        current_drawing = self.create_svg_doc(self.width,self.height)
         try:
-            svg_data = parse(svg_file)
             xoffset = pipeline.print_top_left_x
             yoffset = pipeline.print_top_left_y
             scale = pipeline.print_width / pipeline.img_width
+            svg_data = parse(svg_file)
+
+            #set up pipeline's transform
             tr = pysvg.builders.TransformBuilder()
             tr.setScaling(scale)
             trans = str(xoffset) + " " + str(yoffset) 
             tr.setTranslation( trans )
+            print "Pipeline transform:"+tr.getTransform()
             group = pysvg.structure.g()
-            print "Transform:"+tr.getTransform()
             group.set_transform(tr.getTransform())
             for element in svg_data.getAllElements():
                 group.addElement(element)
-            current_drawing.addElement(group)
+
+            #setup our transform
+            tr = pysvg.builders.TransformBuilder()
+            tr.setScaling(x=1,y=-1)
+            trans = str(self.side_margin) + " " + str(self.img_height) 
+            tr.setTranslation( trans )
+            print "Endpoint transform:"+tr.getTransform()
+            endpoint_group = pysvg.structure.g()
+            endpoint_group.set_transform(tr.getTransform())
+            #add the drawing
+            endpoint_group.addElement(group)
+
+            current_drawing.addElement(endpoint_group)
             return current_drawing
         except Exception as e:
             print "Couldn't read SVG file passed in:",svg_file,e        
+
+    #use pycam and parse_gcode to turn svg into robot style files
+    def convert_svg_to_gcode(self, svgfile, polarfile ):
+        fd, tmp_gcode = tempfile.mkstemp()
+        pycam="/usr/bin/pycam"
+        pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave"]
+        print pycam_args
+        result = subprocess.call(pycam_args)
+        self.parse_gcode_to_polar(tmp_gcode,polarfile)
+        os.close(fd)
+        os.remove(tmp_gcode)
+
+    #this goes through a gcode file (*.ngc) and chucks out all comments and commands we don't use
+    #the output is validated to ensure it won't command the robot to move outside its drawing area
+    #then the output is saved to a polar file ready to be served
+    def parse_gcode_to_polar(self,infile,outfile):
+        try:
+            gcode = open(infile)
+        except:
+            print "bad file"
+            exit( 1 )
+
+        gcodes = gcode.readlines()
+        gcode.close()
+
+        startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
+        contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
+      
+        polar_code=""
+        for line in gcodes:
+            s = startCode.match(line)
+            c = contCode.match(line)
+            gcode = 0
+            if s:
+                gcode = s.group(1)
+                x = s.group(2)
+                y = s.group(3)
+                z = float(s.group(4))
+                if z > 0 :
+                    #don't draw
+                    polar_code += "d0\n"
+                else:
+                    #draw
+                    polar_code += "d1\n"
+            elif c: 
+                try:
+                    x = float(c.group(1))
+                except:
+                    x = lastX 
+                try:
+                    y = float(c.group(2))
+                except:
+                    y = lastY
+
+                outx = x
+                outy = y 
+
+                #validate, the +-1mm is to account for rounding errors
+                if outx > self.x_max + 1:
+                    raise Exception("gcode x too large %f > %f" % (outx,self.x_max))
+                if outy > self.y_max + 1:
+                    raise Exception("gcode y too large %f > %f" % (outy,self.y_max))
+                if outx < self.x_min - 1:
+                    raise Exception("gcode x too small %f < %f" % (outx,self.x_min))
+                if outy < self.y_min - 1:
+                    raise Exception("gcode y too small %f < %f" % (outy,self.y_min))
+
+                polar_code += "g%.1f,%.1f\n" %  (outx,outy) 
+                lastX = x
+                lastY = y
+
+        file = open(outfile,"w")
+        print "writing polar file to ", outfile
+        file.write(polar_code)
                 
     def get_next_filename(self):
         n = self.get_next()

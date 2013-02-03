@@ -5,9 +5,7 @@ Created on 6 Jan 2013
 '''
 import time
 from pysvg.parser import parse
-import polargraph.parse_gcode
 import sys
-import subprocess
 import cairosvg
 
 
@@ -22,16 +20,6 @@ def append_svg_to_file( fragment_file, main_file ):
         svg_main.save(main_file)
     except Exception as e:
         print "Couldnt' read input file:",fragment_file,e
-
-#use pycam and parse_gcode to turn svg into robot style files
-def convert_svg_to_gcode( endpoint,svgfile, polarfile ):
-    gcodefile="/tmp/tmp.gcode" #should be unique for process
-    pycam="/usr/bin/pycam"
-    #pycam="/home/polarsite/pycam-0.5.1/pycam"
-    pycam_args = [pycam, svgfile, "--export-gcode=" + gcodefile, "--process-path-strategy=engrave"]
-    print pycam_args
-    result = subprocess.call(pycam_args)
-    polargraph.parse_gcode.parse(endpoint,gcodefile,polarfile)
 
 
 def convert_svg_to_png( svgfile, pngfilename ):
