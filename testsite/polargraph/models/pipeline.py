@@ -63,6 +63,7 @@ class Pipeline( DrawingState ) :
             self.state.save()
             data.clear_current()
             self.add_svg( svg_document )
+            self.generator.update_last_used()
     
     def begin(self):
         self.reset();
