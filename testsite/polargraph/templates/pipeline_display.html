@@ -6,43 +6,47 @@
 		{% if pipeline %}
 	<div class="controlPanel">
 		<div class="controlColumn">
-			<div class="objectType">Pipeline</div>
-			<div class="objectTitle">{{ pipeline.name }}</div>
-			<div class="description">{{pipeline.description}}</div>
-			<div class="objectInfo">(Data Store:
-				{{pipeline.data_store_id}})</div>
-			<div class="subObject">
-				<div class="objectType">Generator</div>
-				<div class="objectTitle">
-					<a href="{% url polargraph:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>
+			<div class="controlDescription">
+				<div class="objectType">Pipeline</div>
+				<div class="objectTitle">{{ pipeline.name }}</div>
+				<div class="description">{{pipeline.description}}</div>
+				<div class="objectInfo">(Data Store:
+					{{pipeline.data_store_id}})</div>
+				<div class="subObject">
+					<div class="objectType">Generator</div>
+					<div class="objectTitle">
+						<a href="{% url polargraph:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>
+					</div>
+					<div class="description">{{pipeline.generator.description}} </div>
+					<div class="objectInfo">ID: {{pipeline.generator_id}}, last used: {{pipeline.generator.last_used}}</div>
 				</div>
-				<div class="description">{{pipeline.generator.description}} </div>
-				<div class="objectInfo">ID: {{pipeline.generator_id}}, last used: {{pipeline.generator.last_used}}</div>
-			</div>
-			<div class="subObject">
-				<div class="objectType">Endpoint</div>
-				<div class="objectTitle">
-					<a href="{% url polargraph:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
+				<div class="subObject">
+					<div class="objectType">Endpoint</div>
+					<div class="objectTitle">
+						<a href="{% url polargraph:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
+					</div>
+					<div class="description">{{pipeline.endpoint.name}} (id:
+						{{pipeline.endpoint_id}}) is a {{pipeline.endpoint.device}} at
+						{{pipeline.endpoint.location}}</div>
 				</div>
-				<div class="description">{{pipeline.endpoint.name}} (id:
-					{{pipeline.endpoint_id}}) is a {{pipeline.endpoint.device}} at
-					{{pipeline.endpoint.location}}</div>
+				<div class="objectInfo">Image size: {{pipeline.img_width}} by {{pipeline.img_height}}</div>
+				<div class="objectInfo">Last update: {{pipeline.last_updated}}</div>
 			</div>
-			<div class="objectInfo">Image size: {{pipeline.img_width}} by {{pipeline.img_height}}</div>
-			<div class="objectInfo">Last update: {{pipeline.last_updated}}</div>
 			<div class="inputForm parameterForm">
+				<div class="formBlock">
 				<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
 					{% csrf_token %}
 						<div class="formBlockTitle">Parameters</div>
 						{% for param in pipeline.get_param_dict %}
-						<div class="formParam">
-							<span class="formParamName">{{param.name}}</span> 
+						<p>
+							<label for="param{{param.name}}">{{param.name}}</label> 
 							<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}" />
 							<div class="formParamDescription">{{param.description}}</div>
-						</div>
+						</p>
 						{% endfor %} <input type="submit" value="Update Parameters"
 							name="action" />
 				</form>
+				</div>
 			</div>
 		</div>
 		<div class="controlColumn">
@@ -59,32 +63,32 @@
 						<div class="formBlockTitle">Layout</div>
 						<div class="formSubBlock">
 							<div class="formBlockSubTitle">Image Size</div>
-							<div class="formParam">
-								<span class=formParamName">Width:</span>
+							<p>
+								<label for="pipeWidth">Width:</label>
 								<input type="text" name="pipeWidth" id="pipeWidth" value="{{pipeline.img_width}}" /><br /> 
-							</div>
-							<div class="formParam">
-								<span class=formParamName">Height:</span>
+							</p>
+							<p>
+								<label for="pipeHeight">Height:</label>
 								<input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}" /><br />
-							</div>
+							</p>
 							<input type="submit" value="Update Size" name="action" />
 							<div class="formParamDescription">Changing image size will reset the drawing</div>
 						</div>
 						
 						<div class="formSubBlock">
 							<div class="formBlockSubTitle">Location on the page</div>
-							<div class="formParam">
-								<span class=formParamName">X Offset</span>
+							<p>
+								<label for="xOffset">X Offset</label>
 								<input type="text" name="xOffset" id="xOffset" value="{{pipeline.print_top_left_x}}" /><br /> 
-							</div>
-							<div class="formParam">
-								<span class=formParamName">Y Offset</span>
+							</p>
+							<p>
+								<label for="yOffset">Y Offset</label>
 								<input type="text" name="yOffset" id="yOffset" value="{{pipeline.print_top_left_y}}" /><br /> 
-							</div>
-							<div class="formParam">
-								<span class=formParamName">Width</span>
+							</p>
+							<p>
+								<label for="printWidth">Width</label>
 								<input type="text" name="printWidth" id="printWidth" value="{{pipeline.print_width}}" />
-							</div>
+							</p>
 							<input type="submit" value="Update Print Location" name="action" /><br />
 							<div class="formParamDescription">
 								Endpoint drawing area is: {{pipeline.endpoint.img_width}}mm by {{pipeline.endpoint.img_height}}mm
@@ -124,19 +128,19 @@
 			</form>
 		</div>
 	</div>
-	<div style="display: inline-block">
-		<div class="outputContainer">
+	<div class="outputBlock">
+		<div class="mainOutput">
 			<h3> Current Image<h3>
 			<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />
 		</div><br/>
-		<div class="outputContainer">
+		<div class="mainOutput">
 			<h3> Last Update <h3>
 			<img class="bigPic latestImage" src="/{{pipeline.last_svg_file}}" />
 		</div>
 	</div>
 
-	<div>
-		<h1>Previous Output</h1>
+	<div class="bigListSubList">
+		<div class="bigListSublistTitle">Previous Output</div>
 		{% for output in pipeline.get_recent_output %}
 		<div class="outputContainer">
 			<img src="/{{output.filename}}" class="smallPic"/><br />

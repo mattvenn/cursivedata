@@ -9,10 +9,10 @@
     {% for pipeline in pipeline_list %}
     	<div class="bigListItem">
     		<div class="bigListInfo">
-				<h1><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></h1>
-				<h3>Using: {{pipeline.generator.name}}</h3>
-				<div style="font-style: italic"> {{pipeline.description}} </div>
-				Last Update: ({{pipeline.last_updated}})<br/>
+				<div class="objectTitle"><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></div>
+				<div class="description"> {{pipeline.description}} </div>
+				<div class="subObject"><div class="objectTitle">Using: {{pipeline.generator.name}}</div></div>
+				<div class="objectInfo">Last Update: ({{pipeline.last_updated}})</div>
     		</div>
     		<div class="bigListPic">
 				<img class="medPic" src="/{{pipeline.full_image_file}}"/>

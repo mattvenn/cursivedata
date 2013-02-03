@@ -9,10 +9,10 @@
     {% for generator in generator_list %}
     	<div class="bigListItem">
     		<div class="bigListInfo">
-				<h1><a href="{% url polargraph:show_generator generator.id %}">{{ generator.name }}</a></h1>
-				<div style="font-style: italic"> {{generator.description}} </div>
-				Last Used: {{generator.last_used}}<br/>
-				Last Edited: {{generator.last_updated}}<br/>
+				<div class="objectTitle"><a href="{% url polargraph:show_generator generator.id %}">{{ generator.name }}</a></div>
+				<div class="description"> {{generator.description}} </div>
+				<div class="objectInfo">Last Used: {{generator.last_used}}</div>
+				<div class="objectInfo">Last Edited: {{generator.last_updated}}</div>
     		</div>
 			<div class="bigListSublist">
 				<div class="bigListSublistTitle">Previous Output</div>

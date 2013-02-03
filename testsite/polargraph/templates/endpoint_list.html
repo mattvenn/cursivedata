@@ -9,9 +9,9 @@
     {% for endpoint in endpoint_list %}
     	<div class="bigListItem">
     		<div class="bigListInfo">
-				<h1><a href="{% url polargraph:show_endpoint endpoint.id %}">{{ endpoint.name }}</a></h1>
-				<h3>Location: {{endpoint.location}}</h3>
-				Last Update: ({{endpoint.last_updated}})<br/>
+				<div class="objectTitle"><a href="{% url polargraph:show_endpoint endpoint.id %}">{{ endpoint.name }}</a></div>
+				<div class="description">Location: {{endpoint.location}}</div>
+				<div class="objectInfo">Last Update: ({{endpoint.last_updated}})</div>
     		</div>
     		<div class="bigListPic">
 				<img class="medPic" src="/{{endpoint.full_svg_file}}"/>

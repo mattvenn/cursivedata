@@ -66,76 +66,112 @@ body {
 .bigListSublistItem {
 }
 .bigListSublistTitle {
-	text-align: center;
+	text-align: left;
 	font-size: 130%;
 	font-weight: bold;
+	padding-left: 50px;
+	color: #444;
 }
 
 .outputContainer {
 	display: inline-block;
-	background: #ccc;
+	background: #eee;
+	font-size: 80%;
 	padding: 10px;
 	text-align: center;
+}
+.mainOutput {
+	display: inline-block;
+	background: #eee;
+	padding: 10px;
+	text-align: center;
+}
+.mainOutput h3 {
+	padding: 0px;
+	margin: 0px;
+	color: #444;
+}
+
+.outputBlock {
+	display: inline-block;
+	max-width:500px;
 }
 
 .controlPanel {
 	display: inline-block;
-	border: 2pt solid grey;
-	background: #ddd;
-	padding: 10px;
+	background: #eee;
 	vertical-align: top
 }
 
 .controlColumn {
 	display: inline-block;
-	vertical-align: top
+	background: #eee;
+	padding: 8px;
+	max-width: 300px;
+	vertical-align: top;
+}
+
+.controlDescription {
+	background: #dbb;
+	vertical-align: top;
+	padding: 5px;
 }
 
 .description {
 	font-style: italic;
-	background: #ffc;
+	font-family: serif;
+	color: #444;
+	padding: 10px;
+	padding-top: 0px;
 }
 
 .objectTitle {
 	font-weight: bold;
-	font-size: 200%;
+	font-size: 140%;
 	display: inline-block;
 }
 
 .objectType {
 	font-weight: bold;
-	font-size: 140%;
+	font-size: 110%;
 	font-style: italic;
+	float: right;
+	color: #888;
 }
 
 .objectInfo {
 	font-style: italic;
-	background: #cfc;
+	font-family: serif;
+	color: #a55;
 }
 
 .inputForm {
-	background: #ccc; padding : 10px;
 	margin: 10px;
 	text-align: right;
-	padding: 10px;
 }
 
 .parameterForm {
-	background: #cfa;
 }
 
 .actionForm {
-	background: #afc;
+}
+.formBlock {
+	padding: 6px;
+	margin: 0px;
+	margin-bottom: 15px;
+	background: #ddd;
 }
 
-.formBlock {
-	border: 2px solid #fff;
-	padding: 4px;
-	margin: 5px;
+.parameterForm .formBlock {
+	background: #ddf;
+}
+.actionForm .formBlock {
+	background: #dfd;
 }
 
 .formSubBlock {
-	margin: 3px;	
+	padding-left: 8px;	
+	padding-right: 18px;	
 }
 
 .formBlockTitle {
@@ -147,12 +183,10 @@ body {
 	font-size: 100%;
 }
 
-.formParam {
-	border: 1px solid #fdd
+.formBlock label {
 }
-
-.formParamName {
-	font-weight: bold;
+.inputForm p {
+	margin: 2px;
 }
 
 .formParamDescription {
@@ -182,8 +216,9 @@ body {
 }
 
 .subObject {
-	font-size: 80%;
-	border: 2px solid #dfe;
-	margin: 2px;
+	border: 2px solid #ccc;
+	background: #ccc;
+	color: #666;
+	margin: 8px;
 	padding: 6px;
 }
