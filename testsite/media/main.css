@@ -28,6 +28,10 @@ body {
 	max-height: 5000px;
 }
 
+.borderImage {
+	border: 1px solid #555;
+}
+
 .bigList{
 	padding: 10px;
 }
@@ -85,6 +89,7 @@ body {
 	background: #eee;
 	padding: 10px;
 	text-align: center;
+	vertical-align: top;
 }
 .mainOutput h3 {
 	padding: 0px;
@@ -94,7 +99,7 @@ body {
 
 .outputBlock {
 	display: inline-block;
-	max-width:500px;
+	text-align: center;
 }
 
 .controlPanel {
