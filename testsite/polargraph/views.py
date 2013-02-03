@@ -3,6 +3,7 @@
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from polargraph.models import *
+from polargraph.models.generator import GeneratorRunner
 from django.shortcuts import render
 import os
 from django.forms.models import ModelForm
@@ -123,7 +124,25 @@ def show_endpoint(request, endpointID):
 def show_generator(request, generatorID):
     try:
         generator = Generator.objects.get(pk=generatorID)
-        context = {"generator":generator }
+        act = request.POST.get('action',"none")
+        filename = None
+        data_store = None
+        ds_id = int(request.POST.get("ds_id","0"))
+        width = int(request.POST.get("width","400"))
+        height = int(request.POST.get("height","400"))
+        if ds_id :
+            try:
+                data_store = DataStore.objects.get(id=ds_id)
+            except DataStore.DoesNotExist:
+                print "No datastore found",ds_id
+        if act == "Run" :
+            if data_store :
+                params = {}
+                filename = GeneratorRunner().run(generator,data_store,params,width,height)
+                print "Got filename",filename
+            else:
+                print "No data_store setup"
+        context = {"generator":generator,"output":filename, "data_store":data_store, "ds_id":ds_id, "width":width, "height":height }
         return render(request,"generator_display.html",context)
     except Generator.DoesNotExist:
         raise Http404

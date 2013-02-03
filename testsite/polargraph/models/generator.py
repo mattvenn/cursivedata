@@ -7,8 +7,10 @@ Created on 12 Jan 2013
 from django.db import models
 from imp import find_module, load_module
 import jsonfield
-from polargraph.models.drawing_state import StoredOutput
+from polargraph.models.drawing_state import StoredOutput, DrawingState
 from django.utils.datetime_safe import datetime
+from polargraph.models.data import DataStore
+from polargraph.drawing import Drawing
 
 
 #Points to some code and associated parameters which are needed to process data
@@ -66,9 +68,10 @@ class Generator( models.Model ) :
         f, filename, data = find_module(module_name, ["./generators"])
         return load_module(module_name, f, filename, data)
 
-    def get_state( self ) :
+    def get_state( self, save=True) :
         s = GeneratorState( name=self.name, generator=self )
-        s.save()
+        if save :
+            s.save()
         for p in self.parameter_set.all():
             s.params[p.name] = p.default
         return s
@@ -135,3 +138,23 @@ class GeneratorState( models.Model ):
 
     class Meta:
         app_label = 'polargraph'
+
+class GeneratorRunner(DrawingState):        
+    def run(self,generator,data_store,input_params,width,height):
+        data = DataStore()
+        data.current = data_store.get_historic()
+        state = generator.get_state(False) 
+        params = state.params
+        internal = state.state
+        doc = self.create_svg_doc(width, height)
+        drwg = Drawing( doc )
+        generator.begin_drawing( drwg, params, internal )
+        generator.process_data(  drwg, data, params, internal )
+        generator.end_drawing( drwg, params, internal )
+        fn = self.filename()
+        doc.save(fn)
+        return fn;
+        
+    
+    def filename(self):
+        return "data/working/tmp.svg"

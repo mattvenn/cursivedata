@@ -66,6 +66,11 @@ class DataStore( models.Model ) :
             self.deserialise_time(entry)
         return historic
     
+    def get_historic_size(self):
+        return len( self.get_historic() )
+    def get_current_size(self):
+        return len( self.get_current() )
+    
     #Adds the data to the current data and sets available to true
     #Data must be a list of dicts 
     def add_data(self,data):

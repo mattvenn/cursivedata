@@ -17,7 +17,11 @@
 				{% csrf_token %}
 				<div style="font-weight:bold">Controls</div>
 				<h3>Choose DataStore</h3>
+				<p> <label for="ds_id">Data Store ID:</label> <input type="text" name="ds_id" id="ds_id" value="{{ds_id}}" /> </p>
+				{% if data_store %}Data store "{{data_store.name}}" has {{data_store.get_historic_size}} data.{% else %}None selected.{% endif %}
 				<h3>Set parameters</h3>
+				<p> <label for="width">Img Width</label> <input type="text" name="width" id="width" value="{{width}}" /> </p>
+				<p> <label for="height">Img Height</label> <input type="text" name="height" id="height" value="{{height}}" /> </p>
 				<input type="submit" value="Run" name="action"/>
 			</form>
 			</div>
@@ -29,7 +33,7 @@
 	<div class="outputBlock">
 		<div class="mainOutput">
 			<h3>Generated image<h3>
-			<img class="bigPic" src="/{% if endpoint.full_svg_file %}{{endpoint.full_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+			<img class="bigPic" src="/{% if output %}{{output}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
 		</div>
 	</div>
 	<br/>
