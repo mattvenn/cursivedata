@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 from polargraph import views
 
 urlpatterns = patterns('',
-    url(r'^$', views.list_pipelines, name='index'),
+    url(r'^$', views.index, name='index'),
 
 	 # ex: /polargraph/pipeline/5/update/
     

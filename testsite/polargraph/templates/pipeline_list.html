@@ -1,28 +1,35 @@
-<div style="font-family: helvetica">
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
+</head>
+<body>
 {% if pipeline_list %}
-	<h1>Pipelines</h1>
+<div class="bigList">
+	<div class="bigListTitle">Pipelines</div>
     {% for pipeline in pipeline_list %}
-    	<div style="background: #ccc;margin: 20px; padding: 10px;">
-    		<div style="display:inline-block; width=300px;">
+    	<div class="bigListItem">
+    		<div class="bigListInfo">
 				<h1><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></h1>
 				<h3>Using: {{pipeline.generator.name}}</h3>
 				<div style="font-style: italic"> {{pipeline.description}} </div>
 				Last Update: ({{pipeline.last_updated}})<br/>
     		</div>
-			<img style="max-width:250px; max-height:250px;" src="/{{pipeline.full_image_file}}"/>
-			<div style="display:inline-block;padding:10px">
-			<h3>Previous Output</h3>
-			{% for output in pipeline.get_recent_output %}
-			<div style="display:inline-block; background: #ccc; padding:10px; text-align:center;">
-				<img src="/{{output.filename}}" max-width="150px" height="150px"/><br/>
-				{{output.modified}}
+    		<div class="bigListPic">
+				<img class="medPic" src="/{{pipeline.full_image_file}}"/>
 			</div>
-		{% endfor %}
-	</div>	
+			<div class="bigListSublist">
+				<div class="bigListSublistTitle">Previous Output</div>
+				{% for output in pipeline.get_recent_output %}
+					<div class="outputContainer">
+						<img src="/{{output.filename}}" class="smallPic"/><br/>
+						{{output.modified}}
+					</div>
+				{% endfor %}
+			</div>	
         </div>
     {% endfor %}
+</div>
 {% else %}
     <h1>No pipelines are available.</h1>
 {% endif %}
-
-</div>
+</body>

@@ -10,6 +10,10 @@ from django.forms.widgets import Textarea, TextInput
 from django.utils.datetime_safe import datetime
 import re
 
+def index(request):
+    latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
+    context = {"pipeline_list":latest_pipelines}
+    return render(request,"index.html",context)
 
 def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]

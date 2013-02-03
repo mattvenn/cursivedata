@@ -1,0 +1,189 @@
+.col {
+	background: green;
+	display: inline-block;
+	width: 23%;
+}
+
+.col h1 {
+	text-align: center;
+}
+
+body {
+	font-family: Helvetica;
+	font-size: 16px;
+}
+
+.smallPic {
+	max-width: 150px;
+	max-height: 150px;
+}
+
+.medPic {
+	max-width: 250px;
+	max-height: 250px;
+}
+
+.bigPic {
+	max-width: 400px;
+	max-height: 5000px;
+}
+
+.bigList{
+	padding: 10px;
+}
+.bigListTitle {
+	font-size: 200%;
+	font-weight: bold;
+}
+
+.bigListItem {
+	padding: 10px;
+	vertical-align: top;
+	border: 2px solid #bbb;
+	margin: 15px;
+	background: #eee;
+}
+
+.bigListInfo {
+	display:inline-block;
+	width=300px;
+	vertical-align: top;
+	margin-right: 30px;
+}
+
+.bigListPic {
+	display:inline-block;
+	vertical-align: top;
+	margin-right: 30px;
+}
+
+.bigListSublist {
+	display:inline-block;
+	min-height: 190px;
+	vertical-align: top;
+}
+
+.bigListSublistItem {
+}
+.bigListSublistTitle {
+	text-align: center;
+	font-size: 130%;
+	font-weight: bold;
+}
+
+.outputContainer {
+	display: inline-block;
+	background: #ccc;
+	padding: 10px;
+	text-align: center;
+}
+
+.controlPanel {
+	display: inline-block;
+	border: 2pt solid grey;
+	background: #ddd;
+	padding: 10px;
+	vertical-align: top
+}
+
+.controlColumn {
+	display: inline-block;
+	vertical-align: top
+}
+
+.description {
+	font-style: italic;
+	background: #ffc;
+}
+
+.objectTitle {
+	font-weight: bold;
+	font-size: 200%;
+	display: inline-block;
+}
+
+.objectType {
+	font-weight: bold;
+	font-size: 140%;
+	font-style: italic;
+}
+
+.objectInfo {
+	font-style: italic;
+	background: #cfc;
+}
+
+.inputForm {
+	background: #ccc; padding : 10px;
+	margin: 10px;
+	text-align: right;
+	padding: 10px;
+}
+
+.parameterForm {
+	background: #cfa;
+}
+
+.actionForm {
+	background: #afc;
+}
+
+.formBlock {
+	border: 2px solid #fff;
+	padding: 4px;
+	margin: 5px;
+}
+
+.formSubBlock {
+	margin: 3px;	
+}
+
+.formBlockTitle {
+	font-weight: bold;
+	font-size: 120%;
+}
+.formBlockSubTitle {
+	font-weight: bold;
+	font-size: 100%;
+}
+
+.formParam {
+	border: 1px solid #fdd
+}
+
+.formParamName {
+	font-weight: bold;
+}
+
+.formParamDescription {
+	font-style: italic;
+	font-size: 70%
+}
+
+.inputForm [type=submit] {
+	font-weight: bold;
+	font-size: 200%;
+	padding: 2px;
+}
+
+.cosmTrigger {
+	border: 1px solid grey; 
+	margin: 3px;
+	padding: 3px;
+}
+
+.cosmInfo {
+	width: 230px;
+	display: inline-block;
+}
+.cosmAction {
+	width: 130px;
+	display: inline-block;
+}
+
+.subObject {
+	font-size: 80%;
+	border: 2px solid #dfe;
+	margin: 2px;
+	padding: 6px;
+}

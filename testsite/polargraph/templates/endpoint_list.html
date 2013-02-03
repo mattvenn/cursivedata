@@ -1,28 +1,34 @@
-<div style="font-family: helvetica">
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
+</head>
+<body>
 {% if endpoint_list %}
-	<h1>Endpoints</h1>
+<div class="bigList">
+	<div class="bigListTitle">Endpoints</div>
     {% for endpoint in endpoint_list %}
-    	<div style="background: #ccc;margin: 20px; padding: 10px">
-    		<div style="display:inline-block; width=300px">
+    	<div class="bigListItem">
+    		<div class="bigListInfo">
 				<h1><a href="{% url polargraph:show_endpoint endpoint.id %}">{{ endpoint.name }}</a></h1>
 				<h3>Location: {{endpoint.location}}</h3>
-				<div style="font-style: italic"> {{endpoint.description}} </div>
 				Last Update: ({{endpoint.last_updated}})<br/>
     		</div>
-			<img style="max-width:250px; max-height:250px;" src="/{{endpoint.full_svg_file}}"/>
-			<div style="display:inline-block;padding:10px">
-			<h3>Previous Output</h3>
-			{% for output in endpoint.get_recent_output %}
-				<div style="display:inline-block; background: #ccc; padding:10px">
-					<img src="/{{output.filename}}" style="max-width:150px;max-height:400px"/><br/>
-					{{output.modified}}
-				</div>
-			{% endfor %}
-	</div>	
+    		<div class="bigListPic">
+				<img class="medPic" src="/{{endpoint.full_svg_file}}"/>
+			</div>
+			<div class="bigListSublist">
+				<div class="bigListSublistTitle">Previous Output</div>
+				{% for output in endpoint.get_recent_output %}
+					<div class="outputContainer">
+						<img src="/{{output.filename}}" class="smallPic"/><br/>
+						{{output.modified}}
+					</div>
+				{% endfor %}
+			</div>	
         </div>
     {% endfor %}
+</div>
 {% else %}
     <h1>No endpoints are available.</h1>
 {% endif %}
-
-</div>
+</body>
