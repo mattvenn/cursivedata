@@ -74,20 +74,7 @@ def show_pipeline(request, pipelineID):
         elif act != "none":
             print "Unknown action:",act
         
-        
-        
-        params = []
-        for param in pipeline.generator.parameter_set.all():
-            params.append({"name":param.name,
-                           "description":param.description,
-                           "value":pipeline.state.params.get(param.name,param.default)})
-        outputs = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(pipeline=pipeline,status="complete",filetype="svg") \
-                .exclude(run_id= pipeline.run_id)[:8]
-        cosm_triggers = COSMSource.objects \
-                .filter(data_store=pipeline.data_store)
-        context = {"pipeline":pipeline, "params":params, "output":outputs, "cosm_form":cosm_form, "cosm_triggers":cosm_triggers }
+        context = {"pipeline":pipeline, "cosm_form":cosm_form}
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404

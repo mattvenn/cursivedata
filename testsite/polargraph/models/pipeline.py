@@ -24,6 +24,7 @@ import time
 import os
 
 from polargraph.drawing import Drawing
+from polargraph.models.cosm import COSMSource
 
 
 
@@ -102,6 +103,25 @@ class Pipeline( DrawingState ) :
             return StoredOutput.objects.get(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
         except:
             return StoredOutput(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
+    
+    #Gets recent output which is not the current run
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects \
+                .order_by('-modified') \
+                .filter(pipeline=self,status="complete",filetype="svg") \
+                .exclude(run_id= self.run_id)[start:end]
+    #Gets all the cosm triggers on this pipeline
+    def get_cosm_triggers(self):
+        return COSMSource.objects.filter(data_store=self.data_store)
+    
+    #Gets the current values for all parameters as a dict
+    def get_param_dict(self):
+        params = []
+        for param in self.generator.parameter_set.all():
+            params.append({"name":param.name,
+                           "description":param.description,
+                           "value":self.state.params.get(param.name,param.default)})
+        return params
         
     #Sets up a datastore and generator state for use
     def init_data(self,force=False,save=True):
