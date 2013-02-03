@@ -19,8 +19,8 @@ class Generator( models.Model ) :
     image = models.CharField(max_length=200,default="No Image")
     file_path = models.CharField(max_length=200,default="./generators")
     module_name = models.CharField(max_length=200)
-    last_updated = models.DateTimeField("Last Updated",default=datetime.now())
-    last_used = models.DateTimeField("Last Used",default=datetime.now())
+    last_updated = models.DateTimeField("Last Updated",default=datetime.now)
+    last_used = models.DateTimeField("Last Used",default=datetime.now)
     
     module = None
     def __init__(self, *args, **kwargs):
@@ -90,7 +90,9 @@ class Generator( models.Model ) :
         return None
     def get_recent_output(self,start=0,end=8):
         return StoredOutput.objects.order_by('-modified').filter(generator=self,status="complete",filetype="svg")[start:end]            
-    
+    def update_last_used(self):
+        self.last_used = datetime.now()
+        self.save();
     class Meta:
         app_label = 'polargraph'
 

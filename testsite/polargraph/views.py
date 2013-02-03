@@ -117,7 +117,12 @@ def show_endpoint(request, endpointID):
         raise Http404
     
 def show_generator(request, generatorID):
-    raise Http404
+    try:
+        generator = Generator.objects.get(pk=generatorID)
+        context = {"generator":generator }
+        return render(request,"generator_display.html",context)
+    except Generator.DoesNotExist:
+        raise Http404
     
 def get_gcode(request, endpointID ):
     try:
