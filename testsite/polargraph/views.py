@@ -16,6 +16,17 @@ def list_pipelines(request):
     context = {"pipeline_list":latest_pipelines}
     return render(request,"pipeline_list.html",context)
 
+def list_endpoints(request):
+    latest_endpoints = Endpoint.objects.order_by('-last_updated')[:50]
+    context = {"endpoint_list":latest_endpoints}
+    return render(request,"endpoint_list.html",context)
+
+def list_generators(request):
+    latest_generators = Generator.objects.order_by('-last_used')[:50]
+    context = {"generator_list":latest_generators}
+    return render(request,"generator_list.html",context)
+
+
 
 def show_pipeline(request, pipelineID):
     try:
@@ -79,11 +90,6 @@ def show_pipeline(request, pipelineID):
     except Pipeline.DoesNotExist:
         raise Http404
     
-def list_endpoints(request):
-    latest_endpoints = Endpoint.objects.order_by('-last_updated')[:50]
-    context = {"endpoint_list":latest_endpoints}
-    return render(request,"endpoint_list.html",context)
-
 
 def show_endpoint(request, endpointID):
     try:
@@ -109,6 +115,9 @@ def show_endpoint(request, endpointID):
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
         raise Http404
+    
+def show_generator(request, generatorID):
+    raise Http404
     
 def get_gcode(request, endpointID ):
     try:

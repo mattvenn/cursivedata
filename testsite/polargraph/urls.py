@@ -21,5 +21,9 @@ urlpatterns = patterns('',
     
     #Do stuff with endpoints
     url(r'^endpoint_data/(?P<endpointID>\d+)/$', views.get_gcode, name='get_gcode'),
+    
+    #Show generators
+    url(r'^generator/?$', views.list_generators, name='list_generators'),
+    url(r'^generator/(?P<endpointID>\d+)/$', views.show_generator, name='show_generator'),
 )
 

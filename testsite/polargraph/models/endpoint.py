@@ -6,8 +6,7 @@ Created on 12 Jan 2013
 
 from django.db import models
 import polargraph.svg as svg
-from polargraph.models.pipeline import StoredOutput
-from polargraph.models.drawing_state import DrawingState
+from polargraph.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
 from pysvg.parser import parse
