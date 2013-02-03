@@ -70,21 +70,54 @@ class Endpoint( DrawingState ):
         try:
             current_drawing = self.transform_svg(svg_file,pipeline)
             print current_drawing.getXML()
+            #this will save out the latest svg as a file
             self.add_svg(current_drawing)
-            self.create_gcode(self.last_svg_file)
         except Exception as e:
             print "Problem updating SVG in endpoint:",e
-    
-    def create_gcode(self,svg_file):
         try:
+            #now make the gcode
             so = GCodeOutput(endpoint=self)
             so.save()
-            self.convert_svg_to_gcode(svg_file,so.get_filename())
+            #transform the current svg for the robot
+            current_drawing = self.transform_svg_for_robot(self.last_svg_file)
+
+            #write it out as an update
+            self.last_svg_file = self.get_partial_svg_filename()
+            current_drawing.save(self.last_svg_file)
+            self.update_latest_image()
+            print "Saved update as:",self.last_image_file
+
+            #convert it to gcode
+            self.convert_svg_to_gcode(self.last_svg_file,so.get_filename())
         except Exception as e:
             print "Coudldn't make GCode:",e
             so.delete()
 
     #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
+    #returns an svg document (not a file)
+    def transform_svg_for_robot(self, svg_file): 
+        current_drawing = self.create_svg_doc(self.width,self.height)
+        try:
+            svg_data = parse(svg_file)
+
+            #setup our transform
+            tr = pysvg.builders.TransformBuilder()
+            tr.setScaling(x=1,y=-1)
+            trans = str(self.side_margin) + " " + str(self.img_height) 
+            tr.setTranslation( trans )
+            print "Endpoint transform:"+tr.getTransform()
+            group = pysvg.structure.g()
+            group.set_transform(tr.getTransform())
+            #add the drawing
+            for element in svg_data.getAllElements():
+                group.addElement(element)
+
+            current_drawing.addElement(group)
+            return current_drawing
+        except Exception as e:
+            print "Couldn't transform SVG for robot:",svg_file,e        
+
+    #returns an svg document (not a file)
     def transform_svg(self, svg_file, pipeline): 
         current_drawing = self.create_svg_doc(self.width,self.height)
         try:
@@ -101,24 +134,14 @@ class Endpoint( DrawingState ):
             print "Pipeline transform:"+tr.getTransform()
             group = pysvg.structure.g()
             group.set_transform(tr.getTransform())
+
             for element in svg_data.getAllElements():
                 group.addElement(element)
 
-            #setup our transform
-            tr = pysvg.builders.TransformBuilder()
-            tr.setScaling(x=1,y=-1)
-            trans = str(self.side_margin) + " " + str(self.img_height) 
-            tr.setTranslation( trans )
-            print "Endpoint transform:"+tr.getTransform()
-            endpoint_group = pysvg.structure.g()
-            endpoint_group.set_transform(tr.getTransform())
-            #add the drawing
-            endpoint_group.addElement(group)
-
-            current_drawing.addElement(endpoint_group)
+            current_drawing.addElement(group)
             return current_drawing
         except Exception as e:
-            print "Couldn't read SVG file passed in:",svg_file,e        
+            print "Couldn't transform SVG for pipeline:",svg_file,e        
 
     #use pycam and parse_gcode to turn svg into robot style files
     def convert_svg_to_gcode(self, svgfile, polarfile ):
