@@ -42,7 +42,7 @@ class DrawingState( models.Model ):
         self.last_updated = datetime.now()
         self.save()
 
-    #Change ths size of the drawing    
+    #Change the size of the drawing    
     def update_size(self,width,height):
         changed = self.img_width != width or self.img_height != height
         self.img_width = width
