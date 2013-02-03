@@ -27,15 +27,16 @@ class DrawingState( models.Model ):
     img_width = models.IntegerField(default=500)
     img_height = models.IntegerField(default=500)
     
-    #Adds a chunk of SVG to this drawing
+    #Adds the most recent file to the output file
     def add_svg(self, svg_document ):
         #Save the partial file and make a PNG of it
         self.last_svg_file = self.get_partial_svg_filename()
         svg_document.save(self.last_svg_file)
         self.update_latest_image()
         print "Saved update as:",self.last_image_file
+
         self.ensure_full_document()
-        # Add SVG to full output history
+        # Add the last SVG to full output SVG history
         svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
         self.update_full_image()
         print "Saved whole image as:",self.full_image_file
