@@ -16,10 +16,22 @@ def list_pipelines(request):
     context = {"pipeline_list":latest_pipelines}
     return render(request,"pipeline_list.html",context)
 
+def list_endpoints(request):
+    latest_endpoints = Endpoint.objects.order_by('-last_updated')[:50]
+    context = {"endpoint_list":latest_endpoints}
+    return render(request,"endpoint_list.html",context)
+
+def list_generators(request):
+    latest_generators = Generator.objects.order_by('-last_used')[:50]
+    context = {"generator_list":latest_generators}
+    return render(request,"generator_list.html",context)
+
+
 
 def show_pipeline(request, pipelineID):
     try:
-        if request.method == 'POST': # If the form has been submitted...
+        act = request.POST.get('action',"none")
+        if request.method == 'POST' and act == "Create COSM": # If the form has been submitted...
             cosm_form = COSMSourceCreation(request.POST) # A form bound to the POST data
         else:
             cosm_form = COSMSourceCreation( {
@@ -31,7 +43,6 @@ def show_pipeline(request, pipelineID):
                     }) # An unbound form
         
         pipeline = Pipeline.objects.get(pk=pipelineID)
-        act = request.POST.get('action',"none")
         if act == "Reset":
             pipeline.reset()
         elif act == "Begin":
@@ -74,29 +85,11 @@ def show_pipeline(request, pipelineID):
         elif act != "none":
             print "Unknown action:",act
         
-        
-        
-        params = []
-        for param in pipeline.generator.parameter_set.all():
-            params.append({"name":param.name,
-                           "description":param.description,
-                           "value":pipeline.state.params.get(param.name,param.default)})
-        outputs = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(pipeline=pipeline,status="complete",filetype="svg") \
-                .exclude(run_id= pipeline.run_id)[:8]
-        cosm_triggers = COSMSource.objects \
-                .filter(data_store=pipeline.data_store)
-        context = {"pipeline":pipeline, "params":params, "output":outputs, "cosm_form":cosm_form, "cosm_triggers":cosm_triggers }
+        context = {"pipeline":pipeline, "cosm_form":cosm_form}
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404
     
-def list_endpoints(request):
-    latest_endpoints = Endpoint.objects.order_by('-last_updated')[:50]
-    context = {"endpoint_list":latest_endpoints}
-    return render(request,"endpoint_list.html",context)
-
 
 def show_endpoint(request, endpointID):
     try:
@@ -116,13 +109,19 @@ def show_endpoint(request, endpointID):
             print "Update Params"
         elif act != "none":
             print "Unknown action:",act
-        previous = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(endpoint=endpoint,pipeline=None,status="complete",filetype="svg")[1:8] 
+        previous = endpoint.get_recent_output()
         files_left = endpoint.get_num_files_to_serve()
         context = {"endpoint":endpoint, "previous":previous,"files_left":files_left}
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
+        raise Http404
+    
+def show_generator(request, generatorID):
+    try:
+        generator = Generator.objects.get(pk=generatorID)
+        context = {"generator":generator }
+        return render(request,"generator_display.html",context)
+    except Generator.DoesNotExist:
         raise Http404
     
 def get_gcode(request, endpointID ):
@@ -150,7 +149,6 @@ def get_gcode(request, endpointID ):
 def update(request, pipelineID):
     try:
         pipeline = Pipeline.objects.get(pk=pipelineID)
-        pipeline.generator.init()
     except Pipeline.DoesNotExist:
         raise Http404
     return HttpResponse(pipeline.update())
@@ -160,14 +158,7 @@ def create_pipeline( request ):
         form = PipelineCreation(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             pipeline = form.save(commit=False);
-            ds = DataStore(name="Data for"+str(pipeline.name))
-            gs = GeneratorState(name="Data for"+str(pipeline.name), generator=pipeline.generator)
-            ds.save()
-            gs.save()
-            pipeline.data_store = ds
-            pipeline.state = gs
-            pipeline.last_updated = datetime.now()
-            pipeline.save()
+            pipeline.init_data();
             return HttpResponseRedirect('/polargraph/pipeline/'+str(pipeline.id)+"/") # Redirect after POST
     else:
         form = PipelineCreation() # An unbound form

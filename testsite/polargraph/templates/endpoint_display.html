@@ -43,7 +43,7 @@
 	
 	<div>
 		<h1>Previous Output</h1>
-		{% for output in previous %}
+		{% for output in endpoint.get_recent_output %}
 			<div style="display:inline-block; background: #ccc; padding:10px">
 				<img src="/{{output.filename}}" style="max-width:150px;max-height:400px"/><br/>
 				{{output.modified}}

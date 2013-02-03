@@ -10,6 +10,15 @@
 				Last Update: ({{endpoint.last_updated}})<br/>
     		</div>
 			<img style="max-width:250px; max-height:250px;" src="/{{endpoint.full_svg_file}}"/>
+			<div style="display:inline-block;padding:10px">
+			<h3>Previous Output</h3>
+			{% for output in endpoint.get_recent_output %}
+				<div style="display:inline-block; background: #ccc; padding:10px">
+					<img src="/{{output.filename}}" style="max-width:150px;max-height:400px"/><br/>
+					{{output.modified}}
+				</div>
+			{% endfor %}
+	</div>	
         </div>
     {% endfor %}
 {% else %}

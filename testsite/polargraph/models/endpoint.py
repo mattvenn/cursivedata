@@ -6,8 +6,7 @@ Created on 12 Jan 2013
 
 from django.db import models
 import polargraph.svg as svg
-from polargraph.models.pipeline import StoredOutput
-from polargraph.models.drawing_state import DrawingState
+from polargraph.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
 from pysvg.parser import parse
@@ -171,7 +170,8 @@ class Endpoint( DrawingState ):
 
         startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
         contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
-      
+        lastX = None
+        lastY = None
         polar_code=""
         for line in gcodes:
             s = startCode.match(line)
@@ -254,12 +254,22 @@ class Endpoint( DrawingState ):
     def pause(self):
         self.paused = True
         self.save()
+    
+    def reset(self):
+        super(Endpoint, self).reset()
+        for gcode in GCodeOutput.objects.filter(endpoint=self,served=False):
+            gcode.delete()
         
     def get_stored_output(self,output_type,status):
         try:
             return StoredOutput.objects.get(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
         except:
             return StoredOutput(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
+    
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects.order_by('-modified') \
+                .filter(endpoint=self,pipeline=None,status="complete",filetype="svg")\
+                .exclude(run_id= self.run_id)[start:end]
       
     def get_output_name(self):
         return "endpoint"
@@ -278,6 +288,10 @@ class GCodeOutput( models.Model ):
         if not self.id > 0:
             self.save()
         return "data/output/gcode/"+str(self.id)+".gcode"
+    
+    def delete(self):
+        os.remove(self.get_filename())
+        super(GCodeOutput, self).delete()
     
     class Meta:
         app_label = 'polargraph'

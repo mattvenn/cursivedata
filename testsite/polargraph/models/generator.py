@@ -5,14 +5,10 @@ Created on 12 Jan 2013
 '''
 
 from django.db import models
-from django.utils import timezone
-from django.contrib.auth.models import User
 from imp import find_module, load_module
-import json
-import csv
-import polargraph.svg as svg
-import requests
 import jsonfield
+from polargraph.models.drawing_state import StoredOutput
+from django.utils.datetime_safe import datetime
 
 
 #Points to some code and associated parameters which are needed to process data
@@ -23,11 +19,18 @@ class Generator( models.Model ) :
     image = models.CharField(max_length=200,default="No Image")
     file_path = models.CharField(max_length=200,default="./generators")
     module_name = models.CharField(max_length=200)
+    last_updated = models.DateTimeField("Last Updated",default=datetime.now)
+    last_used = models.DateTimeField("Last Used",default=datetime.now)
+    
     module = None
-    def init(self) :
-        self.module = self.get_file( self.module_name )
-        for param in self.module.get_params():
-            self.add_or_update_param( param )
+    def __init__(self, *args, **kwargs):
+        super(Generator, self).__init__(*args, **kwargs)
+        try:
+            self.module = self.get_file( self.module_name )
+            for param in self.module.get_params():
+                self.add_or_update_param( param )
+        except Exception as e:
+            print "Coudln't update Generator params:",e
         return
     #Processes a given chunk of data to return some SVG
     def process_data( self, svg_document, data, params, state ) :
@@ -85,8 +88,11 @@ class Generator( models.Model ) :
             if p.name == name:
                 return p
         return None
-            
-    
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects.order_by('-modified').filter(generator=self,status="complete",filetype="svg")[start:end]            
+    def update_last_used(self):
+        self.last_used = datetime.now()
+        self.save();
     class Meta:
         app_label = 'polargraph'
 

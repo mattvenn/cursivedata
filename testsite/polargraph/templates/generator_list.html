@@ -1,0 +1,26 @@
+<div style="font-family: helvetica">
+{% if generator_list %}
+	<h1>Generators</h1>
+    {% for generator in generator_list %}
+    	<div style="background: #ccc;margin: 20px; padding: 10px">
+    		<div style="display:inline-block; width=300px">
+				<h1><a href="{% url polargraph:show_generator generator.id %}">{{ generator.name }}</a></h1>
+				<div style="font-style: italic"> {{generator.description}} </div>
+				Last Used: {{generator.last_used}}<br/>
+				Last Edited: {{generator.last_updated}}<br/>
+    		</div>
+			<div style="display:inline-block;padding:10px">
+			{% for output in generator.get_recent_output %}
+				<div style="display:inline-block; background: #ccc; padding:10px">
+					<img src="/{{output.filename}}" style="max-width:150px;max-height:400px"/><br/>
+					{{output.modified}}
+				</div>
+			{% endfor %}
+	</div>	
+        </div>
+    {% endfor %}
+{% else %}
+    <h1>No generators are available.</h1>
+{% endif %}
+
+</div>

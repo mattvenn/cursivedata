@@ -1,0 +1,29 @@
+<div style="font-family: helvetica; font-size: 14px;vertical-align:top;">
+{% if generator %}
+	<div style="padding:20px;display:inline-block;vergical-align:top">
+		<div style="display:inline-block; border: 2pt solid grey;background: #ddd; padding:10px; vertical-align:top">
+			<h1>Generator: {{ generator.name }}</h1>
+			<div style="font-style: italic"> {{generator.description}} </div>
+			Last Used: {{generator.last_used}}<br/>
+			Last Changed: {{generator.last_updated}}<br/>
+			<form action="{% url polargraph:show_generator generator.id %}" method="POST">
+				{% csrf_token %}
+				<div style="font-weight:bold">Controls</div>
+			</form>
+			<h3>Code:</h3>
+		</div>
+	</div>
+	<div style="display:inline-block; width:430px;vertical-align:top">
+		<h1>Previous Output</h1>
+		{% for output in generator.get_recent_output %}
+			<div style=" background: #ccc; padding:10px; display:inline-block">
+				<img src="/{{output.filename}}" style="max-width:150px;max-height:400px"/><br/>
+				{{output.modified}}
+			</div>
+		{% endfor %}
+	</div>	
+	
+{% else %}
+    <h1>Generator not found</h1>
+{% endif %}
+</div>
