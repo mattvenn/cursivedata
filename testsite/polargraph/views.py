@@ -103,9 +103,7 @@ def show_endpoint(request, endpointID):
             print "Update Params"
         elif act != "none":
             print "Unknown action:",act
-        previous = StoredOutput.objects \
-                .order_by('-modified') \
-                .filter(endpoint=endpoint,pipeline=None,status="complete",filetype="svg")[1:8] 
+        previous = endpoint.get_recent_output()
         files_left = endpoint.get_num_files_to_serve()
         context = {"endpoint":endpoint, "previous":previous,"files_left":files_left}
         return render(request,"endpoint_display.html",context)

@@ -258,6 +258,11 @@ class Endpoint( DrawingState ):
             return StoredOutput.objects.get(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
         except:
             return StoredOutput(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
+    
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects.order_by('-modified') \
+                .filter(endpoint=self,pipeline=None,status="complete",filetype="svg")\
+                .exclude(run_id= self.run_id)[start:end]
       
     def get_output_name(self):
         return "endpoint"
