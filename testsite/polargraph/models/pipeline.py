@@ -117,12 +117,7 @@ class Pipeline( DrawingState ) :
     
     #Gets the current values for all parameters as a dict
     def get_param_dict(self):
-        params = []
-        for param in self.generator.parameter_set.all():
-            params.append({"name":param.name,
-                           "description":param.description,
-                           "value":self.state.params.get(param.name,param.default)})
-        return params
+        return self.generator.get_param_dict( self.state.params )
         
     #Sets up a datastore and generator state for use
     def init_data(self,force=False,save=True):

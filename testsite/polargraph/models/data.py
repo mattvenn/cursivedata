@@ -131,7 +131,7 @@ class DataStore( models.Model ) :
             del entry['time_ser']
     
     def __unicode__(self):
-        return self.name
+        return "%s (%s)" % (self.name, self.id)
 
     class Meta:
         app_label = 'polargraph'

@@ -91,6 +91,16 @@ class Generator( models.Model ) :
             if p.name == name:
                 return p
         return None
+    
+    #Gets the current values for all parameters as a dict
+    def get_param_dict(self,param_values):
+        params = []
+        for param in self.parameter_set.all():
+            params.append({"name":param.name,
+                           "description":param.description,
+                           "value":param_values.get(param.name,param.default)})
+        return params
+    
     def get_recent_output(self,start=0,end=8):
         return StoredOutput.objects.order_by('-modified').filter(generator=self,status="complete",filetype="svg")[start:end]            
     def update_last_used(self):
@@ -144,8 +154,11 @@ class GeneratorRunner(DrawingState):
         data = DataStore()
         data.current = data_store.get_historic()
         state = generator.get_state(False) 
+        print "State:",state.state
         params = state.params
-        internal = state.state
+        for (key, value) in input_params.iteritems():
+            params[key] = value
+        internal = {}
         doc = self.create_svg_doc(width, height)
         drwg = Drawing( doc )
         generator.begin_drawing( drwg, params, internal )

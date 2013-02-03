@@ -9,6 +9,7 @@ import os
 from django.forms.models import ModelForm
 from django.forms.widgets import Textarea, TextInput
 from django.utils.datetime_safe import datetime
+from django import forms
 import re
 
 def index(request):
@@ -125,27 +126,47 @@ def show_generator(request, generatorID):
     try:
         generator = Generator.objects.get(pk=generatorID)
         act = request.POST.get('action',"none")
+        
         filename = None
         data_store = None
-        ds_id = int(request.POST.get("ds_id","0"))
         width = int(request.POST.get("width","400"))
         height = int(request.POST.get("height","400"))
-        if ds_id :
-            try:
-                data_store = DataStore.objects.get(id=ds_id)
-            except DataStore.DoesNotExist:
-                print "No datastore found",ds_id
+        param_values = {}
+        #Create forms to use
+        if request.POST:
+            ds_form = SelectOrMakeDataStore(request.POST)
+        else:
+            ds_form = SelectOrMakeDataStore()
+            
+        #Extract values from them
+        if ds_form.is_valid():
+            data_store = ds_form.cleaned_data['data_store']
+            
+        #Get other values by hand
+        for (key, value) in request.POST.iteritems():
+            if key.startswith("param"):
+                param_values[key.replace("param","")]= float(value)
+        params = generator.get_param_dict(param_values)
+        
         if act == "Run" :
             if data_store :
-                params = {}
-                filename = GeneratorRunner().run(generator,data_store,params,width,height)
+                filename = GeneratorRunner().run(generator,data_store,param_values,width,height)
                 print "Got filename",filename
             else:
                 print "No data_store setup"
-        context = {"generator":generator,"output":filename, "data_store":data_store, "ds_id":ds_id, "width":width, "height":height }
+        elif act == "Create Datastore":
+            data_store = DataStore(name=request.POST.get("ds_name","Unnamed Datastore"))
+            data_store.save()
+        
+        context = {"generator":generator,"output":filename, "data_store":data_store, 
+                    "width":width, "height":height, "params":params, "ds_form":ds_form }
         return render(request,"generator_display.html",context)
     except Generator.DoesNotExist:
         raise Http404
+
+class SelectOrMakeDataStore(forms.Form):
+    data_store = forms.ModelChoiceField(queryset=DataStore.objects.all(),label="Select",required=False)
+    ds_name = forms.CharField(label="New DS Name",initial="New Datastore")
     
 def get_gcode(request, endpointID ):
     try:

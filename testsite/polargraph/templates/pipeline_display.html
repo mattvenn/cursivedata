@@ -43,8 +43,8 @@
 							<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}" />
 							<div class="formParamDescription">{{param.description}}</div>
 						</p>
-						{% endfor %} <input type="submit" value="Update Parameters"
-							name="action" />
+						{% endfor %} 
+						<input type="submit" value="Update Parameters" name="action" />
 				</form>
 				</div>
 			</div>
@@ -96,9 +96,8 @@
 						</div>
 					</div>
 					<div class="formBlock">
-					<span class="formBlockTitle">Add COSM Feed</span>
-					{{ cosm_form.as_p }} <input type="submit" value="Create COSM"
-						name="action" />
+						<span class="formBlockTitle">Add COSM Feed</span>
+						{{ cosm_form.as_p }} <input type="submit" value="Create COSM" name="action" />
 					</div>
 					<div class="formBlock">
 					<span class="formBlockTitle">Existing COSM Triggers</span>
