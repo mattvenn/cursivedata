@@ -50,8 +50,8 @@ class Endpoint( DrawingState ):
     paused = models.BooleanField(default=False)
     #add this to db, using url for now
     status = models.CharField(max_length=200)
-    url = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
+    robot_svg = models.CharField(max_length=200,blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Endpoint, self).__init__(*args, **kwargs)
@@ -74,6 +74,7 @@ class Endpoint( DrawingState ):
             self.add_svg(current_drawing)
         except Exception as e:
             print "Problem updating SVG in endpoint:",e
+        """
         try:
             #now make the gcode
             so = GCodeOutput(endpoint=self)
@@ -92,6 +93,7 @@ class Endpoint( DrawingState ):
         except Exception as e:
             print "Coudldn't make GCode:",e
             so.delete()
+        """
 
     #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
     #returns an svg document (not a file)
