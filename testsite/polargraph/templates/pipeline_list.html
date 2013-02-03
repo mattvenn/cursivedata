@@ -2,14 +2,23 @@
 {% if pipeline_list %}
 	<h1>Pipelines</h1>
     {% for pipeline in pipeline_list %}
-    	<div style="background: #ccc;margin: 20px; padding: 10px">
-    		<div style="display:inline-block; width=300px">
+    	<div style="background: #ccc;margin: 20px; padding: 10px;">
+    		<div style="display:inline-block; width=300px;">
 				<h1><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></h1>
 				<h3>Using: {{pipeline.generator.name}}</h3>
 				<div style="font-style: italic"> {{pipeline.description}} </div>
 				Last Update: ({{pipeline.last_updated}})<br/>
     		</div>
 			<img style="max-width:250px; max-height:250px;" src="/{{pipeline.full_image_file}}"/>
+			<div style="display:inline-block;padding:10px">
+			<h3>Previous Output</h3>
+			{% for output in pipeline.get_recent_output %}
+			<div style="display:inline-block; background: #ccc; padding:10px; text-align:center;">
+				<img src="/{{output.filename}}" max-width="150px" height="150px"/><br/>
+				{{output.modified}}
+			</div>
+		{% endfor %}
+	</div>	
         </div>
     {% endfor %}
 {% else %}
