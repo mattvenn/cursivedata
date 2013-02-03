@@ -150,7 +150,6 @@ def get_gcode(request, endpointID ):
 def update(request, pipelineID):
     try:
         pipeline = Pipeline.objects.get(pk=pipelineID)
-        pipeline.generator.init()
     except Pipeline.DoesNotExist:
         raise Http404
     return HttpResponse(pipeline.update())
@@ -160,14 +159,7 @@ def create_pipeline( request ):
         form = PipelineCreation(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             pipeline = form.save(commit=False);
-            ds = DataStore(name="Data for"+str(pipeline.name))
-            gs = GeneratorState(name="Data for"+str(pipeline.name), generator=pipeline.generator)
-            ds.save()
-            gs.save()
-            pipeline.data_store = ds
-            pipeline.state = gs
-            pipeline.last_updated = datetime.now()
-            pipeline.save()
+            pipeline.init_data();
             return HttpResponseRedirect('/polargraph/pipeline/'+str(pipeline.id)+"/") # Redirect after POST
     else:
         form = PipelineCreation() # An unbound form
