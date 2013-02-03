@@ -169,7 +169,8 @@ class Endpoint( DrawingState ):
 
         startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
         contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
-      
+        lastX = None
+        lastY = None
         polar_code=""
         for line in gcodes:
             s = startCode.match(line)
