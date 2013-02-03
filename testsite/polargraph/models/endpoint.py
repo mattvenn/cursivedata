@@ -290,7 +290,10 @@ class GCodeOutput( models.Model ):
         return "data/output/gcode/"+str(self.id)+".gcode"
     
     def delete(self):
-        os.remove(self.get_filename())
+        try:
+            os.remove(self.get_filename())
+        except Exception as e:
+            print "Couldn't remove GCode file",self.get_filename,e
         super(GCodeOutput, self).delete()
     
     class Meta:
