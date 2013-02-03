@@ -49,8 +49,8 @@ class Endpoint( DrawingState ):
     paused = models.BooleanField(default=False)
     #add this to db, using url for now
     status = models.CharField(max_length=200)
-    url = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
+    robot_svg_file = models.CharField(max_length=200,blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Endpoint, self).__init__(*args, **kwargs)
@@ -80,14 +80,13 @@ class Endpoint( DrawingState ):
             #transform the current svg for the robot
             current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
-            #write it out as an update
-            self.last_svg_file = self.get_partial_svg_filename()
-            current_drawing.save(self.last_svg_file)
-            self.update_latest_image()
-            print "Saved update as:",self.last_image_file
+            #write it out as an svg
+            self.robot_svg_file = self.get_robot_svg_filename()
+            current_drawing.save(self.robot_svg_file)
+            self.save()
 
             #convert it to gcode
-            self.convert_svg_to_gcode(self.last_svg_file,so.get_filename())
+            self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
         except Exception as e:
             print "Coudldn't make GCode:",e
             so.delete()
@@ -118,7 +117,7 @@ class Endpoint( DrawingState ):
 
     #returns an svg document (not a file)
     def transform_svg(self, svg_file, pipeline): 
-        current_drawing = self.create_svg_doc(self.width,self.height)
+        current_drawing = self.create_svg_doc()
         try:
             xoffset = pipeline.print_top_left_x
             yoffset = pipeline.print_top_left_y
@@ -269,6 +268,9 @@ class Endpoint( DrawingState ):
                 .filter(endpoint=self,pipeline=None,status="complete",filetype="svg")\
                 .exclude(run_id= self.run_id)[start:end]
       
+    def get_robot_svg_filename(self):
+        return self.get_filename("robot", "svg")
+
     def get_output_name(self):
         return "endpoint"
     def __unicode__(self):
