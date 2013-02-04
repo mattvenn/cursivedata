@@ -72,7 +72,7 @@ class DataStore( models.Model ) :
         self.update_current_data(data)
         print "Pre-Pipeline Data",self.get_current()
         print "Datastore ID is:",self.id
-        print "Data Hash",hash(self)
+#        print "Data Hash",hash(self)
         self.clean()
         if hasattr(self, 'pipeline'):
             self.pipeline.update(self)
