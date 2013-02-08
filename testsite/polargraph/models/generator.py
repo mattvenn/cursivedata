@@ -32,7 +32,7 @@ class Generator( models.Model ) :
             for param in self.module.get_params():
                 self.add_or_update_param( param )
         except Exception as e:
-            print "Coudln't update Generator params:",e
+            print "Couldn't update Generator params:",e
         return
     #Processes a given chunk of data to return some SVG
     def process_data( self, svg_document, data, params, state ) :
