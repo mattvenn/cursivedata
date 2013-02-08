@@ -94,7 +94,7 @@ class Grid:
         self.offset_y = (h - (self.ny * self.size_y ) ) / 2
     
     def index_to_xy(self,i):
-        return( i%self.nx,(i/self.nx)%self.ny )
+        return( i%self.nx,int(i/self.nx)%self.ny )
         
     def cell(self,index):
         x,y = self.index_to_xy(int(index))
