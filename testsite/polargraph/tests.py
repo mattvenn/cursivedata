@@ -5,10 +5,12 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
+import pdb
 from django.test import TestCase
 from django.contrib.auth.models import User
 from polargraph.models import *
 from django.utils import timezone
+from polargraph.drawing import Drawing
 
 from pysvg.structure import svg
 from pysvg.builders import ShapeBuilder
@@ -17,37 +19,79 @@ from pysvg.text import text
 from polargraph.svg import append_svg_to_file
 from pysvg.parser import parse
 
+from django.utils import timezone
+import nose.tools as nt
+
+"""
 #class SimpleTest(TestCase):
 class SimpleTest():
     def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
         self.assertEqual(1 + 1, 2)
 
-    def test_creating_pipeline(self):
-        g1 = Generator(name="Test Generator", description="This is a fake generator to test stuff with", image="No Image", module_name="example")
-        g1.save()
-        g1p = Parameter(name="Param 1",generator=g1)
-        g1p.save()
-        g1s = GeneratorState(name="Current",generator=g1)
-        g1s.save()
-        e1 = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" )
-        e1.save()
-        d1 = DataStore()
-        print d1.id
-        d1.save()
-        p1 = Pipeline(name="Test Pipeline",data_store=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
-        p1.save()
-        print "P1:",str(p1)
-        p1.update()
-        ce = COSMSource(data_store=d1)
-        ce.save()
-        print "COSM:",ce.id
-        return {"pipeline":p1, "data_source":d1, "cosm_source":ce }
+"""
+class TestPipeline():
 
+    def setup(self):
+        self.generator = Generator(name="Squares generator", description="Squares generator", image="No Image", module_name="squares")
+        self.generator.save()
     
-    
+        self.gen_state = self.generator.get_state()
+        self.gen_state.name = "Generator State for Pipeline"
+        self.gen_state.save()
+
+        self.data_store = DataStore()
+        self.data_store.save()
+
+        self.end_point = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=500, height=400, top_margin=100, side_margin=100)
+        self.end_point.save()
+
+        self.pipeline = Pipeline(name="Test Pipeline" ,data_store=self.data_store, generator=self.generator, endpoint=self.end_point,state=self.gen_state, last_updated=timezone.now() )
+
+        self.svg_doc =self.pipeline.create_svg_doc()
+        self.drawing = Drawing(self.svg_doc)
+
+    def test_pipeline(self):
+        nt.assert_equal(self.pipeline.get_output_name(), "pipeline" )
+
+    def test_drawing(self):
+        nt.assert_equal(self.drawing.width, 500 )
+        nt.assert_equal(self.drawing.height, 500 )
+
+    def test_grid(self):
+        xdiv =12 
+        ydiv = 12
+        dwg_x = 400
+        dwg_y = 400
+
+        grid = self.drawing.get_grid(xdiv,ydiv)    
+        offsetx = grid.offset_x
+        offsety = grid.offset_y
+        cell_w = grid.size_x
+        cell_h = grid.size_y
+
+        nt.assert_equal( grid.nx, xdiv)
+        nt.assert_equal( grid.ny, ydiv)
+
+        #index
+        for row in range(xdiv):
+            for col in range(ydiv):
+                nt.assert_equal( grid.index_to_xy(row+col*xdiv), (row,col))
+
+        #pdb.set_trace()
+        #top left dimensions
+        for row in range(xdiv):
+            for col in range(ydiv):
+                nt.assert_equal( grid.cell(row+col*xdiv).tl(), (row*cell_w,col*cell_h))
+
+        #centre dimensions
+        for row in range(xdiv):
+            for col in range(ydiv):
+                nt.assert_equal( grid.cell(row+col*xdiv).cent(), (row*cell_w+cell_w/2,col*cell_h+cell_h/2))
+
+
+
+"""
+
 class SVGTest():
     def test_appending(self):
         frag_file="tmp/b.svg"
@@ -78,3 +122,4 @@ class SVGTest():
         
         
         
+"""
