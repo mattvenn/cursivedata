@@ -4,6 +4,7 @@ Created on 12 Jan 2013
 @author: dmrust
 '''
 
+import traceback
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -52,17 +53,33 @@ class Pipeline( DrawingState ) :
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
     def update( self, data=None ) :
+        print "Pipeline updating"
         data = data or self.data_store
+        print "Getting params"
         params = self.state.params
+        print "Getting internal state"
         internal_state = self.state.state
-        self.generator.init()
+        print "Generator init"
+        try:
+            self.generator.init()
+        except Exception as e:
+            print "Couldn't init generator:",e
+        print "Asking generator if it can run"
         if self.generator.can_run( data, params, internal_state ):
-            #Create a new document to write to
-            svg_document = self.create_svg_doc()
-            self.generator.process_data( Drawing(svg_document), data, params, internal_state )
-            self.state.save()
-            data.clear_current()
-            self.add_svg( svg_document )
+            print "Generator running"
+            try:
+                #Create a new document to write to
+                svg_document = self.create_svg_doc()
+                self.generator.process_data( Drawing(svg_document), data, params, internal_state )
+                self.state.save()
+                data.clear_current()
+                self.add_svg( svg_document )
+                print "Generator run OK!"
+            except Exception as e:
+                print "Problem running generator",self,e    
+                print traceback.format_exc()
+        else:
+            print "Generator not ready to run"
     
     def begin(self):
         self.reset();
