@@ -25,6 +25,7 @@ import time
 import os
 
 from polargraph.drawing import Drawing
+from polargraph.models.cosm import COSMSource
 
 
 
@@ -74,6 +75,7 @@ class Pipeline( DrawingState ) :
                 self.state.save()
                 data.clear_current()
                 self.add_svg( svg_document )
+                self.generator.update_last_used()
                 print "Generator run OK!"
             except Exception as e:
                 print "Problem running generator",self,e    
@@ -83,7 +85,6 @@ class Pipeline( DrawingState ) :
     
     def begin(self):
         self.reset();
-        self.generator.init()
         try:
             svg_document = self.create_svg_doc()
             self.generator.begin_drawing( Drawing(svg_document), self.state.params, self.state.state )
@@ -93,7 +94,6 @@ class Pipeline( DrawingState ) :
             print "Couldn't begin document:",e
     
     def end(self):
-        self.generator.init()
         try:
             svg_document = self.create_svg_doc()
             self.generator.end_drawing( Drawing(svg_document), self.state.params, self.state.state )
@@ -122,7 +122,39 @@ class Pipeline( DrawingState ) :
             return StoredOutput.objects.get(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
         except:
             return StoredOutput(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
+    
+    #Gets recent output which is not the current run
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects \
+                .order_by('-modified') \
+                .filter(pipeline=self,status="complete",filetype="svg") \
+                .exclude(run_id= self.run_id)[start:end]
+    #Gets all the cosm triggers on this pipeline
+    def get_cosm_triggers(self):
+        return COSMSource.objects.filter(data_store=self.data_store)
+    
+    #Gets the current values for all parameters as a dict
+    def get_param_dict(self):
+        return self.generator.get_param_dict( self.state.params )
         
+    #Sets up a datastore and generator state for use
+    def init_data(self,force=False,save=True):
+        if (not self.data_store_id) or force:
+            ds = DataStore(name="Data for"+str(self.name))
+            ds.save()
+            self.data_store = ds
+        if (not self.state_id) or force :
+            gs = GeneratorState(name="Data for"+str(self.name), generator=self.generator)
+            gs.save()
+            self.state = gs
+        if save:
+            self.last_updated = datetime.now()
+            self.save()
+        
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.init_data(save=False)
+        super(Pipeline, self).save(*args, **kwargs)
     class Meta:
         app_label = 'polargraph'
         

@@ -6,8 +6,7 @@ Created on 12 Jan 2013
 
 from django.db import models
 import polargraph.svg as svg
-from polargraph.models.pipeline import StoredOutput
-from polargraph.models.drawing_state import DrawingState
+from polargraph.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
 from pysvg.parser import parse
@@ -50,8 +49,8 @@ class Endpoint( DrawingState ):
     paused = models.BooleanField(default=False)
     #add this to db, using url for now
     status = models.CharField(max_length=200)
-    url = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
+    robot_svg_file = models.CharField(max_length=200,blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Endpoint, self).__init__(*args, **kwargs)
@@ -81,14 +80,13 @@ class Endpoint( DrawingState ):
             #transform the current svg for the robot
             current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
-            #write it out as an update
-            self.last_svg_file = self.get_partial_svg_filename()
-            current_drawing.save(self.last_svg_file)
-            self.update_latest_image()
-            print "Saved update as:",self.last_image_file
+            #write it out as an svg
+            self.robot_svg_file = self.get_robot_svg_filename()
+            current_drawing.save(self.robot_svg_file)
+            self.save()
 
             #convert it to gcode
-            self.convert_svg_to_gcode(self.last_svg_file,so.get_filename())
+            self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
         except Exception as e:
             print "Coudldn't make GCode:",e
             so.delete()
@@ -119,7 +117,7 @@ class Endpoint( DrawingState ):
 
     #returns an svg document (not a file)
     def transform_svg(self, svg_file, pipeline): 
-        current_drawing = self.create_svg_doc(self.width,self.height)
+        current_drawing = self.create_svg_doc()
         try:
             xoffset = pipeline.print_top_left_x
             yoffset = pipeline.print_top_left_y
@@ -169,7 +167,8 @@ class Endpoint( DrawingState ):
 
         startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
         contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
-      
+        lastX = None
+        lastY = None
         polar_code=""
         for line in gcodes:
             s = startCode.match(line)
@@ -252,13 +251,26 @@ class Endpoint( DrawingState ):
     def pause(self):
         self.paused = True
         self.save()
+    
+    def reset(self):
+        super(Endpoint, self).reset()
+        for gcode in GCodeOutput.objects.filter(endpoint=self,served=False):
+            gcode.delete()
         
     def get_stored_output(self,output_type,status):
         try:
             return StoredOutput.objects.get(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
         except:
             return StoredOutput(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
+    
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects.order_by('-modified') \
+                .filter(endpoint=self,pipeline=None,status="complete",filetype="svg")\
+                .exclude(run_id= self.run_id)[start:end]
       
+    def get_robot_svg_filename(self):
+        return self.get_filename("robot", "svg")
+
     def get_output_name(self):
         return "endpoint"
     def __unicode__(self):
@@ -276,6 +288,13 @@ class GCodeOutput( models.Model ):
         if not self.id > 0:
             self.save()
         return "data/output/gcode/"+str(self.id)+".gcode"
+    
+    def delete(self):
+        try:
+            os.remove(self.get_filename())
+        except Exception as e:
+            print "Couldn't remove GCode file",self.get_filename,e
+        super(GCodeOutput, self).delete()
     
     class Meta:
         app_label = 'polargraph'

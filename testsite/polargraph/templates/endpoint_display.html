@@ -1,51 +1,68 @@
-<div style="font-family: helvetica; font-size: 14px">
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
+</head>
+<body>
 {% if endpoint %}
-	<div style="padding:20px">
-		<div style="display:inline-block; border: 2pt solid grey;background: #ddd; padding:10px; vertical-align:top">
-			<h1>Endpoint: {{ endpoint.name }}</h1>
-			<div style="font-style: italic"> {{endpoint.description}} </div>
-			Location: {{endpoint.location}}<br/>
-			Device: {{endpoint.device}}<br/>
-			Size: {{endpoint.width}} by {{endpoint.height}}<br/>
-			Side margin: {{endpoint.side_margin}}<br/>
-			Top margin: {{endpoint.top_margin}}<br/>
-            max x: {{endpoint.x_max}}<br/>
-            max y: {{endpoint.y_max}}<br/>
-			Status: {{endpoint.status}}<br/>
-			Paused: {{endpoint.paused}}<br/>
-			URL: {{endpoint.url}}<br/>
-			Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a><br/>
-			Files left to serve: {{files_left}}<br/> 
-            </div>
-			<form action="{% url polargraph:show_endpoint endpoint.id %}" method="POST">
-				{% csrf_token %}
-				<div style="font-weight:bold">Controls</div>
-					<input type="submit" value="Calibrate" name="action"/>
-					<input type="submit" value="Reset" name="action"/>
-                    {% if endpoint.paused %}
-					<input type="submit" value="Resume" name="action"/>
-                    {% else %}
-					<input type="submit" value="Pause" name="action"/>
-                    {% endif %}
-			</form>
-		</div>
-		<div style="display:inline-block">
-			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
-				<h3>Current Image:<h3>
-				<img style="max-width:500px;max-height:500px" src="/{% if endpoint.full_svg_file %}{{endpoint.full_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+	<div class="controlPanel">
+		<div class="controlColumn">
+			<div class="objectType">Endpoint</div>
+			<div class="objectTitle">{{ endpoint.name }}</div>
+			<div class="description"> {{endpoint.description}} </div>
+			<div class="objectInfo">
+				Location: {{endpoint.location}}<br/>
+				Device: {{endpoint.device}}<br/>
+				Size: {{endpoint.width}} by {{endpoint.height}}<br/>
+				Side margin: {{endpoint.side_margin}}<br/>
+				Top margin: {{endpoint.top_margin}}<br/>
+	            max x: {{endpoint.x_max}}<br/>
+	            max y: {{endpoint.y_max}}<br/>
+				Status: {{endpoint.status}}<br/>
+				Paused: {{endpoint.paused}}<br/>
+				URL: {{endpoint.url}}<br/>
+				Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a><br/>
+				Files left to serve: {{files_left}}<br/> 
 			</div>
-			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
-				<h3>Last Update (flipped and with margins):<h3>
-				<img style="max-width:300px;max-height:300px;border:2px solid #000;" src="/{% if endpoint.last_svg_file %}{{endpoint.last_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+			<div class="inputForm actionForm formBlock">
+				<form action="{% url polargraph:show_endpoint endpoint.id %}" method="POST">
+					{% csrf_token %}
+					<div class="formBlockTitle">Controls</div>
+						<input type="submit" value="Calibrate" name="action"/>
+						<input type="submit" value="Reset" name="action"/>
+	                    {% if endpoint.paused %}
+						<input type="submit" value="Resume" name="action"/>
+	                    {% else %}
+						<input type="submit" value="Pause" name="action"/>
+	                    {% endif %}
+				</form>
 			</div>
 		</div>
+		
 	</div>
 	
-	<div>
-		<h1>Previous Output</h1>
-		{% for output in previous %}
-			<div style="display:inline-block; background: #ccc; padding:10px">
-				<img src="/{{output.filename}}" style="max-width:150px;max-height:400px"/><br/>
+	<div class="outputBlock">
+		<div class="mainOutput">
+			<h3>Current Image:<h3>
+			<img class="bigPic" src="/{% if endpoint.full_svg_file %}{{endpoint.full_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+		</div>
+		<div style="display: inline-block">
+		<div class="mainOutput">
+			<h3>Last Update:<h3>
+			<img class="medPic" src="/{% if endpoint.last_svg_file %}{{endpoint.last_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+		</div><br/>
+		<div class="mainOutput">
+			<h3>Robot svg (flipped + margins):<h3>
+			<img class="medPic borderImage" src="/{% if endpoint.robot_svg_file %}{{endpoint.robot_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+		</div>
+		</div>
+	</div>
+	<br/>
+
+	<div class="bigListSubList">
+		<div class="bigListSublistTitle">Previous Output</div>
+		{% for output in endpoint.get_recent_output %}
+			<div class="outputContainer">
+				<img src="/{{output.filename}}" class="smallPic"/><br/>
 				{{output.modified}}
 			</div>
 		{% endfor %}
@@ -54,4 +71,4 @@
 {% else %}
     <h1>Endpoint not found</h1>
 {% endif %}
-</div>
+</body>

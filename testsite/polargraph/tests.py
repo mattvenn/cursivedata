@@ -40,7 +40,6 @@ class SimpleTest():
         p1 = Pipeline(name="Test Pipeline",data_store=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
         p1.save()
         print "P1:",str(p1)
-        g1.init()
         p1.update()
         ce = COSMSource(data_store=d1)
         ce.save()

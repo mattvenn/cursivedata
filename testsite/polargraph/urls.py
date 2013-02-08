@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 from polargraph import views
 
 urlpatterns = patterns('',
-    url(r'^$', views.list_pipelines, name='index'),
+    url(r'^$', views.index, name='index'),
 
 	 # ex: /polargraph/pipeline/5/update/
     
@@ -21,5 +21,9 @@ urlpatterns = patterns('',
     
     #Do stuff with endpoints
     url(r'^endpoint_data/(?P<endpointID>\d+)/$', views.get_gcode, name='get_gcode'),
+    
+    #Show generators
+    url(r'^generator/?$', views.list_generators, name='list_generators'),
+    url(r'^generator/(?P<generatorID>\d+)/$', views.show_generator, name='show_generator'),
 )
 

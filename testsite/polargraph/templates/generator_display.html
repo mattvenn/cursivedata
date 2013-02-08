@@ -1,0 +1,74 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
+</head>
+<body>
+{% if generator %}
+	<div class="controlPanel">
+		<div class="controlColumn">
+			<div class="controlDescription">
+				<div class="objectType">Generator</div>
+				<div class="objectTitle">{{ generator.name }}</div>
+				<div class="description"> {{generator.description}} </div>
+				<div class="objectInfo"> Last Used: {{generator.last_used}} </div>
+				<div class="objectInfo"> Last Changed: {{generator.last_updated}} </div>
+			</div>
+			
+			<div class="inputForm actionForm">
+			<form action="{% url polargraph:show_generator generator.id %}" method="POST">
+				{% csrf_token %}
+				<div class="formBlock">
+					<div class="formBlockTitle">Data Store</div>
+					<p>{{ds_form.data_store.label}}{{ ds_form.data_store }} </p>
+					<div class="formParamDescription">
+					{% if data_store %}Data store "{{data_store.name}}" has {{data_store.get_historic_size}} data.{% else %}None selected.{% endif %}<br/>
+					</div>
+					<input type="submit" value="Update Selection"/><br/>
+					Or create a new DataStore:
+					<p>{{ds_form.ds_name.label}}{{ ds_form.ds_name }} </p>
+					<input type="submit" value="Create Datastore" name="action" />
+				</div>
+				<div class="formBlock">
+					<div class="formBlockTitle">Image Settings</div>
+					<p> <label for="width">Img Width</label> <input type="text" name="width" id="width" value="{{width}}" /> </p>
+					<p> <label for="height">Img Height</label> <input type="text" name="height" id="height" value="{{height}}" /> </p>
+				</div>
+				<div class="formBlock">
+					<div class="formBlockTitle">Generator Settings</div>
+					{% for param in params %}
+					<p>
+						<label for="param{{param.name}}">{{param.name}}</label> 
+						<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}" />
+						<div class="formParamDescription">{{param.description}}</div>
+					</p>
+					{% endfor %} 
+				</div>
+				<input type="submit" value="Run" name="action"/>
+			</form>
+			</div>
+		</div>
+	</div>
+	<div class="controlPanel" style="min-width:500px; min-height:500px">
+		<h3>Code:</h3>
+	</div>
+	<div class="outputBlock">
+		<div class="mainOutput">
+			<h3>Generated image<h3>
+			<img class="bigPic" src="/{% if output %}{{output}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+		</div>
+	</div>
+	<br/>
+	<div class="bigListSubList">
+		<div class="bigListSublistTitle">Previous Output</div>
+		{% for output in generator.get_recent_output %}
+		<div class="outputContainer">
+			<img src="/{{output.filename}}" class="smallPic"/><br />
+			{{output.modified}}
+		</div>
+		{% endfor %}
+	</div>
+	
+{% else %}
+    <h1>Generator not found</h1>
+{% endif %}
+</body>

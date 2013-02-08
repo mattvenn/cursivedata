@@ -21,8 +21,9 @@ def test_creating_pipeline():
     gsq.save()
     gex = Generator(name="Example generator", description="Example generator", image="No Image", module_name="example")
     gex.save()
-    g1 = gex
-    g1.init()
+    gts = Generator(name="test shape", description="test shape", image="No Image", module_name="test_shape")
+    gts.save()
+    g1 = gts
     g1s = g1.get_state()
     g1s.name = "Generator State for Pipeline " + str(num)
     g1s.save()
@@ -35,7 +36,6 @@ def test_creating_pipeline():
     p1.description = "Example pipeline created by test script. Number "+str(num)
     p1.save()
     print "P1:",str(p1)
-    g1.init()
     p1.update(d1)
     ce = COSMSource(data_store=d1)
     ce.save()
