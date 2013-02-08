@@ -6,6 +6,7 @@ Replace this with more appropriate tests for your application.
 """
 
 import pdb
+import datetime
 from django.test import TestCase
 from django.contrib.auth.models import User
 from polargraph.models import *
@@ -88,7 +89,25 @@ class TestPipeline():
             for col in range(ydiv):
                 nt.assert_equal( grid.cell(row+col*xdiv).cent(), (row*cell_w+cell_w/2,col*cell_h+cell_h/2))
 
+    def test_update_data(self):
+        #data is less than needed to run pipeline
+        data = [{ 'value' : 1000 }]
+        self.data_store.add_data(data)
+        nt.assert_equal(self.data_store.load_current()[0]['value'],data[0]['value'] )
+        #would be good to check time deserialization
 
+    def test_run_pipeline(self):
+        #data is what is needed to run pipeline
+        data = [{ 'value' : 4000 }]
+        self.data_store.add_data(data)
+        gcode = open(self.end_point.get_next_filename()).readlines()
+        gcode = [ s.strip() for s in gcode ]
+        #use a shape generator and actually check real gcodes
+        nt.assert_equal(gcode[0],'d0')
+
+
+
+        
 
 """
 
