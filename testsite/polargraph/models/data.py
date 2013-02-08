@@ -70,13 +70,14 @@ class DataStore( models.Model ) :
     #Data must be a list of dicts 
     def add_data(self,data):
         self.update_current_data(data)
-        print "Pre-Pipeline Data",self.get_current()
+        print "Pre-Pipeline Data length:",len(self.get_current())
         print "Datastore ID is:",self.id
 #        print "Data Hash",hash(self)
         self.clean()
         if hasattr(self, 'pipeline'):
+            print "Trying to run pipline: ",self.pipeline
             self.pipeline.update(self)
-        print "Post-Pipeline Data",self.get_current()
+        print "Post-Pipeline Data length:",len(self.get_current())
     
     def update_current_data(self,data):
         print "Adding data:",data
@@ -88,12 +89,13 @@ class DataStore( models.Model ) :
         total = cur + data
         self.store_current(total)
         self.save()
-        print "Saved data:",self.current_data
+        print "Saved data length:",len(self.current_data)
     
     def clear_all(self):
         self.historic_data = json.dumps([])
         self.current_data = json.dumps([])
         self.current = []
+        self.save()
         
     def mark_stale(self):
         self.fresh=False

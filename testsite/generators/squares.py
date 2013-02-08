@@ -15,9 +15,10 @@ def process(drawing,data,params,internal_state) :
     aggregate = internal_state.get("aggregate",0)
     square_num = int(internal_state.get("square_num",0))
     grid = drawing.get_grid(nx=params.get("Xdiv"),ny=params.get("Ydiv"))
+    key = 'light'
 
     for point in data.get_current():
-        aggregate += float(point['value'])
+        aggregate += float(point[key])
         #allow user to determine how fast the graph is drawn again
         cell_index = get_minute(point['time'])
         #work out where to draw
@@ -74,9 +75,10 @@ def get_description() : return "every 10 minutes start drawing squares about a c
 
 def can_run(data,params,internal_state):
     #run every time
+    key = 'light'
     aggregate = internal_state.get("aggregate",0)
     for point in data.get_current():
-        aggregate += float(point['value'])
+        aggregate += float(point[key])
         if aggregate > params.get("Value"):
             return True
     print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
