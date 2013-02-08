@@ -15,7 +15,7 @@ def process(drawing,data,params,internal_state) :
     aggregate = internal_state.get("aggregate",0)
     square_num = int(internal_state.get("square_num",0))
     grid = drawing.get_grid(nx=params.get("Xdiv"),ny=params.get("Ydiv"))
-    key = 'light'
+    key = 'value'
 
     for point in data.get_current():
         aggregate += float(point[key])
@@ -75,7 +75,7 @@ def get_description() : return "every 10 minutes start drawing squares about a c
 
 def can_run(data,params,internal_state):
     #run every time
-    key = 'light'
+    key = 'value'
     aggregate = internal_state.get("aggregate",0)
     for point in data.get_current():
         aggregate += float(point[key])
