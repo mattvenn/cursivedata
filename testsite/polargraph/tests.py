@@ -33,7 +33,7 @@ class SimpleTest():
 class TestPipeline():
 
     def setup(self):
-        self.generator = Generator(name="Squares generator", description="Squares generator", image="No Image", module_name="squares")
+        self.generator = Generator(name="shapes", description="shapes", image="No Image", module_name="test_shape")
         self.generator.save()
     
         self.gen_state = self.generator.get_state()
@@ -89,56 +89,35 @@ class TestPipeline():
             for col in range(ydiv):
                 nt.assert_equal( grid.cell(row+col*xdiv).cent(), (row*cell_w+cell_w/2,col*cell_h+cell_h/2))
 
+    """ this won't work for the test_shape generator
     def test_update_data(self):
         #data is less than needed to run pipeline
         data = [{ 'value' : 1000 }]
         self.data_store.add_data(data)
         nt.assert_equal(self.data_store.load_current()[0]['value'],data[0]['value'] )
         #would be good to check time deserialization
+    """
 
     def test_run_pipeline(self):
         #data is what is needed to run pipeline
         data = [{ 'value' : 4000 }]
+        self.pipeline.update_size(300,300)
+        self.pipeline.print_width = 300
+        self.pipeline.save()
         self.data_store.add_data(data)
         gcode = open(self.end_point.get_next_filename()).readlines()
         gcode = [ s.strip() for s in gcode ]
         #use a shape generator and actually check real gcodes
+        #better way to do this?
         nt.assert_equal(gcode[0],'d0')
+        nt.assert_equal(gcode[1],'g100.0,200.0')
+        nt.assert_equal(gcode[2],'d1')
+        nt.assert_equal(gcode[3],'g200.0,200.0')
+        nt.assert_equal(gcode[4],'g200.0,100.0')
+        nt.assert_equal(gcode[5],'g100.0,100.0')
+        nt.assert_equal(gcode[6],'g100.0,200.0')
+        nt.assert_equal(gcode[7],'d0')
 
 
 
         
-
-"""
-
-class SVGTest():
-    def test_appending(self):
-        frag_file="tmp/b.svg"
-        main_file="tmp/a.svg"
-        main = svg()
-        frag = svg()
-        exp = svg()
-        sb = ShapeBuilder()
-        
-        main.addElement(sb.createRect(0, 0, "200px", "100px"))
-        exp.addElement(sb.createRect(0, 0, "200px", "100px"))
-        
-        frag.addElement(text("Hello World", x = 210, y = 110))
-        exp.addElement(text("Hello World", x = 210, y = 110))
-        main.save(main_file)
-        frag.save(frag_file)
-        append_svg_to_file(frag_file,main_file)
-        
-        svg_main = parse(main_file)
-        gotS =str(svg_main.getXML())
-        expS = str(exp.getXML())
-        print"Got:",gotS
-        print"Exp:",expS
-        #self.assertEqual(exp.getXML(), svg_main.getXML(), "Appended files are equal" )
-        if gotS != expS :
-            print "Different\nGot:\n",gotS,"\nExp:\n",expS
-        #self.assertEqual(exp.getXML(), svg_main.getXML(), "Appended files are equal" )
-        
-        
-        
-"""
