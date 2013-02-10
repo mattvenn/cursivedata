@@ -66,6 +66,7 @@ class Endpoint( DrawingState ):
    
     def input_svg(self,svg_file, pipeline ):
         print "Adding SVG"
+#        import pdb; pdb.set_trace()
         try:
             current_drawing = self.transform_svg(svg_file,pipeline)
             print current_drawing.getXML()
@@ -146,8 +147,9 @@ class Endpoint( DrawingState ):
         fd, tmp_gcode = tempfile.mkstemp()
         pycam="/usr/bin/pycam"
         pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave"]
-        print pycam_args
-        result = subprocess.call(pycam_args)
+        #print pycam_args
+        p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
+        stdout,stderr = p.communicate()
         self.parse_gcode_to_polar(tmp_gcode,polarfile)
         os.close(fd)
         os.remove(tmp_gcode)
