@@ -21,10 +21,10 @@ def process(drawing,data,params,internal_state) :
 
 def get_params() :
     return  [ 
-             {"name":"Width", "default": 200, "description":"width in mm" },
-             {"name":"Height", "default": 200, "description":"height in mm" }, 
-             {"name":"x", "default": 200, "description":"x offset" },
-             {"name":"y", "default": 200, "description":"y offset" }, ]
+             {"name":"Width", "default": 100, "description":"width in mm" },
+             {"name":"Height", "default": 100, "description":"height in mm" }, 
+             {"name":"x", "default": 0, "description":"x offset" },
+             {"name":"y", "default": 0, "description":"y offset" }, ]
 
 def get_name() : return "Shape Test"
 def get_description() : return "Draw a square at the set position"
