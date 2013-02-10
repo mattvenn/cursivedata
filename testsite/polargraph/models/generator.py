@@ -5,6 +5,7 @@ Created on 12 Jan 2013
 '''
 
 from django.db import models
+from django.utils import timezone
 from imp import find_module, load_module
 import jsonfield
 from polargraph.models.drawing_state import StoredOutput, DrawingState
@@ -21,19 +22,23 @@ class Generator( models.Model ) :
     image = models.CharField(max_length=200,default="No Image")
     file_path = models.CharField(max_length=200,default="./generators")
     module_name = models.CharField(max_length=200)
-    last_updated = models.DateTimeField("Last Updated",default=datetime.now)
-    last_used = models.DateTimeField("Last Used",default=datetime.now)
+    last_updated = models.DateTimeField("Last Updated",default=timezone.now())
+    last_used = models.DateTimeField("Last Used",default=timezone.now())
     
     module = None
     def __init__(self, *args, **kwargs):
         super(Generator, self).__init__(*args, **kwargs)
         try:
+            #put this in so that when we add parameters we'll have a valid id for them to use as a foreign key
+            if not self.id: 
+                self.save()
             self.module = self.get_file( self.module_name )
             for param in self.module.get_params():
                 self.add_or_update_param( param )
         except Exception as e:
             print "Couldn't update Generator params:",e
         return
+
     #Processes a given chunk of data to return some SVG
     def process_data( self, svg_document, data, params, state ) :
         return self.module.process(svg_document, data,params,state)
@@ -104,7 +109,7 @@ class Generator( models.Model ) :
     def get_recent_output(self,start=0,end=8):
         return StoredOutput.objects.order_by('-modified').filter(generator=self,status="complete",filetype="svg")[start:end]            
     def update_last_used(self):
-        self.last_used = datetime.now()
+        self.last_used = timezone.now()
         self.save();
     class Meta:
         app_label = 'polargraph'

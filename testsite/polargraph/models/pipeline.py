@@ -148,7 +148,7 @@ class Pipeline( DrawingState ) :
             gs.save()
             self.state = gs
         if save:
-            self.last_updated = datetime.now()
+            self.last_updated = timezone.now()
             self.save()
         
     def save(self, *args, **kwargs):

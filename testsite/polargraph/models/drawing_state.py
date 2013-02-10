@@ -4,6 +4,7 @@ Created on 2 Feb 2013
 @author: dmrust
 '''
 from django.db import models
+from django.utils import timezone
 import polargraph.svg as svg
 import pysvg.structure
 import pysvg.builders
@@ -19,7 +20,7 @@ DrawingState is a class which deals with drawings that change incrementally over
 '''
 class DrawingState( models.Model ):
     run_id = models.IntegerField(default=0)
-    last_updated = models.DateTimeField("Last Updated",default=datetime.now())
+    last_updated = models.DateTimeField("Last Updated",default=timezone.now())
     full_svg_file = models.CharField(max_length=200,blank=True)
     last_svg_file = models.CharField(max_length=200,blank=True)
     full_image_file = models.CharField(max_length=200,blank=True)
@@ -40,7 +41,7 @@ class DrawingState( models.Model ):
         svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
         self.update_full_image()
         print "Saved whole image as:",self.full_image_file
-        self.last_updated = datetime.now()
+        self.last_updated = timezone.now()
         self.save()
 
     #Change the size of the drawing    
