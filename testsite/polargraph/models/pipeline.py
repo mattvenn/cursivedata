@@ -40,7 +40,7 @@ class Pipeline( DrawingState ) :
 
     print_top_left_x = models.FloatField(default=0)
     print_top_left_y = models.FloatField(default=0)
-    print_width = models.FloatField( default=200 )
+    print_width = models.FloatField( default=500 )
     
     def __unicode__(self):
         return self.name
