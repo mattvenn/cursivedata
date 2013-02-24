@@ -34,6 +34,7 @@ class COSMSource( models.Model ):
     #Add the id of the feed to the data
     add_feed_id = models.BooleanField(default=False)
     last_updated = models.DateTimeField("Last Updated",blank=True,null=True)
+    last_value = models.CharField(max_length=200,default="")
     
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
