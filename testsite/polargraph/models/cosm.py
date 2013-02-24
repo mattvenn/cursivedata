@@ -57,6 +57,7 @@ class COSMSource( models.Model ):
             datapoint["feed_title"] = msg["environment"]["title"]
         self.data_store.add_data([datapoint])
         self.last_updated = timezone.now()
+        self.last_value = value
         self.save()
         
     def start_trigger(self):

@@ -105,8 +105,8 @@
 					<div class="cosmTrigger">
 						<div class="cosmInfo">
 							Stream: <a href="https://cosm.com/feeds/{{cosm.feed_id}}">{{cosm.feed_id}}/{{cosm.stream_id}}</a><br/>
-							Updated:<br/>
-							{% if cosm.last_updated %} {{cosm.last_updated}} {% else %}
+							Updated:
+							{% if cosm.last_updated %} {{cosm.last_updated}}- {{cosm.last_value}} {% else %}
 							Never updated {% endif %}
 							</div>
 						<div class="cosmAction">
