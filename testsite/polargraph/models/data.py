@@ -26,7 +26,7 @@ class DataStore( models.Model ) :
     name = models.CharField(max_length=200)
     current_data = models.CharField(max_length=20000,default=json.dumps([]))
     current = None
-    historic_data = models.CharField(max_length=200000,default=json.dumps([]))
+    historic_data = models.CharField(max_length=40000,default=json.dumps([]))
     available = models.BooleanField(default=False)
     fresh=False
     
