@@ -255,7 +255,8 @@ if __name__ == '__main__':
 
     if not args.norobot:
         serial_port = setup_serial()
-        update_robot_dimensions()
+        if args.updatedimensions:
+            update_robot_dimensions()
         update_robot_status()
 
         if args.setup_robot:
