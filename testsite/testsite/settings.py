@@ -1,5 +1,7 @@
 # Django settings for testsite project.
 
+from os import path
+
 # Try and import pycairo or fallback to cairocffi and install as cairo
 try:
     import cairo
@@ -7,9 +9,9 @@ except ImportError:
     import cairocffi
     cairocffi.install_as_pycairo()
 
-from os.path import dirname, join
+from django.core.urlresolvers import reverse_lazy
 
-PROJECT_ROOT = dirname(dirname(__file__))
+PROJECT_ROOT = path.dirname(path.dirname(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -31,7 +33,7 @@ DATABASES = {
                 },
     'sqllite': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': join(PROJECT_ROOT, 'db', 'testsite.sqlite'),
+        'NAME': path.join(PROJECT_ROOT, 'db', 'testsite.sqlite'),
     }
 }
 
@@ -126,24 +128,27 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    path.join(PROJECT_ROOT, 'testsite', 'templates'),
     "polargraph/templates"
 )
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    'django.contrib.admindocs',
-	'polargraph',
+
+    # Third party libraries
     'tastypie',
     'django_nose',
-	)
+
+    # Our apps
+    'landing',
+    'polargraph',
+    )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # A sample logging configuration. The only tangible logging
@@ -174,3 +179,6 @@ LOGGING = {
         },
     }
 }
+
+LOGIN_URL = reverse_lazy('login')
+LOGOUT_URL = reverse_lazy('logout')
