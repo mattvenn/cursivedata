@@ -55,6 +55,13 @@ def show_pipeline(request, pipelineID):
             pipeline.begin()
         elif act == "End":
             pipeline.end()
+        elif act == "Auto Size":
+            pipeline.print_top_left_x = 0
+            pipeline.print_top_left_y = 0
+            pipeline.print_width = pipeline.endpoint.img_width
+            print pipeline.print_width
+            pipeline.update_size(pipeline.endpoint.img_width,pipeline.endpoint.img_height)
+            pipeline.save()
         elif act == "Update Size":
             pipeline.update_size( int(request.POST.get('pipeWidth',pipeline.img_width)),
                     int(request.POST.get('pipeHeight',pipeline.img_height)))
