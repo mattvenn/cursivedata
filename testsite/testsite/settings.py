@@ -23,6 +23,13 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'polargraph',
+        'USER': 'polargraph',
+        'HOST': 'localhost',
+        'PASSWORD': 'polargraph',
+                },
+    'sqllite': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': join(PROJECT_ROOT, 'db', 'testsite.sqlite'),
     }
