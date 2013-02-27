@@ -76,19 +76,22 @@ class COSMSource( models.Model ):
             " from feed:",self.feed_id,", stream:",self.stream_id,", API Key: ",self.api_key
         print "Pointing to URL:",data['url']
         r=requests.post(self.cosm_url,data=json.dumps(data),headers = headers)
-        try:
+        if r.status_code == 201:
             cosm_trigger_id=r.headers['location'].split("/")[-1]
             print "Setup with id:",cosm_trigger_id
             self.cosm_trigger_id=cosm_trigger_id
             self.save()
             return "OK"
-        except Exception as e:
-            print "Coudln't setup COSM trigger:",e
-            print "Sent to url:",self.cosm_url
-            print "Sent data:",json.dumps(data)
-            print "Response:",r
-            print "Headers:",r.headers
-            return r
+        elif r.status_code == 404:
+            print "no such stream id, check stream id"
+        elif r.status_code == 401:
+            print "not authorized, check api key"
+        elif r.status_code == 500:
+            print "no such data stream, check environment id"
+        else:
+            print "unknown error"
+            print r.status_code
+            print json.loads(r.text)
         
     def stop_trigger(self):
         if self.cosm_trigger_id :
