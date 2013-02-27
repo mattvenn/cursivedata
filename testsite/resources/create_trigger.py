@@ -4,12 +4,16 @@ import pprint
 data = {}
 
 url="http://api.cosm.com/v2/triggers/"
-key='bZEYm4Ws0V1pKAg8SOWjD_-V156SAKw4MmNNMkhGZzFTQT0g'
 
-headers= {'content-type': 'application/json'}
-headers['X-ApiKey'] = key
-
-r = requests.get(url,headers=headers)
+f = open("cosm_create_trigger.json")
+data = json.load(f)
+print data
+print "request----------"
+#r = requests.get(url,headers=data["headers"])
+r = requests.post(url,data=json.dumps(data["data"]),headers=data["headers"])
 print r.status_code
-a = json.loads(r.text)
-pprint.pprint(a)
+try:
+    a = json.loads(r.text)
+    pprint.pprint(a)
+except ValueError:
+    pass
