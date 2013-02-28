@@ -127,7 +127,8 @@ class DataStore( models.Model ) :
             del entry['time']
     
     def deserialise_time(self,entry):
-        date_str = entry.get('time',timezone.now().isoformat())
+        #this was time, rather than time_ser - bug?
+        date_str = entry.get('time_ser',timezone.now().isoformat())
         entry['time'] = dateutil.parser.parse(date_str)
         if entry.has_key('time_ser'):
             del entry['time_ser']
