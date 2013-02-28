@@ -21,6 +21,8 @@ def test_creating_pipeline():
     gsq.save()
     gex = Generator(name="Example generator", description="Example generator", image="No Image", module_name="example")
     gex.save()
+    gts = Generator(name="graph", description="graph", image="No Image", module_name="graph")
+    gts.save()
     gts = Generator(name="test shape", description="test shape", image="No Image", module_name="test_shape")
     gts.save()
     g1 = gts
