@@ -6,6 +6,7 @@ Created on 2 Feb 2013
 import pysvg
 import colorsys
 import pysvg.text as txt
+from pysvg.shape import *
 import math
 
 class Drawing:
@@ -16,6 +17,10 @@ class Drawing:
         self.width = float(str(self.doc.get_width()).replace("mm",""))
         self.height = float(str(self.doc.get_height()).replace("mm",""))
     
+    #so all time formats are the same
+    def get_time_format(self):
+        return "%d/%m/%y"
+
     #Turns an array of floats in [0..1] into an RGB colour string
     def rgb_to_color(self,rgb):
         return 'rgb('+str(int(rgb[0]*255.0))+','+str(int(rgb[1]*255.0))+','+str(int(rgb[2]*255.0))+')'
@@ -41,7 +46,11 @@ class Drawing:
         if id :
             circ.set_id(id)
         self.doc.addElement( circ )
-    
+   
+    def line(self,x1,y1,x2,y2,stroke="#000",strokewidth="1"):
+        line = self.shapes.createLine(x1,y1,x2,y2,strokewidth,stroke)
+        self.doc.addElement(line)
+
     def text(self,content,x,y,size=10,family="Helvetica",fill="none",stroke="#000",transform=None,id=None):
         text = txt.text(content=content,x=x,y=y,fill=fill,stroke=stroke)
         text.set_font_size(size);
