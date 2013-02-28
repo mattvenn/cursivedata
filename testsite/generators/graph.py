@@ -1,3 +1,8 @@
+"""
+todo:
+    add labelled axis
+    ability to set a ymin
+"""
 from django.utils.datetime_safe import datetime
 
 def get_x(point,params):
