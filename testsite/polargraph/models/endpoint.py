@@ -75,19 +75,21 @@ class Endpoint( DrawingState ):
         except Exception as e:
             print "Problem updating SVG in endpoint:",e
         try:
-            #now make the gcode
-            so = GCodeOutput(endpoint=self)
-            so.save()
-            #transform the current svg for the robot
-            current_drawing = self.transform_svg_for_robot(self.last_svg_file)
+            #easy comment out gcode for speedier testing.
+            if True:
+                #now make the gcode
+                so = GCodeOutput(endpoint=self)
+                so.save()
+                #transform the current svg for the robot
+                current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
-            #write it out as an svg
-            self.robot_svg_file = self.get_robot_svg_filename()
-            current_drawing.save(self.robot_svg_file)
-            self.save()
+                #write it out as an svg
+                self.robot_svg_file = self.get_robot_svg_filename()
+                current_drawing.save(self.robot_svg_file)
+                self.save()
 
-            #convert it to gcode
-            self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
+                #convert it to gcode
+                self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
         except Exception as e:
             print "Coudldn't make GCode:",e
             so.delete()
