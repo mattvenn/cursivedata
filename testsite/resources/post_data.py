@@ -5,12 +5,11 @@ import datetime
 import pprint
 import argparse
 
-
-def push_data():
+def push_data( input_data ):
     headers= {'content-type': 'application/json'}
     print "value: ", args.value
     data = {
-        "input_data": [{"value":args.value,"time":timestamp}],
+        "input_data": input_data,
         "name": "UPDATED!"
         }
     """
@@ -84,8 +83,23 @@ if __name__ == '__main__':
     parser.add_argument('--minute',
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
+    parser.add_argument('--file',
+        action='store', dest='file', help="historical data")
+    parser.add_argument('--stream-id',
+        action='store', dest='stream_id', help="which stream in historical data")
 
     args = parser.parse_args()
     print args.url
-    timestamp = calculate_datetime_from_minute()
-    push_data()
+
+    if args.file:
+        data = json.load(open(args.file))
+        if data.has_key(args.stream_id):
+            #could we do this all in one go?
+            for line in data[args.stream_id]:
+                print line
+                push_data([{"value":line["value"],"time":line["at"]}],)
+        else:
+            print "no such stream_id, choose from ", data.keys()
+    else:
+        timestamp = calculate_datetime_from_minute()
+        push_data([{"value":args.value,"time":timestamp}],)
