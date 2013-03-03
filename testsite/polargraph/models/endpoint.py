@@ -37,19 +37,19 @@ Create GCode will take the SVG (in Page coordinates) and transform them into Rob
 i.e. translate them by side_margin and top_margin
 '''
 class Endpoint( DrawingState ):
-    name = models.CharField(max_length=200)
-    device = models.CharField(max_length=200)
+    name = models.CharField(max_length=200,default="default")
+    device = models.CharField(max_length=200,default="web")
     #Width of the robot - not width of the drawing, which is img_width
-    width = models.FloatField(max_length=200)
+    width = models.FloatField(max_length=200,default=200)
     #Height of the robot - not height of the drawing, which is img_height
-    height = models.FloatField(max_length=200)
+    height = models.FloatField(max_length=200,default=200)
     #Robot margins - the undrawable area on each side and at the top
-    side_margin = models.FloatField(max_length=200)
-    top_margin = models.FloatField(max_length=200)
+    side_margin = models.FloatField(max_length=200,default=10)
+    top_margin = models.FloatField(max_length=200,default=10)
     paused = models.BooleanField(default=False)
     #add this to db, using url for now
-    status = models.CharField(max_length=200)
-    location = models.CharField(max_length=200)
+    status = models.CharField(max_length=200,default="default")
+    location = models.CharField(max_length=200,default="default")
     robot_svg_file = models.CharField(max_length=200,blank=True)
 
     def __init__(self, *args, **kwargs):
