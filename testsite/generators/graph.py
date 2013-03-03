@@ -40,12 +40,12 @@ def process(drawing,data,params,internal_state) :
             oldx = x
             oldy = y
             continue
-        print "drawing", oldx,oldy,x,y
+        #print "drawing", oldx,oldy,x,y
         drawing.line(oldx*x_scale,oldy*y_scale,x*x_scale,y*y_scale)
         oldx = x
         oldy = y
         
-    print "saving:" ,oldx,oldy
+    #print "saving:" ,oldx,oldy
     #Write back any state we want to keep track of
     internal_state["oldx"]=oldx
     internal_state["oldy"]=oldy
