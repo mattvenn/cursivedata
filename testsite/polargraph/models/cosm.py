@@ -39,7 +39,7 @@ class COSMSource( models.Model ):
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
     def receive_data(self,msg):
-        print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
+        #print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         datapoint = {"time":time}
