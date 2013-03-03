@@ -80,6 +80,7 @@ class Endpoint( DrawingState ):
                 #now make the gcode
                 so = GCodeOutput(endpoint=self)
                 so.save()
+                print "creating gcode in ", so.get_filename()
                 #transform the current svg for the robot
                 current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
