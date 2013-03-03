@@ -4,6 +4,7 @@ import json
 import datetime
 import pprint
 import argparse
+import sys
 
 def delete_trigger(id):
     headers= {'content-type': 'application/json', "X-ApiKey": key }
@@ -18,7 +19,8 @@ def get_triggers():
     try:
         pprint.pprint(json.loads(r.text))
     except:
-        print r.text
+        print >>sys.stderr, r.text
+        raise
     return json.loads(r.text)
 
 

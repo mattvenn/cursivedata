@@ -16,6 +16,9 @@ import subprocess
 import os
 
 
+class EndpointConversionError(Exception):
+    pass
+
 
 '''
 A robot or other output device
@@ -67,83 +70,70 @@ class Endpoint( DrawingState ):
     def input_svg(self,svg_file, pipeline ):
   #      print "Adding SVG"
 #        import pdb; pdb.set_trace()
-        try:
-            current_drawing = self.transform_svg(svg_file,pipeline)
-  #          print current_drawing.getXML()
-            #this will save out the latest svg as a file
-            self.add_svg(current_drawing)
-        except Exception as e:
-            print "Problem updating SVG in endpoint:",e
-        try:
-            #easy comment out gcode for speedier testing.
-            if True:
-                #now make the gcode
-                so = GCodeOutput(endpoint=self)
-                so.save()
-                print "creating gcode in ", so.get_filename()
-                #transform the current svg for the robot
-                current_drawing = self.transform_svg_for_robot(self.last_svg_file)
+        current_drawing = self.transform_svg(svg_file,pipeline)
+#          print current_drawing.getXML()
+        #this will save out the latest svg as a file
+        self.add_svg(current_drawing)
+        #easy comment out gcode for speedier testing.
+        if True:
+            #now make the gcode
+            so = GCodeOutput(endpoint=self)
+            so.save()
+            print "creating gcode in ", so.get_filename()
+            #transform the current svg for the robot
+            current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
-                #write it out as an svg
-                self.robot_svg_file = self.get_robot_svg_filename()
-                current_drawing.save(self.robot_svg_file)
-                self.save()
+            #write it out as an svg
+            self.robot_svg_file = self.get_robot_svg_filename()
+            current_drawing.save(self.robot_svg_file)
+            self.save()
 
-                #convert it to gcode
-                self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
-        except Exception as e:
-            print "Coudldn't make GCode:",e
-            so.delete()
+            #convert it to gcode
+            self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
 
     #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
     #returns an svg document (not a file)
     def transform_svg_for_robot(self, svg_file): 
         current_drawing = self.create_svg_doc(self.width,self.height)
-        try:
-            svg_data = parse(svg_file)
+        svg_data = parse(svg_file)
 
-            #setup our transform
-            tr = pysvg.builders.TransformBuilder()
-            tr.setScaling(x=1,y=-1)
-            trans = str(self.side_margin) + " " + str(self.img_height) 
-            tr.setTranslation( trans )
+        #setup our transform
+        tr = pysvg.builders.TransformBuilder()
+        tr.setScaling(x=1,y=-1)
+        trans = str(self.side_margin) + " " + str(self.img_height) 
+        tr.setTranslation( trans )
 #            print "Endpoint transform:"+tr.getTransform()
-            group = pysvg.structure.g()
-            group.set_transform(tr.getTransform())
-            #add the drawing
-            for element in svg_data.getAllElements():
-                group.addElement(element)
+        group = pysvg.structure.g()
+        group.set_transform(tr.getTransform())
+        #add the drawing
+        for element in svg_data.getAllElements():
+            group.addElement(element)
 
-            current_drawing.addElement(group)
-            return current_drawing
-        except Exception as e:
-            print "Couldn't transform SVG for robot:",svg_file,e        
+        current_drawing.addElement(group)
+        return current_drawing
 
     #returns an svg document (not a file)
     def transform_svg(self, svg_file, pipeline): 
         current_drawing = self.create_svg_doc()
-        try:
-            xoffset = pipeline.print_top_left_x
-            yoffset = pipeline.print_top_left_y
-            scale = pipeline.print_width / pipeline.img_width
-            svg_data = parse(svg_file)
+        xoffset = pipeline.print_top_left_x
+        yoffset = pipeline.print_top_left_y
+        scale = pipeline.print_width / pipeline.img_width
+        svg_data = parse(svg_file)
 
-            #set up pipeline's transform
-            tr = pysvg.builders.TransformBuilder()
-            tr.setScaling(scale)
-            trans = str(xoffset) + " " + str(yoffset) 
-            tr.setTranslation( trans )
+        #set up pipeline's transform
+        tr = pysvg.builders.TransformBuilder()
+        tr.setScaling(scale)
+        trans = str(xoffset) + " " + str(yoffset) 
+        tr.setTranslation( trans )
 #            print "Pipeline transform:"+tr.getTransform()
-            group = pysvg.structure.g()
-            group.set_transform(tr.getTransform())
+        group = pysvg.structure.g()
+        group.set_transform(tr.getTransform())
 
-            for element in svg_data.getAllElements():
-                group.addElement(element)
+        for element in svg_data.getAllElements():
+            group.addElement(element)
 
-            current_drawing.addElement(group)
-            return current_drawing
-        except Exception as e:
-            print "Couldn't transform SVG for pipeline:",svg_file,e        
+        current_drawing.addElement(group)
+        return current_drawing
 
     #use pycam and parse_gcode to turn svg into robot style files
     def convert_svg_to_gcode(self, svgfile, polarfile ):
@@ -161,11 +151,7 @@ class Endpoint( DrawingState ):
     #the output is validated to ensure it won't command the robot to move outside its drawing area
     #then the output is saved to a polar file ready to be served
     def parse_gcode_to_polar(self,infile,outfile):
-        try:
-            gcode = open(infile)
-        except:
-            print "bad file"
-            exit( 1 )
+        gcode = open(infile)
 
         gcodes = gcode.readlines()
         gcode.close()
@@ -199,13 +185,13 @@ class Endpoint( DrawingState ):
 
                 #validate, the +-1mm is to account for rounding errors
                 if outx > self.x_max + 1:
-                    raise Exception("gcode x too large %f > %f" % (outx,self.x_max))
+                    raise EndpointConversionError("gcode x too large %f > %f" % (outx,self.x_max))
                 if outy > self.y_max + 1:
-                    raise Exception("gcode y too large %f > %f" % (outy,self.y_max))
+                    raise EndpointConversionError("gcode y too large %f > %f" % (outy,self.y_max))
                 if outx < self.x_min - 1:
-                    raise Exception("gcode x too small %f < %f" % (outx,self.x_min))
+                    raise EndpointConversionError("gcode x too small %f < %f" % (outx,self.x_min))
                 if outy < self.y_min - 1:
-                    raise Exception("gcode y too small %f < %f" % (outy,self.y_min))
+                    raise EndpointConversionError("gcode y too small %f < %f" % (outy,self.y_min))
 
                 polar_code += "g%.1f,%.1f\n" %  (outx,outy) 
                 lastX = x
@@ -222,10 +208,7 @@ class Endpoint( DrawingState ):
         return None
     
     def get_num_files_to_serve(self):
-        try:
-            return len(GCodeOutput.objects.filter(endpoint=self,served=False))
-        except Exception as e:
-            return None
+        return GCodeOutput.objects.filter(endpoint=self,served=False).count()
 
     def mark_all_gcode_served(self):
         for gcode in GCodeOutput.objects.filter(endpoint=self,served=False):
@@ -235,7 +218,7 @@ class Endpoint( DrawingState ):
     def get_next(self):
         try:
             return GCodeOutput.objects.filter(endpoint=self,served=False).order_by('modified')[:1].get()
-        except Exception as e:
+        except GCodeOutput.DoesNotExist:
             return None
         
     def consume(self):
@@ -290,10 +273,7 @@ class GCodeOutput( models.Model ):
         return "data/output/gcode/"+str(self.id)+".gcode"
     
     def delete(self):
-        try:
-            os.remove(self.get_filename())
-        except Exception as e:
-            print "Couldn't remove GCode file",self.get_filename,e
+        os.remove(self.get_filename())
         super(GCodeOutput, self).delete()
     
     class Meta:

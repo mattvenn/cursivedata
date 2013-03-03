@@ -28,15 +28,12 @@ class Generator( models.Model ) :
     module = None
     def __init__(self, *args, **kwargs):
         super(Generator, self).__init__(*args, **kwargs)
-        try:
-            #put this in so that when we add parameters we'll have a valid id for them to use as a foreign key
-            if not self.id: 
-                self.save()
-            self.module = self.get_file( self.module_name )
-            for param in self.module.get_params():
-                self.add_or_update_param( param )
-        except Exception as e:
-            print "Couldn't update Generator params:",e
+        #put this in so that when we add parameters we'll have a valid id for them to use as a foreign key
+        if not self.id: 
+            self.save()
+        self.module = self.get_file( self.module_name )
+        for param in self.module.get_params():
+            self.add_or_update_param( param )
         return
 
     #Processes a given chunk of data to return some SVG

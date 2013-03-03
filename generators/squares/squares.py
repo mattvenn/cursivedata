@@ -161,22 +161,17 @@ if __name__ == '__main__':
   #2 different things can happen here, either we are loading a whole load of points at once, or we are running realtime
   #load of points at once
   if args.loadhistory:
-    try:
-        fh = open(args.dir + args.loadhistory)
-        jsondata = json.load(fh)
-        data=processData(jsondata)
-        state["startenv"] = 0
-        state["number"] = 0
-
-    except:
-        "failed to read history file"
-        exit(1)
+      fh = open(args.dir + args.loadhistory)
+      jsondata = json.load(fh)
+      data=processData(jsondata)
+      state["startenv"] = 0
+      state["number"] = 0
   else:
     try:
       state = pickle.load( open( args.dir + "save.p", "rb" ) )
       #will throw an exception if not available
-    except:
-      print "exception loading state, creating default state"
+    except UnpicklingError as e:
+      print "exception loading state, creating default state: %s" % e
       state["startenv"] = args.startenv
       state["number"] = args.number
        

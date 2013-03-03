@@ -33,15 +33,8 @@ class DataStore( models.Model ) :
     #After the data's been used, add it to the history and clear the current data
     def clear_current(self) : 
         current = json.loads(self.current_data)
-        try:
-            hist = json.loads(self.historic_data)
-        except Exception as e:
-            print "Couldn't load history:", e
-            hist = []
-        try:
-            self.historic_data=json.dumps(hist+current)
-        except Exception as e:
-            print "Couldn't save history",e
+        hist = json.loads(self.historic_data)
+        self.historic_data=json.dumps(hist+current)
         self.current = []
         self.store_current(self.current)
         self.available=False

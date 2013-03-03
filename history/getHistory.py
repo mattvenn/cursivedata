@@ -101,8 +101,8 @@ if __name__ == '__main__':
     key = keyfile.read()
     key = key.strip()
     print "using key: ", key
-  except:
-    print "couldn't open key file", args.keyfile
+  except Exception as e:
+    print "couldn't open key file '%s': %s" % (args.keyfile, e)
     exit(1)
 
   #check dates

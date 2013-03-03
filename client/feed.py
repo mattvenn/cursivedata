@@ -15,6 +15,8 @@ import signal
 import serial
 import requests
 
+class FeedParseError(Exception):
+    pass
 
 def update_robot_dimensions():
     status_commands=["u"]
@@ -28,11 +30,9 @@ def update_robot_dimensions():
       height=m.group(1)
       m=re.search('^w: ([0-9.]+)mm',response,re.M)
       width=m.group(1)
-    except:
-      print "couldn't parse robot's output:", response
-      return
-      
-    
+    except AttributeError:
+      raise FeedParseError("couldn't parse robot's output:%s" % response)
+
     payload = {
         'width': float(width),
         "height": float(height),
@@ -99,7 +99,9 @@ def finish_serial():
         if args.verbose:
             print "closing serial"
         serial_port.close()
-    except:
+    except serial.SerialException:
+        # We are explicitely silencing the error here.
+        # TODO: Log the error message at least.
         pass
 
 """
@@ -121,11 +123,7 @@ def read_serial_response():
   return all_lines
 
 def readFile():
-  try:
-    gcode = open(args.file)
-  except:
-    print "bad file"
-    exit(1)
+  gcode = open(args.file)
   gcodes = gcode.readlines()
   return gcodes
 
