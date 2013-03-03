@@ -65,11 +65,11 @@ class Endpoint( DrawingState ):
         self.y_max = self.top_margin + self.img_height
    
     def input_svg(self,svg_file, pipeline ):
-        print "Adding SVG"
+  #      print "Adding SVG"
 #        import pdb; pdb.set_trace()
         try:
             current_drawing = self.transform_svg(svg_file,pipeline)
-            print current_drawing.getXML()
+  #          print current_drawing.getXML()
             #this will save out the latest svg as a file
             self.add_svg(current_drawing)
         except Exception as e:
@@ -106,7 +106,7 @@ class Endpoint( DrawingState ):
             tr.setScaling(x=1,y=-1)
             trans = str(self.side_margin) + " " + str(self.img_height) 
             tr.setTranslation( trans )
-            print "Endpoint transform:"+tr.getTransform()
+#            print "Endpoint transform:"+tr.getTransform()
             group = pysvg.structure.g()
             group.set_transform(tr.getTransform())
             #add the drawing
@@ -132,7 +132,7 @@ class Endpoint( DrawingState ):
             tr.setScaling(scale)
             trans = str(xoffset) + " " + str(yoffset) 
             tr.setTranslation( trans )
-            print "Pipeline transform:"+tr.getTransform()
+#            print "Pipeline transform:"+tr.getTransform()
             group = pysvg.structure.g()
             group.set_transform(tr.getTransform())
 
@@ -217,7 +217,7 @@ class Endpoint( DrawingState ):
                 lastY = y
 
         file = open(outfile,"w")
-        print "writing polar file to ", outfile
+        #print "writing polar file to ", outfile
         file.write(polar_code)
                 
     def get_next_filename(self):

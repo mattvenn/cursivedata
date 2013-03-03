@@ -54,20 +54,14 @@ class Pipeline( DrawingState ) :
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
     def update( self, data=None ) :
-        print "Pipeline updating"
         data = data or self.data_store
-        print "Getting params"
         params = self.state.params
-        print "Getting internal state"
         internal_state = self.state.state
-        print "Generator init"
         try:
             self.generator.init()
         except Exception as e:
             print "Couldn't init generator:",e
-        print "Asking generator if it can run"
         if self.generator.can_run( data, params, internal_state ):
-            print "Generator running"
             try:
                 #Create a new document to write to
                 svg_document = self.create_svg_doc()

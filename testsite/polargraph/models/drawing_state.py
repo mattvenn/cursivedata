@@ -34,13 +34,13 @@ class DrawingState( models.Model ):
         self.last_svg_file = self.get_partial_svg_filename()
         svg_document.save(self.last_svg_file)
         self.update_latest_image()
-        print "Saved update as:",self.last_image_file
+#        print "Saved update as:",self.last_image_file
 
         self.ensure_full_document()
         # Add the last SVG to full output SVG history
         svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
         self.update_full_image()
-        print "Saved whole image as:",self.full_image_file
+#        print "Saved whole image as:",self.full_image_file
         self.last_updated = timezone.now()
         self.save()
 
