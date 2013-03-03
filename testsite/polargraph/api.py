@@ -55,14 +55,14 @@ class COSMSourceResource(ModelResource):
         store_id=int(request.path.split("/")[-2])
         ce = COSMSource.objects.get(id=store_id) #Uuuugh. Sorry!
         try:
-            print "Trying to get post stuff"
+        #    print "Trying to get post stuff"
             data_string = request.POST['body']
             data = json.loads(data_string)
         except Exception as e:
-            print "Trying raw data instead"
+        #    print "Trying raw data instead"
             data = json.loads(request.raw_post_data)
-            print "Got data:",data
-        print "Data:",data
+        #    print "Got data:",data
+        #print "Data:",data
         ce.receive_data(data)
         return {"OK":"True"}
     
