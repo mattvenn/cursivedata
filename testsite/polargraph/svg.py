@@ -12,14 +12,14 @@ import cairosvg
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
 def append_svg_to_file( fragment_file, main_file ):
-    try :
+    try:
         svg_main = parse(main_file)
         svg_frag = parse(fragment_file)
         for e in svg_frag.getAllElements():
             svg_main.addElement( e )
         svg_main.save(main_file)
     except Exception as e:
-        print "Couldnt' read input file:",fragment_file,e
+        print "couldn't add %s to %s: %s" % (fragment_file,main_file,e)
 
 
 def convert_svg_to_png( svgfile, pngfilename ):
