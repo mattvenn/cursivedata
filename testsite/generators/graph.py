@@ -6,12 +6,7 @@ todo:
 from django.utils.datetime_safe import datetime
 
 def get_x(point,params):
-
-    if get_minute(point['time']) > params.get("MaxTime"):
-        wrap = True
-    else:
-        wrap = False
-    return (get_minute(point['time']) % params.get("MaxTime"), wrap) 
+    return get_minute(point['time']) % params.get("MaxTime")
 
 #turns a date into minutes
 def get_minute(date):
@@ -38,9 +33,10 @@ def process(drawing,data,params,internal_state) :
         #flip y
         y = params.get("MaxY") - y
         #do this as a function so can also call from can_run
-        (x,wrap) = get_x(point,params)
+        x = get_x(point,params)
+        #import pdb; pdb.set_trace()
         #if we wrap back round, don't draw the connecting line, just update old x and y
-        if wrap:
+        if x < oldx or (x - oldx) > params.get("SkipDrawTime"):
             oldx = x
             oldy = y
             continue
@@ -68,6 +64,7 @@ def get_params() :
     return  [ 
              { "name":"MaxTime", "default": 10, "description":"Max time for X axis (minutes)" }, 
              { "name":"MaxY", "default":10, "description":"Max Y axis" },
+             { "name":"SkipDrawTime", "default":20, "description":"how many minutes pass before we lift the pen to move" },
              ]
 
 def get_name() : return "Graph Generator"
@@ -77,7 +74,7 @@ def get_description() : return "draws a simple line graph"
 def can_run(data,params,internal_state):
 #    import pdb;pdb.set_trace()
     for point in data.get_current():
-        (x,wrap) = get_x(point,params)
+        x = get_x(point,params)
         if x != internal_state.get("oldx"):
             return True;
     return False
