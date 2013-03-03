@@ -57,10 +57,7 @@ class Pipeline( DrawingState ) :
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state
-        try:
-            self.generator.init()
-        except Exception as e:
-            print "Couldn't init generator:",e
+        print "Asking generator if it can run"
         if self.generator.can_run( data, params, internal_state ):
             try:
                 #Create a new document to write to
@@ -114,7 +111,8 @@ class Pipeline( DrawingState ) :
     def get_stored_output(self,output_type,status):
         try:
             return StoredOutput.objects.get(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
-        except:
+        except StoredOutput.DoesNotExist:
+            # XXX: The new object isn't saved. Is this intentional?
             return StoredOutput(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
     
     #Gets recent output which is not the current run

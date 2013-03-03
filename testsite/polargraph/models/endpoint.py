@@ -191,14 +191,8 @@ class Endpoint( DrawingState ):
                     #draw
                     polar_code += "d1\n"
             elif c: 
-                try:
-                    x = float(c.group(1))
-                except:
-                    x = lastX 
-                try:
-                    y = float(c.group(2))
-                except:
-                    y = lastY
+                x = float(c.group(1) or lastX)
+                y = float(c.group(2) or lastY)
 
                 outx = x
                 outy = y 
@@ -265,7 +259,8 @@ class Endpoint( DrawingState ):
     def get_stored_output(self,output_type,status):
         try:
             return StoredOutput.objects.get(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
-        except:
+        except StoredOutput.DoesNotExist:
+            # XXX: The new object isn't saved. Is this intentional?
             return StoredOutput(endpoint=self,pipeline=None,generator=None,run_id=self.run_id,filetype=output_type,status=status)
     
     def get_recent_output(self,start=0,end=8):
