@@ -7,6 +7,7 @@ import time
 from pysvg.parser import parse
 import sys
 import cairosvg
+from xml.parsers.expat import ExpatError
 
 
 #Append one svg file to another svg file
@@ -18,8 +19,26 @@ def append_svg_to_file( fragment_file, main_file ):
         for e in svg_frag.getAllElements():
             svg_main.addElement( e )
         svg_main.save(main_file)
-    except Exception as e:
-        print "couldn't add %s to %s: %s" % (fragment_file,main_file,e)
+    except IOError, e:
+        print "couldn't open either %s or %s: %s" % (fragment_file,main_file,e)
+    except ExpatError, e:
+        print "couldn't parse either %s or %s: %s" % (fragment_file,main_file,e)
+    clear_blank_lines(main_file)
+
+def is_blank_line(line):
+    if line == "\n":
+        return True
+    return False
+
+def clear_blank_lines(main_file):
+    print "cleaning blank lines from ", main_file
+    f = open(main_file)
+    lines = f.readlines()
+    f.close()
+    noblanks = [ x for x in lines if x != '\n' ]
+    f = open(main_file,'w')
+    f.writelines(noblanks)
+    f.close()
 
 
 def convert_svg_to_png( svgfile, pngfilename ):
