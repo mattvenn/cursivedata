@@ -15,18 +15,29 @@
 			</div>
 			
 			<div class="inputForm actionForm">
-			<form action="{% url polargraph:show_generator generator.id %}" method="POST">
+			<form action="{% url polargraph:show_generator generator.id %}" method="POST" enctype="multipart/form-data">
 				{% csrf_token %}
 				<div class="formBlock">
 					<div class="formBlockTitle">Data Store</div>
 					<p>{{ds_form.data_store.label}}{{ ds_form.data_store }} </p>
 					<div class="formParamDescription">
-					{% if data_store %}Data store "{{data_store.name}}" has {{data_store.get_historic_size}} data.{% else %}None selected.{% endif %}<br/>
+					{% if data_store %}Data store "{{data_store.name}}"<br/>{{data_store.get_current_size}} current / {{data_store.get_historic_size}} historic data.{% else %}None selected.{% endif %}<br/>
 					</div>
-					<input type="submit" value="Update Selection"/><br/>
+					<input type="submit" value="Update Selection" name="action"/><br/>
+					<hr/>
 					Or create a new DataStore:
 					<p>{{ds_form.ds_name.label}}{{ ds_form.ds_name }} </p>
 					<input type="submit" value="Create Datastore" name="action" />
+					<hr/>
+					<p>{{ds_form.csv_file.label}}{{ ds_form.csv_file }} </p>
+					<input type="submit" value="Import CSV" name="action"/><br/>
+				</div>
+				<div class="formBlock">
+					<div class="formBlockTitle">Data Selection</div>
+					<p>{{select_form.max_records.label}}{{ select_form.max_records }} </p>
+					<p>{{select_form.max_date.label}}{{ select_form.max_date }} </p>
+					<p>{{select_form.min_date.label}}{{ select_form.min_date }} </p>
+					<input type="submit" value="Update Query" name="action" />
 				</div>
 				<div class="formBlock">
 					<div class="formBlockTitle">Image Settings</div>
@@ -49,7 +60,12 @@
 		</div>
 	</div>
 	<div class="controlPanel" style="min-width:500px; min-height:500px">
+		<form action="{% url polargraph:show_generator generator.id %}" method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
 		<h3>Code:</h3>
+		{{ code_form.code_field }}
+		<input type="submit" value="Save Code" name="action"/>
+		</form>
 	</div>
 	<div class="outputBlock">
 		<div class="mainOutput">
