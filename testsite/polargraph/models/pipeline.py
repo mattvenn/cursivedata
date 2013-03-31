@@ -46,10 +46,7 @@ class Pipeline( DrawingState ) :
         return self.name
     def __init__(self, *args, **kwargs):
         super(Pipeline, self).__init__(*args, **kwargs)
-        try:
-            self.ensure_full_document()
-        except Exception as e:
-            print "Couldn't make document ",e
+        self.ensure_full_document()
     
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
@@ -57,44 +54,31 @@ class Pipeline( DrawingState ) :
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state
-        try:
-            self.generator.init()
-        except Exception as e:
-            print "Couldn't init generator:",e
+        print "Asking generator if it can run"
         if self.generator.can_run( data, params, internal_state ):
-            try:
-                #Create a new document to write to
-                svg_document = self.create_svg_doc()
-                self.generator.process_data( Drawing(svg_document), data, params, internal_state )
-                self.state.save()
-                data.clear_current()
-                self.add_svg( svg_document )
-                self.generator.update_last_used()
-                print "Generator run OK!"
-            except Exception as e:
-                print "Problem running generator",self,e    
-                print traceback.format_exc()
+            #Create a new document to write to
+            svg_document = self.create_svg_doc()
+            self.generator.process_data( Drawing(svg_document), data, params, internal_state )
+            self.state.save()
+            data.clear_current()
+            self.add_svg( svg_document )
+            self.generator.update_last_used()
+            print "Generator run OK!"
         else:
             print "Generator not ready to run"
     
     def begin(self):
         self.reset();
-        try:
-            svg_document = self.create_svg_doc()
-            self.generator.begin_drawing( Drawing(svg_document), self.state.params, self.state.state )
-            self.state.save()
-            self.add_svg( svg_document )
-        except Exception as e:
-            print "Couldn't begin document:",e
+        svg_document = self.create_svg_doc()
+        self.generator.begin_drawing( Drawing(svg_document), self.state.params, self.state.state )
+        self.state.save()
+        self.add_svg( svg_document )
     
     def end(self):
-        try:
-            svg_document = self.create_svg_doc()
-            self.generator.end_drawing( Drawing(svg_document), self.state.params, self.state.state )
-            self.state.save()
-            self.add_svg( svg_document )
-        except Exception as e:
-            print "Couldn't end document:",e
+        svg_document = self.create_svg_doc()
+        self.generator.end_drawing( Drawing(svg_document), self.state.params, self.state.state )
+        self.state.save()
+        self.add_svg( svg_document )
  
 
     def add_svg(self, svg_document ):
@@ -114,7 +98,8 @@ class Pipeline( DrawingState ) :
     def get_stored_output(self,output_type,status):
         try:
             return StoredOutput.objects.get(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
-        except:
+        except StoredOutput.DoesNotExist:
+            # XXX: The new object isn't saved. Is this intentional?
             return StoredOutput(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
     
     #Gets recent output which is not the current run

@@ -4,11 +4,7 @@ import re
 import sys
 
 def parse(args):
-  try:
-    gcode = open( args.file )
-  except:
-    print "bad file"
-    exit( 1 )
+  gcode = open( args.file )
 
   #assume, could fix when we sort out the below
   xmin = 0
@@ -60,14 +56,8 @@ def parse(args):
         #draw
         polar_code += "d1\n"
     elif c: 
-      try:
-        x = float(c.group(1))
-      except:
-        x = lastX 
-      try:
-        y = float(c.group(2))
-      except:
-        y = lastY
+      x = float(c.group(1) or lastX)
+      y = float(c.group(2) or lastY)
   #    z = float(c.group(3))
   #    print line
 

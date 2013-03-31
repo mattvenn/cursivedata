@@ -3,6 +3,7 @@ from os.path import join
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.core.urlresolvers import reverse_lazy
 admin.autodiscover()
 
 from polargraph import views
@@ -20,14 +21,6 @@ v1_api.register(EndpointResource())
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'testsite.views.home', name='home'),
-    # url(r'^testsite/', include('testsite.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
      url(r'^admin/', include(admin.site.urls)),
 
      url(r'^polargraph/', include('polargraph.urls',namespace='polargraph',app_name='polargraph')),
@@ -39,4 +32,8 @@ urlpatterns = patterns('',
      (r'^media/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': join(settings.PROJECT_ROOT, 'media')}),
      
+     url(r'^login', 'django.contrib.auth.views.login', name="login"),
+     url(r'^logout', 'django.contrib.auth.views.logout',
+         {'next_page': reverse_lazy('landing')}, name='logout'),
+     url(r'^$', 'landing.views.landing', name='landing'),
 )

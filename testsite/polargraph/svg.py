@@ -25,10 +25,9 @@ def append_svg_to_file( fragment_file, main_file ):
                 pass
             svg_main.addElement( e )
         svg_main.save(main_file)
-    except IOError, e:
+    except (ExpatError, IOError) as e:
         print "couldn't open either %s or %s: %s" % (fragment_file,main_file,e)
-    except ExpatError, e:
-        print "couldn't parse either %s or %s: %s" % (fragment_file,main_file,e)
+        raise
     clear_blank_lines(main_file)
 
 def is_blank_line(line):

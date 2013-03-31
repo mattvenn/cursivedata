@@ -4,6 +4,7 @@ import json
 import datetime
 import pprint
 import argparse
+import sys
 
 def push_data( input_data ):
     headers= {'content-type': 'application/json'}
@@ -52,7 +53,8 @@ def push_data( input_data ):
     try:
         pprint.pprint(json.loads(r.text))
     except:
-        print r.text
+        print >>sys.stderr, r.text
+        raise
 
 def calculate_datetime_from_minute():
    now = datetime.datetime.now()
