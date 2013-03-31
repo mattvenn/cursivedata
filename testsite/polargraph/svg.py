@@ -16,7 +16,13 @@ def append_svg_to_file( fragment_file, main_file ):
     try:
         svg_main = parse(main_file)
         svg_frag = parse(fragment_file)
+        svg_id = int(time.time())
         for e in svg_frag.getAllElements():
+            try:
+                e.set_id(svg_id)
+                e.set_class("frame")
+            except AttributeError:
+                pass
             svg_main.addElement( e )
         svg_main.save(main_file)
     except IOError, e:
