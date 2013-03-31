@@ -49,7 +49,7 @@ class Pipeline( DrawingState ) :
         try:
             self.ensure_full_document()
         except Exception as e:
-            print "Coudln't make document ",e
+            print "Couldn't make document ",e
     
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
