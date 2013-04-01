@@ -154,10 +154,16 @@ class GeneratorState( models.Model ):
     class Meta:
         app_label = 'polargraph'
 
+#Generator should be self explanatory
+#ds_form is a SelectOrMakeDataStore
+#ds_settings is a DataStoreSettings, which can give query params
+#params is a Dict, with:
+## param_<x> for params
 class GeneratorRunner(DrawingState):        
-    def run(self,generator,data_store,input_params,width,height):
+    def run(self,generator,input_data,input_params,width,height):
         data = DataStore()
-        data.current = data_store.get_historic()
+        data.current = input_data
+        
         state = generator.get_state(False) 
         print "State:",state.state
         params = state.params

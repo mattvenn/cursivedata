@@ -132,77 +132,99 @@ def show_endpoint(request, endpointID):
 def show_generator(request, generatorID):
     try:
         generator = Generator.objects.get(pk=generatorID)
-        act = request.POST.get('action',"none")
-        
-        filename = None
-        data_store = None
-        width = int(request.POST.get("width","400"))
-        height = int(request.POST.get("height","400"))
-        param_values = {}
         #Create forms to use
         if request.POST:
             ds_form = SelectOrMakeDataStore(request.POST,request.FILES)
             select_form = DataStoreSettings(request.POST)
-            code_form = GeneratorCode(request.POST)
         else:
             ds_form = SelectOrMakeDataStore()
             select_form = DataStoreSettings()
-            code_form = GeneratorCode()
             
-        #Extract values from them
-        if ds_form.is_valid():
-            data_store = ds_form.cleaned_data['data_store']
-            
-        #Get other values by hand
+        ds_form.get_data_store()
+                
+        #Setup width and height
+        width = int(request.POST.get("width","400"))
+        height = int(request.POST.get("height","400"))
+        
+        #Get parameter values
+        param_values = {}
         for (key, value) in request.POST.iteritems():
             if key.startswith("param"):
                 param_values[key.replace("param","")]= float(value)
         params = generator.get_param_dict(param_values)
         
+        filename = None
+        
+        data = select_form.query_data_store(ds_form.data_store)
+        
+        act = request.POST.get('action',"none")
         if act == "Run" :
-            if data_store :
-                filename = GeneratorRunner().run(generator,data_store,param_values,width,height)
-                print "Got filename",filename
+            if ds_form.data_store :
+                filename = GeneratorRunner().run(generator,data,param_values,width,height)
             else:
-                print "No data_store setup"
+                print "No data store setup"
         elif act == "Create Datastore":
-            data_store = DataStore(name=request.POST.get("ds_name","Unnamed Datastore"))
-            data_store.save()
+            ds_form.create_data_store(request.POST.get("ds_name","Unnamed Datastore"))
         elif act == "Import CSV":
-            if data_store :
-                file = request.FILES['csv_file'].read().split("\n")
-                print "File:",file
-                data_store.load_from_csv(file,time_field="Time")
+            ds_form.load_csv(request.FILES['csv_file'], "Time")
         elif act == "Save Code":
-            if code_form.is_valid():
-                with open(generator.get_filename(), 'wb') as codefile:
-                    codefile.write(code_form.cleaned_data['code_field'])
-                    codefile.close()
+            code_form = GeneratorCode(request.POST)
+            code_form.save_code(generator)
         else:
             print "Unknown Action:",act
             
-        with open(generator.get_filename(), 'rb') as codefile:
-	        code_form.fields['code_field'].initial = codefile.read()
+        code_form = GeneratorCode()
+        code_form.load_code(generator)
         
-        context = {"generator":generator,"output":filename, "data_store":data_store, 
-                    "width":width, "height":height, "params":params, 
+        context = {"generator":generator,"output":filename, "data_store":ds_form.data_store, 
+                    "width":width, "height":height, "params":params, "data": data,
                     "ds_form":ds_form, "select_form":select_form, "code_form":code_form }
         return render(request,"generator_display.html",context)
     except Generator.DoesNotExist:
         raise Http404
 
 class SelectOrMakeDataStore(forms.Form):
-    data_store = forms.ModelChoiceField(queryset=DataStore.objects.all(),label="Select",required=False)
+    data_store_id = forms.ModelChoiceField(queryset=DataStore.objects.all(),label="Select")
     csv_file  = forms.FileField(label="Load CSV Data into current datastore",required=False)
     ds_name = forms.CharField(label="New DS Name",initial="New Datastore")
+    data_store = None
+    
+    def get_data_store(self):
+        if self.is_valid() :
+            self.data_store = self.cleaned_data['data_store_id']
+    def create_data_store(self,name):
+        self.data_store = DataStore(name=request.POST.get("ds_name","Unnamed Datastore"))
+        self.data_store.save()
+    def load_csv(self,file,time_field):
+        if self.data_store :
+            data_store.load_from_csv(file.read().split("\n"),time_field=time_field)
     
 class DataStoreSettings(forms.Form):
-    max_date = forms.DateTimeField(label="Data Before")
-    min_date = forms.DateTimeField(label="Data After")
-    max_records = forms.IntegerField(label="Limit records to")
+    max_time = forms.DateTimeField(label="Data Before",required=False)
+    min_time = forms.DateTimeField(label="Data After",required=False)
+    max_records = forms.IntegerField(label="Limit records to",required=False)
+    def get_params(self):
+        return { "max_date": self.max_date, 
+                "min_date":self.min_date, "max_records":self.max_records}
+    def query_data_store(self,data_store):
+        if not data_store:
+            return []
+        if self.is_valid( ):
+	        return data_store.query(max_time=self.cleaned_data['max_time'],
+                                    min_time=self.cleaned_data['min_time'],
+                                    max_records=self.cleaned_data['max_records'])
+        return data_store.query()
 
 class GeneratorCode(forms.Form):
-    code_field = forms.CharField(label="Codez",widget = forms.widgets.Textarea(attrs={'cols': 80, 'rows': 20}))
+    code_field = forms.CharField(label="Codez",widget = forms.widgets.Textarea(attrs={'cols': 80, 'rows': 50}))
+    def load_code(self,generator):
+        with open(generator.get_filename(), 'rb') as codefile:
+	        self.fields['code_field'].initial = codefile.read()
+    def save_code(self,generator):
+        if self.is_valid():
+            with open(generator.get_filename(), 'wb') as codefile:
+                codefile.write(self.cleaned_data['code_field'])
+                codefile.close()
     
 def get_gcode(request, endpointID ):
     try:

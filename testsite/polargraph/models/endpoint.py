@@ -139,8 +139,9 @@ class Endpoint( DrawingState ):
     def convert_svg_to_gcode(self, svgfile, polarfile ):
         fd, tmp_gcode = tempfile.mkstemp()
         pycam="/usr/bin/pycam"
+        #pycam="/Users/dmrust/.virtualenvs/polarsite/lib/python2.7/site-packages/pycam-0.5.1/pycam"
         pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave"]
-        #print pycam_args
+        print pycam_args
         p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
         stdout,stderr = p.communicate()
         self.parse_gcode_to_polar(tmp_gcode,polarfile)

@@ -227,3 +227,29 @@ body {
 	margin: 8px;
 	padding: 6px;
 }
+
+.dataDisplay {
+	background: #ccc;
+	max-width: 300px;
+	font-size: 80%;
+}
+
+.dataEntry {
+	border: 1px solid #aaa;
+}
+
+.dataTime {
+	display: block;
+	width: 100%;
+	text-align: left;
+}
+
+.dataData {
+	font-size: 80%;
+}
+
+.codeInput textarea{
+	background: #444;
+	font-family: "Lucida Console", Monaco, monospace;
+	color: #ccc;
+}
