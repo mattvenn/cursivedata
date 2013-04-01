@@ -1,8 +1,9 @@
 <html>
 <head>
+<script src="{{ MEDIA_URL }}slider.js"></script>
 <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
 </head>
-<body>
+<body onload="load()">
 		{% if pipeline %}
 	<div class="controlPanel">
 		<div class="controlColumn">
@@ -132,7 +133,11 @@
 	<div class="outputBlock">
 		<div class="mainOutput">
 			<h3> Current Image<h3>
-			<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />
+			<!--<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />-->
+            <input id="slider" type="range" min="0" class="bigPic" max="0" step="1" onchange="toggleVis()">
+            <input id="rangeVal" type="text" size="8"/>
+            <!-- fix this terrible shit -->
+            <embed width="800px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" />
 		</div><br/>
 		<div class="mainOutput">
 			<h3> Last Update <h3>
