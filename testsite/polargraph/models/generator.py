@@ -21,7 +21,7 @@ class Generator( models.Model ) :
     description = models.CharField(max_length=2000,default="Unknown")
     image = models.CharField(max_length=200,default="No Image")
     file_path = models.CharField(max_length=200,default="./generators")
-    module_name = models.CharField(max_length=200)
+    module_name = models.CharField(max_length=200,unique=True)
     last_updated = models.DateTimeField("Last Updated",default=timezone.now())
     last_used = models.DateTimeField("Last Used",default=timezone.now())
     
@@ -29,11 +29,18 @@ class Generator( models.Model ) :
     def __init__(self, *args, **kwargs):
         super(Generator, self).__init__(*args, **kwargs)
         #put this in so that when we add parameters we'll have a valid id for them to use as a foreign key
+        should_work = True
         if not self.id: 
             self.save()
-        self.module = self.get_file( self.module_name )
-        for param in self.module.get_params():
-            self.add_or_update_param( param )
+            should_work = False
+        try: #Its OK to for the module loading to not work if we haven't been saved
+            self.module = self.get_file( self.module_name )
+            for param in self.module.get_params():
+                self.add_or_update_param( param )
+        except Exception as e:
+            if should_work :
+                #raise e
+                print "Empty module",e
         return
 
     #Processes a given chunk of data to return some SVG
@@ -113,6 +120,9 @@ class Generator( models.Model ) :
         self.save();
     class Meta:
         app_label = 'polargraph'
+    def __unicode__(self):
+        return "%s (%s)" % (self.name, self.id)
+
 
 #Generators have parameters. These can result in UI elements
 class Parameter( models.Model ) :

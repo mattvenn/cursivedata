@@ -24,6 +24,7 @@ urlpatterns = patterns('',
     
     #Show generators
     url(r'^generator/?$', views.list_generators, name='list_generators'),
+    url(r'^generator/create/?$', views.create_generator, name='create_generator'),
     url(r'^generator/(?P<generatorID>\d+)/$', views.show_generator, name='show_generator'),
 )
 

@@ -6,6 +6,7 @@ from polargraph.models import *
 from polargraph.models.generator import GeneratorRunner
 from django.shortcuts import render
 import os
+import shutil
 from django.forms.models import ModelForm
 from django.forms.widgets import Textarea, TextInput
 from django.utils.datetime_safe import datetime
@@ -128,7 +129,47 @@ def show_endpoint(request, endpointID):
         return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
         raise Http404
+
+def create_generator(request):
+    create_form = GeneratorSource()
+    create_message = None;
+    if request.POST:
+        create_form = GeneratorSource(request.POST,request.FILES)
+        if create_form.is_valid() :
+            source_id=create_form.cleaned_data['source_id']
+            name=create_form.cleaned_data['name']
+            description=create_form.cleaned_data['description']
+            module_name=create_form.cleaned_data['module_name']
+            
+            source = create_form.cleaned_data['source_id']
+            print "Source:",source
+            g = Generator( name=name, description=description, module_name=module_name )
+            shutil.copy(source.get_filename(), g.get_filename())
+            g.save()
+            return HttpResponseRedirect('/polargraph/generator/'+str(g.id)+"/") # Redirect after POST
+    context = {"create":create_form}
+    r = render(request,"generator_create.html",context)
+    return r;
+        
     
+class GeneratorSource(forms.Form):
+    source_id = forms.ModelChoiceField(queryset=Generator.objects.all(),label="Select")
+    source_file  = forms.FileField(label="Upload new file (not implemented yet)",required=False)
+    name = forms.CharField(label="Human Readable Name",initial="New Generator")
+    description = forms.CharField(label="Describe your generator",initial="This generator does .... ",
+                           widget = forms.widgets.Textarea(attrs={'cols': 80, 'rows': 20}) )
+    module_name = forms.CharField(label="Choose a unique filename",initial="filename")
+    
+    def clean_module_name(self):
+        data = self.cleaned_data['module_name']
+        if Generator.objects.filter(module_name=data).count() > 0 :
+            raise forms.ValidationError("Module name already exists: " + data )
+        p = re.compile('^[a-zA-Z_]+$')
+        if not p.match(data):
+            raise forms.ValidationError("Filename can only have letters and underscores. You had: " + data )
+        return data
+    
+        
 def show_generator(request, generatorID):
     try:
         generator = Generator.objects.get(pk=generatorID)
