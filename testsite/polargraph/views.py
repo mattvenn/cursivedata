@@ -141,9 +141,13 @@ def show_generator(request, generatorID):
         param_values = {}
         #Create forms to use
         if request.POST:
-            ds_form = SelectOrMakeDataStore(request.POST)
+            ds_form = SelectOrMakeDataStore(request.POST,request.FILES)
+            select_form = DataStoreSettings(request.POST)
+            code_form = GeneratorCode(request.POST)
         else:
             ds_form = SelectOrMakeDataStore()
+            select_form = DataStoreSettings()
+            code_form = GeneratorCode()
             
         #Extract values from them
         if ds_form.is_valid():
@@ -164,16 +168,41 @@ def show_generator(request, generatorID):
         elif act == "Create Datastore":
             data_store = DataStore(name=request.POST.get("ds_name","Unnamed Datastore"))
             data_store.save()
+        elif act == "Import CSV":
+            if data_store :
+                file = request.FILES['csv_file'].read().split("\n")
+                print "File:",file
+                data_store.load_from_csv(file,time_field="Time")
+        elif act == "Save Code":
+            if code_form.is_valid():
+                with open(generator.get_filename(), 'wb') as codefile:
+                    codefile.write(code_form.cleaned_data['code_field'])
+                    codefile.close()
+        else:
+            print "Unknown Action:",act
+            
+        with open(generator.get_filename(), 'rb') as codefile:
+	        code_form.fields['code_field'].initial = codefile.read()
         
         context = {"generator":generator,"output":filename, "data_store":data_store, 
-                    "width":width, "height":height, "params":params, "ds_form":ds_form }
+                    "width":width, "height":height, "params":params, 
+                    "ds_form":ds_form, "select_form":select_form, "code_form":code_form }
         return render(request,"generator_display.html",context)
     except Generator.DoesNotExist:
         raise Http404
 
 class SelectOrMakeDataStore(forms.Form):
     data_store = forms.ModelChoiceField(queryset=DataStore.objects.all(),label="Select",required=False)
+    csv_file  = forms.FileField(label="Load CSV Data into current datastore",required=False)
     ds_name = forms.CharField(label="New DS Name",initial="New Datastore")
+    
+class DataStoreSettings(forms.Form):
+    max_date = forms.DateTimeField(label="Data Before")
+    min_date = forms.DateTimeField(label="Data After")
+    max_records = forms.IntegerField(label="Limit records to")
+
+class GeneratorCode(forms.Form):
+    code_field = forms.CharField(label="Codez",widget = forms.widgets.Textarea(attrs={'cols': 80, 'rows': 20}))
     
 def get_gcode(request, endpointID ):
     try:
@@ -217,6 +246,8 @@ def create_pipeline( request ):
     return render(request, 'pipeline_create.html', {
         'form': form,
     })
+
+
 
 class PipelineCreation(ModelForm):
     class Meta:

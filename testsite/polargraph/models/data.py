@@ -64,6 +64,19 @@ class DataStore( models.Model ) :
     def get_current_size(self):
         return len( self.get_current() )
     
+    def query(self,max_records=None,max_time=None,min_time=None):
+        data = self.get_historic() + self.get_current() 
+        print "Orig size", len(data)
+        if max_time :
+            data = filter(lambda d: d["time"].toordinal() < max_time.toordinal(), data)
+        if min_time :
+            data = filter(lambda d: d["time"].toordinal() > min_time.toordinal(), data)
+        if max_records :
+            if (len(data) > max_records ):
+	            data = data[-max_records:]
+        print "Final size", len(data)
+        return data
+    
     #Adds the data to the current data and sets available to true
     #Data must be a list of dicts 
     def add_data(self,data):
@@ -89,6 +102,23 @@ class DataStore( models.Model ) :
         self.store_current(total)
         self.save()
         print "Saved data length:",len(self.current_data)
+    
+    def load_from_csv(self,data, time_field=None):
+        reader = csv.DictReader(data,skipinitialspace=True)
+        data = []
+        print "Adding data to store",str(self)
+        for row in reader:
+            print "Row:",row
+            if time_field :
+                row['time_ser'] = row[time_field]
+                del row[time_field]
+            data.append(row)
+        self.update_current_data(data)
+    
+    def load_from_csv_file(self,datafile,time_field=None):
+        with open(datafile, 'rb') as csvfile:
+            self.load_from_csv(csvfile,time_field)
+        
     
     def clear_all(self):
         self.historic_data = json.dumps([])

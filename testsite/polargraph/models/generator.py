@@ -52,6 +52,9 @@ class Generator( models.Model ) :
     def end_drawing( self, svg_document, params, state ) :
         return self.module.end(svg_document, params,state)
     
+    def get_filename(self):
+        return self.file_path + "/" + self.module_name + ".py"
+    
     def __unicode__(self):
         return self.name
     @staticmethod
