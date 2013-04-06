@@ -316,8 +316,11 @@ if __name__ == '__main__':
         update_robot_status()
     if args.dumpconfig:
         (pack,names,values) =  get_robot_config()
+        config = {}
         for i in range(len(names)):
           print names[i], '=', values[i]
+          config[names[i]] = values[i]
+        open("config",'w').write(json.dumps(config))
     if args.updateconfig:
         update_robot_config()
 
