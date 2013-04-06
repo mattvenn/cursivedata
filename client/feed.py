@@ -41,6 +41,27 @@ def get_robot_config():
       print "bad data, machine said:", response
       exit(1)
 
+def load_robot_config():
+    config = json.load(open(args.loadconfig)) 
+    #check the config is ok
+    (pack,names,values) = get_robot_config()
+    for key in config.keys():
+        try:
+            values[names.index(key)] = config[key]
+        except ValueError:
+            print key, "not in robot's config"
+            exit(1)
+    #otherwise, ok to go
+    load_config(pack,values)
+
+def load_config(pack,values):
+    fmt = "=" + ''.join(pack)
+    string = struct.pack(fmt,*values) 
+    response = send_robot_commands(["k0,0"])
+    #don't use the function we have, as it doesn't work with this - because of line splitting?
+    serial_port.write(string) 
+    print read_serial_response()
+
 def update_robot_config():
     print args.updateconfig
     (pack,names,values) = get_robot_config()
@@ -50,13 +71,7 @@ def update_robot_config():
         try:
           value = float(m.group(2))
           values[names.index(m.group(1))] = value
-          fmt = "=" + ''.join(pack)
-          string = struct.pack(fmt,*values) 
-          status_commands=["k0,0"]
-          response = send_robot_commands(status_commands)
-          #don't use the function we have, as it doesn't work with this - because of line splitting?
-          serial_port.write(string) 
-          print read_serial_response()
+          load_config(pack,values)
         except ValueError:
           print "bad value", m.group(2)
         
@@ -247,6 +262,9 @@ if __name__ == '__main__':
     group.add_argument('--update-config',
         action='store', dest='updateconfig',
         help="update the robot's config")
+    group.add_argument('--load-config',
+        action='store', dest='loadconfig', 
+        help="load a json config into the robot")
     group.add_argument('--dump-config',
         action='store_const', dest='dumpconfig', const=True, default=False,
         help="dump the robot's config")
@@ -266,9 +284,9 @@ if __name__ == '__main__':
     parser.add_argument('--verbose',
         action='store_const', const=True, dest='verbose', default=False,
         help="verbose")
-    parser.add_argument('--no-send-status',
-        action='store_const', const=False, dest='sendstatus', default=True,
-        help="don't send current status of the robot to the server")
+    parser.add_argument('--send-status',
+        action='store_const', const=True, dest='sendstatus', default=False,
+        help="send current status of the robot to the server")
     parser.add_argument('--no-robot',
         action='store_const', const=True, dest='norobot', default=False,
         help="no robot connected, for testing")
@@ -313,7 +331,8 @@ if __name__ == '__main__':
         serial_port = setup_serial()
         if args.updatedimensions:
             update_robot_dimensions()
-        update_robot_status()
+        if args.sendstatus:
+            update_robot_status()
     if args.dumpconfig:
         (pack,names,values) =  get_robot_config()
         config = {}
@@ -323,6 +342,8 @@ if __name__ == '__main__':
         open("config",'w').write(json.dumps(config))
     if args.updateconfig:
         update_robot_config()
+    if args.loadconfig:
+        load_robot_config()
 
     if args.setup_robot:
         setup_robot()
