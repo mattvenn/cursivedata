@@ -3,6 +3,8 @@
 main problem with reading and writing to the robot is that if we read too much we hang.
 if we don't read enough, the leonardo resets!
 """
+import parse_header
+import struct
 import sys
 import json
 import re
@@ -15,6 +17,53 @@ import signal
 import serial
 import requests
 
+
+def get_robot_config():
+    status_commands=["j"]
+    response = send_robot_commands(status_commands)
+    try:
+      m=re.match('(.*)\r\nok\r\n',response,re.S)
+      string = m.group(1)
+
+    except AttributeError:
+      print "couldn't parse robot's output:", response
+      return
+
+    #load this from the config file
+    (names,pack) = parse_header.parse_header()
+    fmt = "=" + ''.join(pack)
+    try:
+      values = struct.unpack(fmt,string)
+      return (pack,names,list(values))
+    except struct.error:
+      print "bad data, machine said:", response
+      exit(1)
+
+def update_robot_config():
+    print args.updateconfig
+    (pack,names,values) = get_robot_config()
+    m = re.match('(\w+)=(\w+)',args.updateconfig)
+    if m:
+      if m.group(1) in names:
+        try:
+          value = float(m.group(2))
+          values[names.index(m.group(1))] = value
+          fmt = "=" + ''.join(pack)
+          string = struct.pack(fmt,*values) 
+          status_commands=["k0,0"]
+          response = send_robot_commands(status_commands)
+          #don't use the function we have, as it doesn't work with this - because of line splitting?
+          serial_port.write(string) 
+          print read_serial_response()
+        except ValueError:
+          print "bad value", m.group(2)
+        
+      else:
+        print "no such name", m.group(1)
+        print "use one of", names
+       
+    else:
+      print "didn't understand config, needs to be name=value", args.updateconfig
 
 def update_robot_dimensions():
     status_commands=["u"]
@@ -101,6 +150,8 @@ def read_serial_response():
 
   response = ""
   all_lines = ""
+  #this needs to find a \r\nok\r\n I think, but don't know why
+  #just ok\r\n doesn't work
   while string.find(response,"ok"):
     response = serial_port.readline()
     if response == "":
@@ -170,7 +221,8 @@ def send_robot_commands(gcodes):
     if p.match(line):
       print "skipping line:", line
     elif not line == None:
-      print "-> %s" % line,
+      if args.verbose:
+        print "-> %s" % line,
       serial_port.write(str(line)) #str added because we get unicode from the server
       response += read_serial_response()
   return response
@@ -186,6 +238,12 @@ if __name__ == '__main__':
     group.add_argument('--update-dimensions',
         action='store_const', const=True, dest='updatedimensions', default=False,
         help="update the server with this robot's dimensions")
+    group.add_argument('--update-config',
+        action='store', dest='updateconfig',
+        help="update the robot's config")
+    group.add_argument('--dump-config',
+        action='store_const', dest='dumpconfig', const=True, default=False,
+        help="dump the robot's config")
 
     parser.add_argument('--baud',
         action='store', dest='baud', type=int, default='57600',
@@ -252,6 +310,12 @@ if __name__ == '__main__':
         update_robot_dimensions()
     if args.sendstatus and not args.norobot:
         update_robot_status()
+    if args.dumpconfig:
+        (pack,names,values) =  get_robot_config()
+        for i in range(len(names)):
+          print names[i], '=', values[i]
+    if args.updateconfig:
+        update_robot_config()
 
     if not args.norobot:
       if args.setup_robot:
