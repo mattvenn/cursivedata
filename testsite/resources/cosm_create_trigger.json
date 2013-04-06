@@ -1,6 +1,12 @@
 {
-  "url":"http:\/\/www.postbin.org\/1ijyltn",
-  "trigger_type":"change",
-  "environment_id":96779,
-  "stream_id":"two"
+    "data":{
+          "url":"http:\/\/www.postbin.org\/1ijyltn",
+          "trigger_type":"change",
+          "environment_id":96779,
+          "stream_id":"two"
+},
+    "headers":{
+        "content-type": "application/json",
+        "X-ApiKey": "bZEYm4Ws0V1pKAg8SOWjD_-V156SAKw4MmNNMkhGZzFTQT0g"
+    }
 }

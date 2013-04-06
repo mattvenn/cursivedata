@@ -17,6 +17,8 @@ import signal
 import serial
 import requests
 
+class FeedParseError(Exception):
+    pass
 
 def get_robot_config():
     status_commands=["j"]
@@ -77,19 +79,17 @@ def update_robot_dimensions():
       height=m.group(1)
       m=re.search('^w: ([0-9.]+)mm',response,re.M)
       width=m.group(1)
-    except:
-      print "couldn't parse robot's output:", response
-      return
-      
-    
+    except AttributeError:
+      raise FeedParseError("couldn't parse robot's output:%s" % response)
+
     payload = {
-        'width': width,
-        "height": height,
-        "side_margin": side_margin,
-        "top_margin": top_margin,
+        'width': float(width),
+        "height": float(height),
+        "side_margin": float(side_margin) + 10, #hack, robot should return larger than needed
+        "top_margin": float(top_margin) + 100, #hack, robot should be  ypdated
         }
 
-    url = args.apiurl + "endpoint/" + str(args.robot_id) + "/"
+    url = args.url + '/api/v1/endpoint/' + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -104,10 +104,10 @@ def update_robot_status():
     response = send_robot_commands(status_commands)
 
     payload = {
-        'url': response,
+        'status': response,
         }
 
-    url = args.apiurl + "endpoint/" + str(args.robot_id) + "/"
+    url = args.url + '/api/v1/endpoint/' + str(args.robot_id) + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -115,33 +115,43 @@ def update_robot_status():
         print "updated ok"
     else:
         print "failed to update"
-
+    
 def fetch_data():
-    url = args.endpointurl + str(args.robot_id) + "/?consume=true"
+    url = args.url + '/polargraph/endpoint_data/' + str(args.robot_id) + "/?consume=true"
     if args.verbose:
-      print "fetching from ", url
-    try:
-      r = requests.get(url)
-      if r.status_code == 200:
-        gcodes = r.text
-        if args.verbose:
-          print "got answer from server:"
-          print gcodes
-        return gcodes.splitlines()
-      else:
-        raise Exception( "failed with", r.status_code )
+        print "fetching from", url
+    gcodes = []
+    count = 0
+    while True:
+        count += 1
+        try:
+            r = requests.get(url)
+            if r.status_code == 200:
+                new_codes = r.text.splitlines()
+                if args.verbose:
+                    print "%d: got %d gcodes from server" % ( count, len(new_codes) )
+                gcodes = gcodes + new_codes
+            elif r.status_code == 404:
+                #end of the gcodes
+                return gcodes
+            else:
+                print "unexpected server response ", r.status_code 
+                return None
 
-    except requests.exceptions.ConnectionError, e:
-      print >>sys.stderr, e.code
-      print >>sys.stderr, e.read()
-      return None
+        except requests.exceptions.ConnectionError, e:
+            print >>sys.stderr, e
+            return None
 
 
 def finish_serial():
-  if serial_port:
-      print "closing serial"
-      #print serial_port
-      serial_port.close()
+    try:
+        if args.verbose:
+            print "closing serial"
+        serial_port.close()
+    except serial.SerialException:
+        # We are explicitely silencing the error here.
+        # TODO: Log the error message at least.
+        pass
 
 """
 this requires the robot to respond in the expected way, where all responsed end with "ok"
@@ -164,11 +174,7 @@ def read_serial_response():
   return all_lines
 
 def readFile():
-  try:
-    gcode = open(args.file)
-  except:
-    print "bad file"
-    exit(1)
+  gcode = open(args.file)
   gcodes = gcode.readlines()
   return gcodes
 
@@ -251,12 +257,9 @@ if __name__ == '__main__':
     parser.add_argument('--serialport',
         action='store', dest='serialport', default='/dev/ttyACM0',
         help="serial port to listen on")
-    parser.add_argument('--endpointurl',
-        action='store', dest='endpointurl', default='http://mattvenn.net:8080/polargraph/endpoint_data/',
-        help="endpoint url, must end with /")
-    parser.add_argument('--apiurl',
-        action='store', dest='apiurl', default='http://mattvenn.net:8080/api/v1/',
-        help="api url, must end in a /")
+    parser.add_argument('--url',
+        action='store', dest='url', default='http://mattvenn.net:8080',
+        help="url of the server")
     parser.add_argument('--store',
         action='store', dest='store_file', 
         help="file to write robot responses in")
@@ -285,13 +288,15 @@ if __name__ == '__main__':
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
     parser.add_argument('--serial-timeout',
-        action='store', dest='timeout', type=int, default=10,
+        action='store', dest='timeout', type=int, default=20,
         help="timeout on serial read")
     parser.add_argument('--ms',
         action='store', dest='ms', type=int, default=0,
         help="micro step: 0,1,2,3")
 
     args = parser.parse_args()
+
+    print "started ", datetime.datetime.now()
     gcodes = []
 
     #send a file   
@@ -306,9 +311,8 @@ if __name__ == '__main__':
 
     if not args.norobot:
         serial_port = setup_serial()
-    if args.updatedimensions and not args.norobot:
-        update_robot_dimensions()
-    if args.sendstatus and not args.norobot:
+        if args.updatedimensions:
+            update_robot_dimensions()
         update_robot_status()
     if args.dumpconfig:
         (pack,names,values) =  get_robot_config()
@@ -317,22 +321,21 @@ if __name__ == '__main__':
     if args.updateconfig:
         update_robot_config()
 
-    if not args.norobot:
-      if args.setup_robot:
-        setup_robot()
+        if args.setup_robot:
+            setup_robot()
 
-    if len(gcodes):
-      response = send_robot_commands(gcodes)
-    elif args.log:
-      while True:
-        response = read_serial_response()
-    else:
-      print "no gcodes found"
+        if len(gcodes):
+            response = send_robot_commands(gcodes)
+        elif args.log:
+            while True:
+                response = read_serial_response()
+        else:
+            print "no gcodes found"
 
-    if args.store_file:
-      store=open(args.store_file,'w+')
-      store.write(response)
+        if args.store_file:
+            store=open(args.store_file,'w+')
+            store.write(response)
 
-    finish_serial()
+        finish_serial()
 
 

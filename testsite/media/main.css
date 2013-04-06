@@ -1,0 +1,255 @@
+.col {
+	background: green;
+	display: inline-block;
+	width: 23%;
+}
+
+.col h1 {
+	text-align: center;
+}
+
+body {
+	font-family: Helvetica;
+	font-size: 16px;
+}
+
+.smallPic {
+	max-width: 150px;
+	max-height: 150px;
+}
+
+.medPic {
+	max-width: 250px;
+	max-height: 250px;
+}
+
+.bigPic {
+	max-width: 400px;
+	max-height: 5000px;
+}
+
+.borderImage {
+	border: 1px solid #555;
+}
+
+.bigList{
+	padding: 10px;
+}
+.bigListTitle {
+	font-size: 200%;
+	font-weight: bold;
+}
+
+.bigListItem {
+	padding: 10px;
+	vertical-align: top;
+	border: 2px solid #bbb;
+	margin: 15px;
+	background: #eee;
+}
+
+.bigListInfo {
+	display:inline-block;
+	width=300px;
+	vertical-align: top;
+	margin-right: 30px;
+}
+
+.bigListPic {
+	display:inline-block;
+	vertical-align: top;
+	margin-right: 30px;
+}
+
+.bigListSublist {
+	display:inline-block;
+	min-height: 190px;
+	vertical-align: top;
+}
+
+.bigListSublistItem {
+}
+.bigListSublistTitle {
+	text-align: left;
+	font-size: 130%;
+	font-weight: bold;
+	padding-left: 50px;
+	color: #444;
+}
+
+.outputContainer {
+	display: inline-block;
+	background: #eee;
+	font-size: 80%;
+	padding: 10px;
+	text-align: center;
+}
+.mainOutput {
+	display: inline-block;
+	background: #eee;
+	padding: 10px;
+	text-align: center;
+	vertical-align: top;
+}
+.mainOutput h3 {
+	padding: 0px;
+	margin: 0px;
+	color: #444;
+}
+
+.outputBlock {
+	display: inline-block;
+	text-align: center;
+}
+
+.controlPanel {
+	display: inline-block;
+	background: #eee;
+	vertical-align: top
+}
+
+.controlColumn {
+	display: inline-block;
+	background: #eee;
+	padding: 8px;
+	max-width: 300px;
+	vertical-align: top;
+}
+
+.controlDescription {
+	background: #dbb;
+	vertical-align: top;
+	padding: 5px;
+}
+
+.description {
+	font-style: italic;
+	font-family: serif;
+	color: #444;
+	padding: 10px;
+	padding-top: 0px;
+}
+
+.objectTitle {
+	font-weight: bold;
+	font-size: 140%;
+	display: inline-block;
+}
+
+.objectType {
+	font-weight: bold;
+	font-size: 110%;
+	font-style: italic;
+	float: right;
+	color: #888;
+}
+
+.objectInfo {
+	font-style: italic;
+	font-family: serif;
+	color: #a55;
+}
+
+.inputForm {
+	margin: 10px;
+	text-align: right;
+}
+
+.parameterForm {
+}
+
+.actionForm {
+}
+.formBlock {
+	padding: 6px;
+	margin: 0px;
+	margin-bottom: 15px;
+	background: #ddd;
+}
+
+.parameterForm .formBlock {
+	background: #ddf;
+}
+.actionForm .formBlock {
+	background: #dfd;
+}
+
+.formSubBlock {
+	padding-left: 8px;	
+	padding-right: 18px;	
+}
+
+.formBlockTitle {
+	font-weight: bold;
+	font-size: 120%;
+}
+.formBlockSubTitle {
+	font-weight: bold;
+	font-size: 100%;
+}
+
+.formBlock label {
+}
+.inputForm p {
+	margin: 2px;
+}
+
+.formParamDescription {
+	font-style: italic;
+	font-size: 70%
+}
+
+.inputForm [type=submit] {
+	font-weight: bold;
+	font-size: 200%;
+	padding: 2px;
+}
+
+.cosmTrigger {
+	border: 1px solid grey; 
+	margin: 3px;
+	padding: 3px;
+}
+
+.cosmInfo {
+	width: 230px;
+	display: inline-block;
+}
+.cosmAction {
+	width: 130px;
+	display: inline-block;
+}
+
+.subObject {
+	border: 2px solid #ccc;
+	background: #ccc;
+	color: #666;
+	margin: 8px;
+	padding: 6px;
+}
+
+.dataDisplay {
+	background: #ccc;
+	max-width: 300px;
+	font-size: 80%;
+}
+
+.dataEntry {
+	border: 1px solid #aaa;
+}
+
+.dataTime {
+	display: block;
+	width: 100%;
+	text-align: left;
+}
+
+.dataData {
+	font-size: 80%;
+}
+
+.codeInput textarea{
+	background: #444;
+	font-family: "Lucida Console", Monaco, monospace;
+	color: #ccc;
+}

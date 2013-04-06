@@ -5,39 +5,50 @@ Created on 6 Jan 2013
 '''
 import time
 from pysvg.parser import parse
-import polargraph.parse_gcode
 import sys
-import subprocess
 import cairosvg
+from xml.parsers.expat import ExpatError
 
 
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
 def append_svg_to_file( fragment_file, main_file ):
-    try :
+    try:
         svg_main = parse(main_file)
         svg_frag = parse(fragment_file)
+        svg_id = int(time.time())
         for e in svg_frag.getAllElements():
+            try:
+                e.set_id(svg_id)
+                e.set_class("frame")
+            except AttributeError:
+                pass
             svg_main.addElement( e )
         svg_main.save(main_file)
-    except Exception as e:
-        print "Coudlnt' read input file:",fragment_file,e
+    except (ExpatError, IOError) as e:
+        print "couldn't open either %s or %s: %s" % (fragment_file,main_file,e)
+        raise
+    clear_blank_lines(main_file)
 
-#use pycam and parse_gcode to turn svg into robot style files
-def convert_svg_to_gcode( endpoint,generator_params,svgfile, polarfile ):
-    try :
-        gcodefile="/tmp/tmp.gcode" #should be unique for process
-	pycam="/home/polarsite/pycam-0.5.1/pycam"
-        pycam_args = [pycam, svgfile, "--export-gcode=" + gcodefile, "--process-path-strategy=engrave"]
-        result = subprocess.call(pycam_args)
-        polargraph.parse_gcode.parse(endpoint,generator_params,gcodefile,polarfile)
-    except Exception as e:
-        print "Coudlnt' read input SVG file to make GCODE:",svgfile,e
+def is_blank_line(line):
+    if line == "\n":
+        return True
+    return False
+
+def clear_blank_lines(main_file):
+    print "cleaning blank lines from ", main_file
+    f = open(main_file)
+    lines = f.readlines()
+    f.close()
+    noblanks = [ x for x in lines if x != '\n' ]
+    f = open(main_file,'w')
+    f.writelines(noblanks)
+    f.close()
 
 
 def convert_svg_to_png( svgfile, pngfilename ):
     with open( pngfilename, 'w+') as png_file:
-        print "Writing PNG file:",pngfilename," from ",svgfile," got",str(png_file)
+        #print "Writing PNG file:",pngfilename," from ",svgfile," got",str(png_file)
         cairosvg.svg2png(url=svgfile,write_to=png_file)
 
 def get_temp_filename(extension):

@@ -1,0 +1,24 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
+</head>
+<body onload="load()">
+	<div class="controlPanel">
+		<div class="formBlock">
+			<form action="{% url polargraph:create_generator %}" method="POST">
+				{% csrf_token %}
+				<div class="formBlockTitle">Source</div>
+				<p>{{create.source_id.label}}<br/>{{ create.source_id }} </p>
+				<p>{{create.source_file.label}}<br/>{{ create.source_file }} </p>
+				<div class="formBlockTitle">Settings</div>
+				<p>{{create.name.label}}<br/>{{ create.name }} </p>
+				<p>{{create.module_name.label}}<br/>{{ create.module_name }} </p>
+				<p>{{create.description.label}}<br/>{{ create.description }} </p>
+				<div style="background: #f88">
+				{{ create.errors }}
+				</div>
+				<input type="submit" value="Create" name="action" />
+			</form>
+		</div>
+	</div>
+</body>

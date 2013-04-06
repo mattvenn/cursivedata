@@ -6,13 +6,12 @@ Created on 12 Jan 2013
 
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
 from imp import find_module, load_module
-import json
-import csv
-import polargraph.svg as svg
-import requests
 import jsonfield
+from polargraph.models.drawing_state import StoredOutput, DrawingState
+from django.utils.datetime_safe import datetime
+from polargraph.models.data import DataStore
+from polargraph.drawing import Drawing
 
 
 #Points to some code and associated parameters which are needed to process data
@@ -22,13 +21,28 @@ class Generator( models.Model ) :
     description = models.CharField(max_length=2000,default="Unknown")
     image = models.CharField(max_length=200,default="No Image")
     file_path = models.CharField(max_length=200,default="./generators")
-    module_name = models.CharField(max_length=200)
+    module_name = models.CharField(max_length=200,unique=True)
+    last_updated = models.DateTimeField("Last Updated",default=timezone.now())
+    last_used = models.DateTimeField("Last Used",default=timezone.now())
+    
     module = None
-    def init(self) :
-        self.module = self.get_file( self.module_name )
-        for param in self.module.get_params():
-            self.add_or_update_param( param )
+    def __init__(self, *args, **kwargs):
+        super(Generator, self).__init__(*args, **kwargs)
+        #put this in so that when we add parameters we'll have a valid id for them to use as a foreign key
+        should_work = True
+        if not self.id: 
+            self.save()
+            should_work = False
+        try: #Its OK to for the module loading to not work if we haven't been saved
+            self.module = self.get_file( self.module_name )
+            for param in self.module.get_params():
+                self.add_or_update_param( param )
+        except Exception as e:
+            if should_work :
+                #raise e
+                print "Empty module",e
         return
+
     #Processes a given chunk of data to return some SVG
     def process_data( self, svg_document, data, params, state ) :
         return self.module.process(svg_document, data,params,state)
@@ -36,6 +50,17 @@ class Generator( models.Model ) :
     #Checks to see if the current data is enough to run
     def can_run( self, data, params, state ) :
         return self.module.can_run(data,params,state)
+    
+    #Processes a given chunk of data to return some SVG
+    def begin_drawing( self, svg_document, params, state ) :
+        return self.module.begin(svg_document, params,state)
+    
+    #Processes a given chunk of data to return some SVG
+    def end_drawing( self, svg_document, params, state ) :
+        return self.module.end(svg_document, params,state)
+    
+    def get_filename(self):
+        return self.file_path + "/" + self.module_name + ".py"
     
     def __unicode__(self):
         return self.name
@@ -55,9 +80,10 @@ class Generator( models.Model ) :
         f, filename, data = find_module(module_name, ["./generators"])
         return load_module(module_name, f, filename, data)
 
-    def get_state( self ) :
+    def get_state( self, save=True) :
         s = GeneratorState( name=self.name, generator=self )
-        s.save()
+        if save :
+            s.save()
         for p in self.parameter_set.all():
             s.params[p.name] = p.default
         return s
@@ -77,10 +103,26 @@ class Generator( models.Model ) :
             if p.name == name:
                 return p
         return None
-            
     
+    #Gets the current values for all parameters as a dict
+    def get_param_dict(self,param_values):
+        params = []
+        for param in self.parameter_set.all():
+            params.append({"name":param.name,
+                           "description":param.description,
+                           "value":param_values.get(param.name,param.default)})
+        return params
+    
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects.order_by('-modified').filter(generator=self,status="complete",filetype="svg")[start:end]            
+    def update_last_used(self):
+        self.last_used = timezone.now()
+        self.save();
     class Meta:
         app_label = 'polargraph'
+    def __unicode__(self):
+        return "%s (%s)" % (self.name, self.id)
+
 
 #Generators have parameters. These can result in UI elements
 class Parameter( models.Model ) :
@@ -121,3 +163,32 @@ class GeneratorState( models.Model ):
 
     class Meta:
         app_label = 'polargraph'
+
+#Generator should be self explanatory
+#ds_form is a SelectOrMakeDataStore
+#ds_settings is a DataStoreSettings, which can give query params
+#params is a Dict, with:
+## param_<x> for params
+class GeneratorRunner(DrawingState):        
+    def run(self,generator,input_data,input_params,width,height):
+        data = DataStore()
+        data.current = input_data
+        
+        state = generator.get_state(False) 
+        print "State:",state.state
+        params = state.params
+        for (key, value) in input_params.iteritems():
+            params[key] = value
+        internal = {}
+        doc = self.create_svg_doc(width, height)
+        drwg = Drawing( doc )
+        generator.begin_drawing( drwg, params, internal )
+        generator.process_data(  drwg, data, params, internal )
+        generator.end_drawing( drwg, params, internal )
+        fn = self.filename()
+        doc.save(fn)
+        return fn;
+        
+    
+    def filename(self):
+        return "data/working/tmp.svg"

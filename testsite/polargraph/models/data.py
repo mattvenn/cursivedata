@@ -26,22 +26,15 @@ class DataStore( models.Model ) :
     name = models.CharField(max_length=200)
     current_data = models.CharField(max_length=20000,default=json.dumps([]))
     current = None
-    historic_data = models.CharField(max_length=200000,default=json.dumps([]))
+    historic_data = models.CharField(max_length=40000,default=json.dumps([]))
     available = models.BooleanField(default=False)
     fresh=False
     
     #After the data's been used, add it to the history and clear the current data
     def clear_current(self) : 
         current = json.loads(self.current_data)
-        try:
-            hist = json.loads(self.historic_data)
-        except Exception as e:
-            print "Couldn't load history:", e
-            hist = []
-        try:
-            self.historic_data=json.dumps(hist+current)
-        except Exception as e:
-            print "Couldn't save history",e
+        hist = json.loads(self.historic_data)
+        self.historic_data=json.dumps(hist+current)
         self.current = []
         self.store_current(self.current)
         self.available=False
@@ -66,20 +59,40 @@ class DataStore( models.Model ) :
             self.deserialise_time(entry)
         return historic
     
+    def get_historic_size(self):
+        return len( self.get_historic() )
+    def get_current_size(self):
+        return len( self.get_current() )
+    
+    def query(self,max_records=None,max_time=None,min_time=None):
+        data = self.get_historic() + self.get_current() 
+        print "Orig size", len(data)
+        if max_time :
+            data = filter(lambda d: d["time"].toordinal() < max_time.toordinal(), data)
+        if min_time :
+            data = filter(lambda d: d["time"].toordinal() > min_time.toordinal(), data)
+        if max_records :
+            if (len(data) > max_records ):
+	            data = data[-max_records:]
+        print "Final size", len(data)
+        return data
+    
     #Adds the data to the current data and sets available to true
     #Data must be a list of dicts 
     def add_data(self,data):
         self.update_current_data(data)
-        print "Pre-Pipeline Data",self.get_current()
-        print "Data Is:",self.id
-        print "Data Hash",hash(self)
+        print "Pre-Pipeline Data length:",len(self.get_current())
+        print "Datastore ID is:",self.id
+#        print "Data Hash",hash(self)
         self.clean()
         if hasattr(self, 'pipeline'):
+            print "Trying to run pipline: ",self.pipeline
             self.pipeline.update(self)
-        print "Post-Pipeline Data",self.get_current()
+        print "Post-Pipeline Data length:",len(self.get_current())
     
     def update_current_data(self,data):
         print "Adding data:",data
+#        import pdb; pdb.set_trace()
         self.available=True
         self.fresh=True
         for entry in data :
@@ -88,12 +101,30 @@ class DataStore( models.Model ) :
         total = cur + data
         self.store_current(total)
         self.save()
-        print "Saved data:",self.current_data
+        print "Saved data length:",len(self.current_data)
+    
+    def load_from_csv(self,data, time_field=None):
+        reader = csv.DictReader(data,skipinitialspace=True)
+        data = []
+        print "Adding data to store",str(self)
+        for row in reader:
+            print "Row:",row
+            if time_field :
+                row['time_ser'] = row[time_field]
+                del row[time_field]
+            data.append(row)
+        self.update_current_data(data)
+    
+    def load_from_csv_file(self,datafile,time_field=None):
+        with open(datafile, 'rb') as csvfile:
+            self.load_from_csv(csvfile,time_field)
+        
     
     def clear_all(self):
         self.historic_data = json.dumps([])
         self.current_data = json.dumps([])
         self.current = []
+        self.save()
         
     def mark_stale(self):
         self.fresh=False
@@ -120,13 +151,16 @@ class DataStore( models.Model ) :
             del entry['time']
     
     def deserialise_time(self,entry):
-        date_str = entry.get('time',timezone.now().isoformat())
-        entry['time'] = dateutil.parser.parse(date_str)
         if entry.has_key('time_ser'):
+            date_str = entry.get('time_ser',timezone.now().isoformat())
+            entry['time'] = dateutil.parser.parse(date_str)
             del entry['time_ser']
+        elif entry.has_key('time'):
+            date_str = entry.get('time',timezone.now().isoformat())
+            entry['time'] = dateutil.parser.parse(date_str)
     
     def __unicode__(self):
-        return self.name
+        return "%s (%s)" % (self.name, self.id)
 
     class Meta:
         app_label = 'polargraph'

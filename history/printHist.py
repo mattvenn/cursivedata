@@ -16,5 +16,8 @@ datapoints = len(d[first_key])
 for line in range(0, datapoints):
   print "%s," % d[first_key][line]["at"],
   for key in d.keys():
-    print "%s," % d[key][line]["value"],
+    try:
+      print "%s," % d[key][line]["value"],
+    except:
+      print 0,
   print

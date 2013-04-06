@@ -4,6 +4,7 @@ Created on 12 Jan 2013
 @author: dmrust
 '''
 
+import traceback
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -15,6 +16,7 @@ import requests
 import polargraph.models.cosm
 from polargraph.models.generator import Generator,GeneratorState
 from polargraph.models.data import DataStore
+from polargraph.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
@@ -22,31 +24,29 @@ import shutil
 import time
 import os
 
+from polargraph.drawing import Drawing
+from polargraph.models.cosm import COSMSource
+
+
 
 #A complete pipeline from data source through to a running algorithm
-class Pipeline( models.Model ) :
+class Pipeline( DrawingState ) :
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000,default="",blank=True)
     generator = models.ForeignKey( Generator)
     data_store = models.OneToOneField( DataStore)
     state = models.OneToOneField( GeneratorState)
     endpoint = models.ForeignKey( "Endpoint")
-    run_id = models.IntegerField(default=0)
-    last_updated = models.DateTimeField("Last Updated",default=datetime.now())
-    full_svg_file = models.CharField(max_length=200,blank=True)
-    last_svg_file = models.CharField(max_length=200,blank=True)
-    full_image_file = models.CharField(max_length=200,blank=True)
-    last_image_file = models.CharField(max_length=200,blank=True)
-    img_width = models.IntegerField(default=500)
-    img_height = models.IntegerField(default=500)
+
+    print_top_left_x = models.FloatField(default=0)
+    print_top_left_y = models.FloatField(default=0)
+    print_width = models.FloatField( default=500 )
+    
     def __unicode__(self):
         return self.name
     def __init__(self, *args, **kwargs):
         super(Pipeline, self).__init__(*args, **kwargs)
-        try:
-            self.ensure_full_document()
-        except Exception as e:
-            print "Coudln't make document ",e
+        self.ensure_full_document()
     
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
@@ -54,128 +54,87 @@ class Pipeline( models.Model ) :
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state
-        self.generator.init()
-        #print "Pipeline Data:",self.data_store.get_current()
-        #print "Data:",data.get_current()
-        #print "Pipeline DataID:",self.data_store_id
-        #print "Pipeline DHash:",hash(self.data_store)
+        print "Asking generator if it can run"
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
-            svg_document = pysvg.structure.svg(width=self.img_width,height=self.img_height)
-            self.generator.process_data( svg_document, data, params, internal_state )
+            svg_document = self.create_svg_doc()
+            self.generator.process_data( Drawing(svg_document), data, params, internal_state )
             self.state.save()
-            
             data.clear_current()
-            
-            #Save the partial file and make a PNG of it
-            self.last_svg_file = self.get_partial_svg_filename()
-            svg_document.save(self.last_svg_file)
-            self.update_latest_image()
-            
-            print "Saved update as:",self.last_image_file
-            self.ensure_full_document()
-            
-            # Add SVG to full output history
-            svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
-            self.update_full_image()
-            
-            print "Saved whole image as:",self.full_image_file
-            print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
-            self.endpoint.add_svg( self.last_svg_file,params)
-            self.last_updated = datetime.now()
-            self.save()
+            self.add_svg( svg_document )
+            self.generator.update_last_used()
+            print "Generator run OK!"
+        else:
+            print "Generator not ready to run"
     
-    def get_partial_svg_filename(self):
-        return self.get_filename("partial", "svg")
-    def get_full_svg_filename(self):
-        return self.get_filename("complete", "svg")
-    def get_partial_image_filename(self):
-        return self.get_filename("partial", "png")
-    def get_full_image_filename(self):
-        return self.get_filename("complete", "png")
-    def get_filename(self,status,extension):
-        if not self.id > 0:
-            self.save()
-        return "data/working/pipeline_"+str(self.id)+"_"+status+"."+extension
-        
-    def update_size(self,width,height):
-        changed = self.img_width != width or self.img_height != height
-        self.img_width = width
-        self.img_height = height
-        if changed:
-            self.reset()
-        
-    def create_blank_svg(self,filename):
-        doc = pysvg.structure.svg(width=self.img_width,height=self.img_height)
-        build = pysvg.builders.ShapeBuilder()
-        doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
-        doc.save(filename)
-        
-    def update_full_image(self):
-        self.full_image_file = self.get_full_image_filename()
-        svg.convert_svg_to_png(self.full_svg_file, self.full_image_file)
-        StoredOutput.get_output(self, "png", "complete").set_file(self.full_image_file)
-        StoredOutput.get_output(self, "svg", "complete").set_file(self.full_svg_file)
-        
-    def update_latest_image(self):
-        self.last_image_file = self.get_partial_image_filename()
-        svg.convert_svg_to_png(self.last_svg_file, self.last_image_file)
-        StoredOutput.get_output(self, "png", "partial").set_file(self.last_image_file)
-        StoredOutput.get_output(self, "svg", "partial").set_file(self.last_svg_file)
+    def begin(self):
+        self.reset();
+        svg_document = self.create_svg_doc()
+        self.generator.begin_drawing( Drawing(svg_document), self.state.params, self.state.state )
+        self.state.save()
+        self.add_svg( svg_document )
     
-    def ensure_full_document(self,force=False):
-        if self.full_svg_file is None or self.full_svg_file == "" or force:
-            self.full_svg_file = self.get_full_svg_filename()
-            self.create_blank_svg(self.full_svg_file)
-            self.update_full_image()
-            
-    def clear_latest_image(self):
-        self.last_svg_file = self.get_partial_svg_filename()
-        self.create_blank_svg(self.last_svg_file)
-        self.update_latest_image()
-        self.save()
+    def end(self):
+        svg_document = self.create_svg_doc()
+        self.generator.end_drawing( Drawing(svg_document), self.state.params, self.state.state )
+        self.state.save()
+        self.add_svg( svg_document )
+ 
+
+    def add_svg(self, svg_document ):
+        super(Pipeline, self).add_svg(svg_document)
+        print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
+        self.endpoint.input_svg( self.last_svg_file,self)
     
     def reset(self):
-        self.run_id = self.run_id + 1
-        self.ensure_full_document(True)
-        self.clear_latest_image()
+        super(Pipeline, self).reset()
         self.data_store.clear_all()
         self.state.write_state({})
         self.state.save()
-        self.save()
-
-    class Meta:
-        app_label = 'polargraph'
-
-class StoredOutput( models.Model ):
-    endpoint = models.ForeignKey( "Endpoint", blank=True )
-    pipeline = models.ForeignKey( Pipeline, blank=True )
-    generator = models.ForeignKey( Generator, blank=True )
-    run_id = models.IntegerField(default=0)
-    filetype = models.CharField(max_length=10,default="unknown") #svg or png
-    status = models.CharField(max_length=10,default="complete") #complete or partial
-    filename = models.CharField(max_length=200,default="output/none")
-    modified = models.DateTimeField(auto_now=True)
-    
-    @staticmethod
-    def get_output(pipeline,filetype,status):
-        try:
-            return StoredOutput.objects.get(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-        except:
-            return StoredOutput(endpoint=pipeline.endpoint,pipeline=pipeline,generator=pipeline.generator,run_id=pipeline.run_id,filetype=filetype,status=status)
-    
-    def set_file(self,fn):
-        base,extension = os.path.splitext(fn)
-        if extension != "."+self.filetype:
-            print "Warning: got a "+extension+", but was expecting a "+self.filetype
-        self.filename = self.get_filename()
-        shutil.copy2(fn,self.filename)
-        self.save()
-    
-    def get_filename(self):
-        if not self.id > 0:
-            self.save()
-        return "data/output/"+str(self.id)+"_"+self.status+"."+self.filetype
         
+    def get_output_name(self):
+        return "pipeline"
+
+    def get_stored_output(self,output_type,status):
+        try:
+            return StoredOutput.objects.get(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
+        except StoredOutput.DoesNotExist:
+            # XXX: The new object isn't saved. Is this intentional?
+            return StoredOutput(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
+    
+    #Gets recent output which is not the current run
+    def get_recent_output(self,start=0,end=8):
+        return StoredOutput.objects \
+                .order_by('-modified') \
+                .filter(pipeline=self,status="complete",filetype="svg") \
+                .exclude(run_id= self.run_id)[start:end]
+    #Gets all the cosm triggers on this pipeline
+    def get_cosm_triggers(self):
+        return COSMSource.objects.filter(data_store=self.data_store)
+    
+    #Gets the current values for all parameters as a dict
+    def get_param_dict(self):
+        return self.generator.get_param_dict( self.state.params )
+        
+    #Sets up a datastore and generator state for use
+    def init_data(self,force=False,save=True):
+        if (not self.data_store_id) or force:
+            ds = DataStore(name="Data for"+str(self.name))
+            ds.save()
+            self.data_store = ds
+        if (not self.state_id) or force :
+            gs = GeneratorState(name="Data for"+str(self.name), generator=self.generator)
+            gs.save()
+            self.state = gs
+        if save:
+            self.last_updated = timezone.now()
+            self.save()
+        
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.init_data(save=False)
+        super(Pipeline, self).save(*args, **kwargs)
     class Meta:
         app_label = 'polargraph'
+        
+

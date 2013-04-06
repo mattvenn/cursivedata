@@ -54,15 +54,10 @@ class COSMSourceResource(ModelResource):
         print "COSM UPDATE!"
         store_id=int(request.path.split("/")[-2])
         ce = COSMSource.objects.get(id=store_id) #Uuuugh. Sorry!
-        try:
-            print "Trying to get post stuff"
-            data_string = request.POST['body']
-            data = json.loads(data_string)
-        except Exception as e:
-            print "Trying raw data instead"
-            data = json.loads(request.raw_post_data)
-            print "Got data:",data
-        print "Data:",data
+        print "Trying to get post stuff"
+        data_string = request.POST.get('body') or request.raw_post_data
+        data = json.loads(data_string)
+        #    print "Data:",data
         ce.receive_data(data)
         return {"OK":"True"}
     
@@ -80,6 +75,6 @@ class EndpointResource(ModelResource):
         width = endpoint.width
         height = endpoint.height
         print "Width: ",width," Height:",height
-        for p in Pipeline.objects.filter(endpoint=endpoint):
-            p.update_size(width,height)
+        #for p in Pipeline.objects.filter(endpoint=endpoint):
+        #    p.update_size(width,height)
         return res

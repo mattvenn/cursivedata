@@ -4,12 +4,16 @@ import json
 import datetime
 import pprint
 import argparse
+import sys
 
-
-def push_data():
+def push_data( input_data ):
     headers= {'content-type': 'application/json'}
     print "value: ", args.value
-      #how much of this can be got rid of?
+    data = {
+        "input_data": input_data,
+        "name": "UPDATED!"
+        }
+    """
     data = {
       "environment": 
       {
@@ -42,13 +46,15 @@ def push_data():
       "type": "gte",
       "url": "http:\/\/api.cosm.com\/v2\/triggers\/1"
     }
-
     r = requests.post(args.url + str(args.cosmsourceid) + "/",headers=headers,data=json.dumps(data))
+    """
+    r = requests.patch(args.url + str(args.datastore) + "/",headers=headers,data=json.dumps(data))
     print r.status_code
     try:
         pprint.pprint(json.loads(r.text))
     except:
-        print r.text
+        print >>sys.stderr, r.text
+        raise
 
 def calculate_datetime_from_minute():
    now = datetime.datetime.now()
@@ -63,13 +69,13 @@ def calculate_datetime_from_minute():
 
 if __name__ == '__main__':
 
-    default_url = 'http://localhost:8080/api/v1/cosm/'
+    default_url = 'http://localhost:8080/api/v1/datastore/'
 #    'http://mattvenn.net:8080/api/v1/cosm'
 
     parser = argparse.ArgumentParser(description="feed polar files to polargraph robot")
-    parser.add_argument('--cosmsourceid',
-        action='store', dest='cosmsourceid', type=int, default='1',
-        help="the id of the cosm source (not the pipeline)")
+    parser.add_argument('--datastore',
+        action='store', dest='datastore', type=int, default='1',
+        help="the id of the datastore (not the pipeline)")
     parser.add_argument('--value',
         action='store', dest='value', type=float, default='1',
         help="value")
@@ -79,8 +85,23 @@ if __name__ == '__main__':
     parser.add_argument('--minute',
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
+    parser.add_argument('--file',
+        action='store', dest='file', help="historical data")
+    parser.add_argument('--stream-id',
+        action='store', dest='stream_id', help="which stream in historical data")
 
     args = parser.parse_args()
     print args.url
-    timestamp = calculate_datetime_from_minute()
-    push_data()
+
+    if args.file:
+        data = json.load(open(args.file))
+        if data.has_key(args.stream_id):
+            #could we do this all in one go?
+            for line in data[args.stream_id]:
+                print line
+                push_data([{"value":line["value"],"time":line["at"]}],)
+        else:
+            print "no such stream_id, choose from ", data.keys()
+    else:
+        timestamp = calculate_datetime_from_minute()
+        push_data([{"value":args.value,"time":timestamp}],)

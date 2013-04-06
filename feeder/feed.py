@@ -36,17 +36,12 @@ def readResponse(args,serial,timeout=10):
       signal.alarm(0)
       if args.verbose:
         print "<", response,
-    except:
+    except SerialTimeoutException:
       print "timeout %d secs on read" % timeout
       return
 
 def readFile(args):
-
-  try:
-    gcode = open( args.file)
-  except:
-    print "bad file"
-    exit(1)
+  gcode = open( args.file)
   gcodes = gcode.readlines()
   return gcodes
 
@@ -113,23 +108,17 @@ def listenPort(args,serial,sock):
       try:
           print >>sys.stderr, 'connection from', client_address
           while True:
-              try:
-                  data = connection.recv(4096)
-                  if data:
-                    gcodes = data.split("\n")
-                    writeToRobot(args,serial,gcodes)
-                  else:
-                    print >>sys.stderr, 'no more data from', client_address
-                    break
-              except:
-                  e = sys.exc_info()[0]
-                  print e
-                  connection.close()
-                  sock.close()
-                  exit(1)
+              data = connection.recv(4096)
+              if data:
+                  gcodes = data.split("\n")
+                  writeToRobot(args,serial,gcodes)
+              else:
+                  print >>sys.stderr, 'no more data from', client_address
+                  break
       finally:
-        # Clean up the connection
-        connection.close()
+          # Clean up the connection
+          connection.close()
+          sock.close()
 
 
 if __name__ == '__main__':

@@ -176,6 +176,9 @@ if __name__ == '__main__':
       if args.debug:
         print "parsed concat ok"
   except:
+      # TODO: What exception are we handling here?
+      # Until we know, just re-raise the original exception.
+      raise
       if args.debug:
         print "problem parsing concat"
       concat = setup(args)

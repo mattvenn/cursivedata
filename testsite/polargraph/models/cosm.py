@@ -25,16 +25,40 @@ class COSMSource( models.Model ):
     cosm_trigger_id = models.CharField(max_length=50,blank=True)
     url_base = models.CharField(max_length=200,default="http://mattvenn.net:8080")
     cosm_url=models.CharField(max_length=200,default="http://api.cosm.com/v2/triggers/")
+    #Add in the lat/lon to any data recieved
+    add_location = models.BooleanField(default=False)
+    #Use the id of the stream as the variable name
+    use_stream_id = models.BooleanField(default=False)
+    #Add the title of the feed to the data
+    add_feed_title = models.BooleanField(default=False)
+    #Add the id of the feed to the data
+    add_feed_id = models.BooleanField(default=False)
     last_updated = models.DateTimeField("Last Updated",blank=True,null=True)
+    last_value = models.CharField(max_length=200,default="")
     
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
     def receive_data(self,msg):
-        print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
+        #print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
-        self.data_store.add_data([{"time":time, "value":value}])
-        self.last_updated = datetime.now()
+        datapoint = {"time":time}
+        if self.add_location :
+            datapoint['location'] = {}
+            datapoint['location']['lat'] = msg["environment"]["location"]["lat"]
+            datapoint['location']['lon'] = msg["environment"]["location"]["lng"]
+        if self.use_stream_id :
+            stream_id = msg["triggering_datastream"]["id"]
+            datapoint[stream_id] = value
+        else:
+            datapoint['value'] = value
+        if self.add_feed_id :
+            datapoint["feed_id"] = msg["environment"]["id"]
+        if self.add_feed_id :
+            datapoint["feed_title"] = msg["environment"]["title"]
+        self.data_store.add_data([datapoint])
+        self.last_updated = timezone.now()
+        self.last_value = value
         self.save()
         
     def start_trigger(self):
@@ -52,19 +76,22 @@ class COSMSource( models.Model ):
             " from feed:",self.feed_id,", stream:",self.stream_id,", API Key: ",self.api_key
         print "Pointing to URL:",data['url']
         r=requests.post(self.cosm_url,data=json.dumps(data),headers = headers)
-        try:
+        if r.status_code == 201:
             cosm_trigger_id=r.headers['location'].split("/")[-1]
             print "Setup with id:",cosm_trigger_id
             self.cosm_trigger_id=cosm_trigger_id
             self.save()
             return "OK"
-        except Exception as e:
-            print "Coudln't setup COSM trigger:",e
-            print "Sent to url:",self.cosm_url
-            print "Sent data:",json.dumps(data)
-            print "Response:",r
-            print "Headers:",r.headers
-            return r
+        elif r.status_code == 404:
+            print "no such stream id, check stream id"
+        elif r.status_code == 401:
+            print "not authorized, check api key"
+        elif r.status_code == 500:
+            print "no such data stream, check environment id"
+        else:
+            print "unknown error"
+            print r.status_code
+            print json.loads(r.text)
         
     def stop_trigger(self):
         if self.cosm_trigger_id :

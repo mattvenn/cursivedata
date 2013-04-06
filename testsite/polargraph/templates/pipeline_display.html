@@ -1,108 +1,164 @@
-<div style="font-family: helvetica; font-size: 16px">
-{% if pipeline %}
-	<div style="padding:20px">
-		<div style="display:inline-block; border: 2pt solid grey;background: #ddd; padding:10px; vertical-align:top">
-		<div style="display:inline-block; vertical-align:top">
-			<h1>Pipeline: {{ pipeline.name }}</h1>
-			<div style="font-style: italic"> {{pipeline.description}} </div>
-			<div style="font-style: italic">(Data Store: {{pipeline.data_store_id}})</div>
-			<h3>Generator: {{pipeline.generator.name}} ({{pipeline.generator_id}})</h3>
-			
-			<div style="font-style: italic"> {{pipeline.generator.description}} </div>
-			<h3><a href="/polargraph/endpoint/{{pipeline.endpoint.id}}/">Endpoint: {{pipeline.endpoint.name}}</a></h3>
-			<div style="font-style: italic">
-				{{pipeline.endpoint.name}} (id: {{pipeline.endpoint_id}}) is a 
-				{{pipeline.endpoint.device}} at
-				{{pipeline.endpoint.location}}
-				 
+<html>
+<head>
+<script src="{{ MEDIA_URL }}slider.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
+</head>
+<body onload="load()">
+		{% if pipeline %}
+	<div class="controlPanel">
+		<div class="controlColumn">
+			<div class="controlDescription">
+				<div class="objectType">Pipeline</div>
+				<div class="objectTitle">{{ pipeline.name }}</div>
+				<div class="description">{{pipeline.description}}</div>
+				<div class="objectInfo">(Data Store:
+					{{pipeline.data_store_id}})</div>
+				<div class="subObject">
+					<div class="objectType">Generator</div>
+					<div class="objectTitle">
+						<a href="{% url polargraph:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>
+					</div>
+					<div class="description">{{pipeline.generator.description}} </div>
+					<div class="objectInfo">ID: {{pipeline.generator_id}}, last used: {{pipeline.generator.last_used}}</div>
+				</div>
+				<div class="subObject">
+					<div class="objectType">Endpoint</div>
+					<div class="objectTitle">
+						<a href="{% url polargraph:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
+					</div>
+					<div class="description">{{pipeline.endpoint.name}} (id:
+						{{pipeline.endpoint_id}}) is a {{pipeline.endpoint.device}} at
+						{{pipeline.endpoint.location}}</div>
+				</div>
+				<div class="objectInfo">Image size: {{pipeline.img_width}} by {{pipeline.img_height}}</div>
+				<div class="objectInfo">Last update: {{pipeline.last_updated}}</div>
 			</div>
-			Image size: {{pipeline.img_width}} by {{pipeline.img_height}}<br/>
-			Last update: {{pipeline.last_updated}}<br/>
+			<div class="inputForm parameterForm">
+				<div class="formBlock">
+				<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
+					{% csrf_token %}
+						<div class="formBlockTitle">Parameters</div>
+						{% for param in pipeline.get_param_dict %}
+						<p>
+							<label for="param{{param.name}}">{{param.name}}</label> 
+							<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}" />
+							<div class="formParamDescription">{{param.description}}</div>
+						</p>
+						{% endfor %} 
+						<input type="submit" value="Update Parameters" name="action" />
+				</form>
+				</div>
+			</div>
+		</div>
+		<div class="controlColumn">
 			<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
 				{% csrf_token %}
-				<div style="background: #ccffaa; padding:10px;margin:10px;text-align:right">
-				<div style="font-weight:bold">Parameters</div>
-				{% for param in params %}
-					<div>
-						<span>{{param.name}}</span>
-						<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}"/>
-						<div style="font-style: italic;font-size: 70%">{{param.description}}</div>
+				<div class="inputForm actionForm">
+					<div class="formBlock">
+						<div class="formBlockTitle">Controls</div>
+						<input type="submit" value="Reset" name="action" />
+						<input type="submit" value="Begin" name="action" />
+						<input type="submit" value="End" name="action" />
 					</div>
-				{% endfor %}
-				<input type="submit" value="Update Parameters" name="action"/>
+					<div class="formBlock">
+						<div class="formBlockTitle">Layout</div>
+						<div class="formSubBlock">
+							<div class="formBlockSubTitle">Image Size</div>
+							<p>
+								<label for="pipeWidth">Width:</label>
+								<input type="text" name="pipeWidth" id="pipeWidth" value="{{pipeline.img_width}}" /><br /> 
+							</p>
+							<p>
+								<label for="pipeHeight">Height:</label>
+								<input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}" /><br />
+							</p>
+							<input type="submit" value="Auto Size" name="action" />
+							<div class="formParamDescription">Auto size will set the width to the robot's drawing width</div>
+							<input type="submit" value="Update Size" name="action" />
+							<div class="formParamDescription">Changing image size will reset the drawing</div>
+						</div>
+						
+						<div class="formSubBlock">
+							<div class="formBlockSubTitle">Location on the page</div>
+							<p>
+								<label for="xOffset">X Offset</label>
+								<input type="text" name="xOffset" id="xOffset" value="{{pipeline.print_top_left_x}}" /><br /> 
+							</p>
+							<p>
+								<label for="yOffset">Y Offset</label>
+								<input type="text" name="yOffset" id="yOffset" value="{{pipeline.print_top_left_y}}" /><br /> 
+							</p>
+							<p>
+								<label for="printWidth">Width</label>
+								<input type="text" name="printWidth" id="printWidth" value="{{pipeline.print_width}}" />
+							</p>
+							<input type="submit" value="Update Print Location" name="action" /><br />
+							<div class="formParamDescription">
+								Endpoint drawing area is: {{pipeline.endpoint.img_width}}mm by {{pipeline.endpoint.img_height}}mm
+							</div>
+						</div>
+					</div>
+					<div class="formBlock">
+						<span class="formBlockTitle">Add COSM Feed</span>
+						{{ cosm_form.as_p }} <input type="submit" value="Create COSM" name="action" />
+					</div>
+					<div class="formBlock">
+					<span class="formBlockTitle">Existing COSM Triggers</span>
+					{% for cosm in pipeline.get_cosm_triggers %}
+					<div class="cosmTrigger">
+						<div class="cosmInfo">
+							Stream: <a href="https://cosm.com/feeds/{{cosm.feed_id}}">{{cosm.feed_id}}/{{cosm.stream_id}}</a><br/>
+							Updated:
+							{% if cosm.last_updated %} {{cosm.last_updated}}- {{cosm.last_value}} {% else %}
+							Never updated {% endif %}
+							</div>
+						<div class="cosmAction">
+							{% if cosm.is_running %}
+							<button type="submit" value="COSM Disable {{cosm.id}}"
+								name="action">Disable</button>
+							{% else %}
+							<button type="submit" value="COSM Enable {{cosm.id}}"
+								name="action">Enable</button>
+							{% endif %}
+							<button type="submit" value="COSM Delete {{cosm.id}}"
+								name="action">Delete</button>
+						</div>
+					</div>
+					{% endfor %}
+					</div>
 				</div>
 			</form>
-		</div>
-		<div style="display:inline-block;">
-			<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
-				{% csrf_token %}
-				<div style="background: #aaffcc; padding:10px;margin:10px;text-align:right">
-				<div style="font-weight:bold">Controls</div>
-					<input type="submit" value="Reset" name="action"/><br/>
-					<hr/>
-					<input type="text" name="pipeWidth" id="pipeWidth" value="{{pipeline.img_width}}"/>
-					<input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}"/>
-					<input type="submit" value="Update Size" name="action"/><br/>
-					<div style="font-style: italic;font-size: 70%">
-						Changing image size will reset the drawing
-					</div>
-					<hr/>
-			    		{{ cosm_form.as_p }}
-						<input type="submit" value="Create COSM" name="action" />
-					<hr/>
-					<h5>Existing COSM Triggers</h5>
-					{% for cosm in cosm_triggers %}
-					<div style="border: 1px solid grey; margin:3px;padding:3px">
-						<div style="width:230px">
-						Stream: <a href="https://cosm.com/feeds/{{cosm.feed_id}}">{{cosm.feed_id}}/{{cosm.stream_id}}</a>
-						</div>
-						<div style="width:230px; display:inline-block">
-						Updated: 
-						{% if cosm.last_updated %}
-							{{cosm.last_updated}}
-						{% else %}
-							Never updated
-						{% endif %}
-						</div>
-						<div style="width:130px; display:inline-block">
-						{% if cosm.is_running %}
-							<button type="submit" value="COSM Disable {{cosm.id}}" name="action">Disable</button>
-						{% else %}
-							<button type="submit" value="COSM Enable {{cosm.id}}" name="action">Enable</button>
-						{% endif %}
-						<button type="submit" value="COSM Delete {{cosm.id}}" name="action">Delete</button>
-						</div>
-					</div>
-				{% endfor %}
-				</div>
-			</form>
-		</div>
-		</div>
-		
-		
-		<div style="display:inline-block">
-			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
-				<h3>Current Image:<h3>
-				<img max-width="300" max-height="450" src="/{{pipeline.full_svg_file}}"/>
-			</div>
-			<div style="display: inline-block;border: 2pt solid grey;background: #ddd; padding:10px;">
-				<h3>Last Update:<h3>
-				<img max-width="300" max-height="450" src="/{{pipeline.last_svg_file}}"/>
-			</div>
 		</div>
 	</div>
-	
-	<div>
-		<h1>Previous Output</h1>
-		{% for output in output %}
-			<div style="display:inline-block; background: #ccc; padding:10px; text-align:center;">
-				<img src="/{{output.filename}}" max-width="150px" height="150px"/><br/>
-				{{output.modified}}
-			</div>
+	<div class="outputBlock">
+		<div class="mainOutput">
+			<h3> Current Image<h3>
+			<!--<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />-->
+            <!-- fix this terrible shit -->
+            <div style="background:#fff">
+            <embed width="400px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /><br/>
+            </div>
+            <input id="slider" type="range" min="0" class="bigPic" max="0" step="1" onchange="toggleVis()">
+            <input id="rangeVal" type="text" size="8"/><br>
+		</div><br/>
+		<div class="mainOutput">
+			<h3> Last Update <h3>
+			<img class="bigPic latestImage" src="/{{pipeline.last_svg_file}}" />
+		</div>
+	</div>
+	<br/>
+
+	<div class="bigListSubList">
+		<div class="bigListSublistTitle">Previous Output</div>
+		{% for output in pipeline.get_recent_output %}
+		<div class="outputContainer">
+			<img src="/{{output.filename}}" class="smallPic"/><br />
+			{{output.modified}}
+		</div>
 		{% endfor %}
-	</div>	
-	
-{% else %}
-    <h1>Pipeline not found</h1>
-{% endif %}
-</div>
+	</div>
+
+	{% else %}
+	<h1>Pipeline not found</h1>
+	{% endif %}
+</body>
