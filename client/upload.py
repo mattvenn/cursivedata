@@ -1,7 +1,6 @@
 #!/usr/bin/python
-import serial, sys, os
+import serial, sys, os, time
 
-serialPort = "/dev/ttyACM1"
 def reset():
     ser = serial.Serial( 
         port=serialPort, baudrate=1200, 
@@ -16,7 +15,8 @@ def upload():
     os.system("avrdude -patmega32u4 -cavr109 -P%s -b57600 -D -Uflash:w:./%s:i" % (serialPort, hexFile))
 
 if __name__ == '__main__':
+    serialPort = sys.argv[1] #"/dev/ttyACM1"
     reset()
-    time.sleep(2000)
+    time.sleep(2)
     upload()
 
