@@ -321,21 +321,21 @@ if __name__ == '__main__':
     if args.updateconfig:
         update_robot_config()
 
-        if args.setup_robot:
-            setup_robot()
+    if args.setup_robot:
+        setup_robot()
 
-        if len(gcodes):
-            response = send_robot_commands(gcodes)
-        elif args.log:
-            while True:
-                response = read_serial_response()
-        else:
-            print "no gcodes found"
+    if len(gcodes):
+        response = send_robot_commands(gcodes)
+    elif args.log:
+        while True:
+            response = read_serial_response()
+    else:
+        print "no gcodes found"
 
-        if args.store_file:
-            store=open(args.store_file,'w+')
-            store.write(response)
+    if args.store_file:
+        store=open(args.store_file,'w+')
+        store.write(response)
 
-        finish_serial()
+    finish_serial()
 
 
