@@ -2,7 +2,7 @@
 run "manage.py test".
 """
 
-import pdb
+import ipdb
 import datetime
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -20,9 +20,9 @@ from pysvg.parser import parse
 from django.utils import timezone
 import nose.tools as nt
 
-class TestPipeline():
+class TestPipeline(TestCase):
 
-    def setup(self):
+    def setUp(self):
         self.generator = Generator(name="shapes", description="shapes", image="No Image", module_name="test_shape")
         self.generator.save()
     
@@ -37,8 +37,9 @@ class TestPipeline():
         self.end_point.save()
 
         self.pipeline = Pipeline(name="Test Pipeline" ,data_store=self.data_store, generator=self.generator, endpoint=self.end_point,state=self.gen_state, last_updated=timezone.now() )
-        #set to same size as robot
+        self.pipeline.save()
 
+        #set to same size as robot
         self.svg_doc =self.pipeline.create_svg_doc()
         self.drawing = Drawing(self.svg_doc)
 
