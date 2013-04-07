@@ -41,13 +41,13 @@ class Pipeline( DrawingState ) :
     print_top_left_x = models.FloatField(default=0)
     print_top_left_y = models.FloatField(default=0)
     print_width = models.FloatField( default=500 )
-    
-    def __unicode__(self):
-        return self.name
+
     def __init__(self, *args, **kwargs):
         super(Pipeline, self).__init__(*args, **kwargs)
-        self.ensure_full_document()
-    
+
+    def __unicode__(self):
+        return self.name
+
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
     def update( self, data=None ) :

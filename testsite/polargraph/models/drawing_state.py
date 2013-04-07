@@ -131,8 +131,6 @@ class DrawingState( models.Model ):
     def get_full_image_filename(self):
         return self.get_filename("complete", "png")
     def get_filename(self,status,extension):
-        if not self.id > 0:
-            self.save()
         return "data/working/"+self.get_output_name()+"_"+str(self.id)+"_"+status+"."+extension
     def get_output_name(self):
         return "unknown"        
