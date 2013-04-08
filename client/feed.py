@@ -20,6 +20,7 @@ import requests
 class FeedParseError(Exception):
     pass
 
+#queries the robot for all its config
 def get_robot_config():
     status_commands=["j"]
     response = send_robot_commands(status_commands)
@@ -41,6 +42,7 @@ def get_robot_config():
       print "bad data, machine said:", response
       exit(1)
 
+#takes a json config file and loads into the robot
 def load_robot_config():
     config = json.load(open(args.loadconfig)) 
     #check the config is ok
@@ -54,6 +56,7 @@ def load_robot_config():
     #otherwise, ok to go
     load_config(pack,values)
 
+#loads config into the robot
 def load_config(pack,values):
     fmt = "=" + ''.join(pack)
     string = struct.pack(fmt,*values) 
@@ -62,6 +65,7 @@ def load_config(pack,values):
     serial_port.write(string) 
     print read_serial_response()
 
+#update a single value of the robots config. Checks against the robot's config.h
 def update_robot_config():
     print args.updateconfig
     (pack,names,values) = get_robot_config()
@@ -82,17 +86,23 @@ def update_robot_config():
     else:
       print "didn't understand config, needs to be name=value", args.updateconfig
 
+#fetches robot id
+def fetch_robot_id():
+    (pack,names,values) = get_robot_config()
+    index = names.index("id")
+    return str(values[index])
+
 def update_robot_dimensions():
     status_commands=["u"]
     response = send_robot_commands(status_commands)
     try:
-      m=re.search('^top margin: ([0-9.]+)mm',response,re.M)
+      m=re.search('^top margin: ([0-9.]+)',response,re.M)
       top_margin=m.group(1)
-      m=re.search('^side margin: ([0-9.]+)mm',response,re.M)
+      m=re.search('^side margin: ([0-9.]+)',response,re.M)
       side_margin=m.group(1)
-      m=re.search('^h: ([0-9.]+)mm',response,re.M)
+      m=re.search('^h: ([0-9.]+)',response,re.M)
       height=m.group(1)
-      m=re.search('^w: ([0-9.]+)mm',response,re.M)
+      m=re.search('^w: ([0-9.]+)',response,re.M)
       width=m.group(1)
     except AttributeError:
       raise FeedParseError("couldn't parse robot's output:%s" % response)
@@ -104,7 +114,7 @@ def update_robot_dimensions():
         "top_margin": float(top_margin) + 100, #hack, robot should be  ypdated
         }
 
-    url = args.url + '/api/v1/endpoint/' + str(args.robot_id) + "/"
+    url = args.url + '/api/v1/endpoint/' + fetch_robot_id() + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -122,7 +132,7 @@ def update_robot_status():
         'status': response,
         }
 
-    url = args.url + '/api/v1/endpoint/' + str(args.robot_id) + "/"
+    url = args.url + '/api/v1/endpoint/' + fetch_robot_id() + "/"
     headers = {'content-type': 'application/json'}
     r = requests.patch(url, data=json.dumps(payload),headers=headers)
     print r.status_code
@@ -132,7 +142,7 @@ def update_robot_status():
         print "failed to update"
     
 def fetch_data():
-    url = args.url + '/polargraph/endpoint_data/' + str(args.robot_id) + "/?consume=true"
+    url = args.url + '/polargraph/endpoint_data/' + fetch_robot_id() + "/?consume=true"
     if args.verbose:
         print "fetching from", url
     gcodes = []
@@ -299,9 +309,6 @@ if __name__ == '__main__':
     parser.add_argument('--pwm',
         action='store', dest='pwm', type=int, default=80,
         help="pwm to draw")
-    parser.add_argument('--robot-id',
-        action='store', dest='robot_id', type=int, default=1,
-        help="robot's endpoint id")
     parser.add_argument('--speed',
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
@@ -317,6 +324,14 @@ if __name__ == '__main__':
     print "started ", datetime.datetime.now()
     gcodes = []
 
+    #get serial init first, as lots depends on getting data from the robot
+    if not args.norobot:
+        serial_port = setup_serial()
+        if args.updatedimensions:
+            update_robot_dimensions()
+        if args.sendstatus:
+            update_robot_status()
+
     #send a file   
     if args.file:
         gcodes = readFile()
@@ -327,12 +342,7 @@ if __name__ == '__main__':
     if args.server:
         gcodes = fetch_data()
 
-    if not args.norobot:
-        serial_port = setup_serial()
-        if args.updatedimensions:
-            update_robot_dimensions()
-        if args.sendstatus:
-            update_robot_status()
+
     if args.dumpconfig:
         (pack,names,values) =  get_robot_config()
         config = {}
