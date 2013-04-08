@@ -261,7 +261,7 @@ if __name__ == '__main__':
         help="update the server with this robot's dimensions")
     group.add_argument('--update-config',
         action='store', dest='updateconfig',
-        help="update the robot's config")
+        help="update one element of the robot's config")
     group.add_argument('--load-config',
         action='store', dest='loadconfig', 
         help="load a json config into the robot")
