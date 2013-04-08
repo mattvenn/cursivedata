@@ -37,10 +37,12 @@ def process(drawing,data,params,internal_state) :
         #import pdb; pdb.set_trace()
         #if we wrap back round, don't draw the connecting line, just update old x and y
         if x < oldx or (x - oldx) > params.get("SkipDrawTime"):
+            print "not drawing, wrapping"
+            print "x: %d oldx: %d, skip time: %d" % (x, oldx, params.get("SkipDrawTime"))
             oldx = x
             oldy = y
             continue
-        #print "drawing", oldx,oldy,x,y
+        print "drawing", oldx,oldy,x,y
         drawing.line(oldx*x_scale,oldy*y_scale,x*x_scale,y*y_scale)
         oldx = x
         oldy = y
