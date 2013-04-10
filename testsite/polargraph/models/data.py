@@ -97,11 +97,19 @@ class DataStore( models.Model ) :
         self.fresh=True
         for entry in data :
             self.deserialise_time(entry)
-        cur = self.get_current()
-        total = cur + data
-        self.store_current(total)
-        self.save()
-        print "Saved data length:",len(self.current_data)
+        try:
+            cur = self.get_current()
+            total = cur + data
+            self.store_current(total)
+            self.save()
+            print "Saved data length:",len(self.current_data)
+        #this happens because we run out of space FIXME!
+        except ValueError:
+            print "problem with current data! - wiping it"
+            self.clear_all()
+            self.save()
+
+
     
     def load_from_csv(self,data, time_field=None):
         reader = csv.DictReader(data,skipinitialspace=True)
