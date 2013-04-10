@@ -58,8 +58,11 @@ class COSMSourceResource(ModelResource):
         data_string = request.POST.get('body') or request.raw_post_data
         data = json.loads(data_string)
         #    print "Data:",data
-        ce.receive_data(data)
-        return {"OK":"True"}
+        try:
+            ce.receive_data(data)
+            return {"OK":"True"}
+        except Exception, e:
+            print ">>cosm update failed!", e
     
 class EndpointResource(ModelResource):
     class Meta:
