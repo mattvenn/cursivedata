@@ -90,9 +90,9 @@ class DataStore( models.Model ) :
             self.pipeline.update(self)
         print "Post-Pipeline Data length:",len(self.get_current())
     
+    #this throws an error when its fields get too long, but the error is supressed somewhere
     def update_current_data(self,data):
         print "Adding data:",data
-#        import pdb; pdb.set_trace()
         self.available=True
         self.fresh=True
         for entry in data :
@@ -120,6 +120,10 @@ class DataStore( models.Model ) :
             self.load_from_csv(csvfile,time_field)
         
     
+    def clear_historic_data(self):
+        self.historic_data = json.dumps([])
+        self.save()
+        
     def clear_all(self):
         self.historic_data = json.dumps([])
         self.current_data = json.dumps([])
