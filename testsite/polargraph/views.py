@@ -111,6 +111,7 @@ def show_endpoint(request, endpointID):
         act = request.POST.get('action',"none")
         if act == "Calibrate":
             print "Calibrating..."
+            endpoint.calibrate()
         elif act == "Reset":
             print endpoint.reset()
         elif act == "Resume":

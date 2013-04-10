@@ -227,6 +227,14 @@ class Endpoint( DrawingState ):
         n.served = True
         n.save()
 
+    def calibrate(self):
+        so = GCodeOutput(endpoint=self)
+        so.save()
+        print "creating gcode in ", so.get_filename()
+        f = open(so.get_filename(),'w')
+        f.write("c\n")
+        f.close()
+         
     def resume(self):
         self.paused = False
         self.save()
