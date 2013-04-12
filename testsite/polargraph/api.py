@@ -75,9 +75,5 @@ class EndpointResource(ModelResource):
     def obj_update(self, bundle, request=None, **kwargs):
         res = super(EndpointResource, self).obj_update(bundle, request, **kwargs)
         endpoint = bundle.obj
-        width = endpoint.width
-        height = endpoint.height
-        print "Width: ",width," Height:",height
-        #for p in Pipeline.objects.filter(endpoint=endpoint):
-        #    p.update_size(width,height)
+        print "Width: ",endpoint.width," Height:",endpoint.height," top margin:",endpoint.top_margin," side margin:", endpoint.side_margin
         return res
