@@ -110,8 +110,8 @@ def update_robot_dimensions():
     payload = {
         'width': float(width),
         "height": float(height),
-        "side_margin": float(side_margin) + 10, #hack, robot should return larger than needed
-        "top_margin": float(top_margin) + 100, #hack, robot should be  ypdated
+        "side_margin": float(side_margin) + 5, #hack, robot should return larger than needed
+        "top_margin": float(top_margin) + 5, #hack, robot should be  ypdated
         }
 
     url = args.url + '/api/v1/endpoint/' + fetch_robot_id() + "/"
