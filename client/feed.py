@@ -208,6 +208,7 @@ def setup_serial():
     serial_port=serial.Serial()
     serial_port.port=args.serialport
     serial_port.timeout=args.timeout
+    serial_port.writeTimeout = args.timeout
     serial_port.baudrate=args.baud
     serial_port.open()
   except IOError, e:
