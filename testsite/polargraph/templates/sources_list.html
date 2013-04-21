@@ -11,14 +11,11 @@
 				<div class="description">last updated: {{source.last_updated}} with {{source.last_value}}.</div>
                 <div>link: <a href="https://cosm.com/feeds/{{source.feed_id}}">{{source.feed_id}}/{{source.stream_id}}</a></div>
         </h4>
-    </div>
     {% endfor %}
 {% else %}
     <div class="row">
     <h1>No sources are available.</h1>
-        <h4 class="subheader">
-				<div class="description"><a href="{% url polargraph:create_source %}">Create a new source</a></div>
-        </h4>
-    </div>
 {% endif %}
+        <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_source %}">Create a new source</a></div> </h4>
+    </div>
 {% endblock %}

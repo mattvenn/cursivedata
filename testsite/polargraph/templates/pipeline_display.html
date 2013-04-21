@@ -3,12 +3,12 @@
 {% block content %}
 
 		{% if pipeline %}
-  <div class="row">
-    <h2>{{pipeline.name}}</h2>
-        <h4 class="subheader">
-        <div class="objectInfo">{{pipeline.description}}</div>
+      <div class="row">
+        <h2>{{pipeline.name}}</h2>
+            <h4 class="subheader">
+            <div class="objectInfo">{{pipeline.description}}</div>
         </h4>
-  </div>
+      </div>
 
 	<div class="controlPanel">
 		<div class="controlColumn">
@@ -107,29 +107,7 @@
 						<span class="formBlockTitle">Add COSM Feed</span>
 						{{ cosm_form.as_p }} <input class="button" type="submit" value="Create COSM" name="action" />
 					</div>
-					<div class="formBlock">
-					<span class="formBlockTitle">Existing COSM Triggers</span>
-					{% for cosm in pipeline.get_cosm_triggers %}
-					<div class="cosmTrigger">
-						<div class="cosmInfo">
-							Stream: <a href="https://cosm.com/feeds/{{cosm.feed_id}}">{{cosm.feed_id}}/{{cosm.stream_id}}</a><br/>
-							Updated:
-							{% if cosm.last_updated %} {{cosm.last_updated}}- {{cosm.last_value}} {% else %}
-							Never updated {% endif %}
-							</div>
-						<div class="cosmAction">
-							{% if cosm.is_running %}
-							<button class="button" type="submit" value="COSM Disable {{cosm.id}}"
-								name="action">Disable</button>
-							{% else %}
-							<button class="button" type="submit" value="COSM Enable {{cosm.id}}"
-								name="action">Enable</button>
-							{% endif %}
-							<button class="button" type="submit" value="COSM Delete {{cosm.id}}"
-								name="action">Delete</button>
-						</div>
 					</div>
-					{% endfor %}
 					</div>
 				</div>
 			</form>

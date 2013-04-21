@@ -30,12 +30,13 @@
           </li>
 		{% endfor %}
     </ul>
-</div>
-		{% endfor %}
+    </div>
+    {% endfor %}
 
 {% else %}
   <div class="row">
     <h2>No robots found</h2>
-  </div>
+    </div>
 {% endif %}
+        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_endpoint %}">Create a new endpoint</a></div> </h4> </div>
 {% endblock %}

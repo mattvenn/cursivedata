@@ -1,79 +1,85 @@
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Create a source{% endblock %}
+{% block content %}
+
 {% if generator %}
-			<form action="{% url polargraph:show_generator generator.id %}" method="POST" enctype="multipart/form-data">
-				{% csrf_token %}
-	<div class="controlPanel">
-		<div class="controlColumn">
-			<div class="controlDescription">
-				<div class="objectType">Generator</div>
-				<div class="objectTitle">{{ generator.name }}</div>
-				<div class="description"> {{generator.description}} </div>
-				<div class="objectInfo"> Last Used: {{generator.last_used}} </div>
-				<div class="objectInfo"> Last Changed: {{generator.last_updated}} </div>
-			</div>
-			
-			<div class="inputForm actionForm">
-				<div class="formBlock">
-					<div class="formBlockTitle">Data Store</div>
+  <div class="row">
+    <h2>Edit generator</h2>
+  </div>
+  <div class="row">
+        <form action="{% url polargraph:show_generator generator.id %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="objectType">Generator</div>
+            <div class="objectTitle">{{ generator.name }}</div>
+            <div class="description"> {{generator.description}} </div>
+            <div class="objectInfo"> Last Used: {{generator.last_used}} </div>
+            <div class="objectInfo"> Last Changed: {{generator.last_updated}} </div>
+   </div> 
+
+  <div class="row">
+    <h2>datastore</h2>
+    <ul class="block-grid three-up">
+        <li>
 					<p>{{ds_form.data_store_id.label}}{{ ds_form.data_store_id }} </p>
 					<div class="formParamDescription">
 					{% if data_store %}Data store "{{data_store.name}}"<br/>{{data_store.get_current_size}} current / {{data_store.get_historic_size}} historic data.{% else %}None selected.{% endif %}<br/>
 					</div>
 					<input type="submit" value="Update Selection" name="action"/><br/>
-					<hr/>
-					Or create a new DataStore:
+
+                    </li>
+                    <li>
 					<p>{{ds_form.ds_name.label}}{{ ds_form.ds_name }} </p>
 					<input type="submit" value="Create Datastore" name="action" />
-					<hr/>
+                    </li>
+                    <li>
 					<p>{{ds_form.csv_file.label}}{{ ds_form.csv_file }} </p>
 					<input type="submit" value="Import CSV" name="action"/><br/>
-				</div>
-				<div class="formBlock">
-					<div class="formBlockTitle">Data Selection</div>
+                    </li>
+                </ul>
+    </div>
+
+  <div class="row">
+    <h2>data to use</h2>
 					<p>{{select_form.max_records.label}}{{ select_form.max_records }} </p>
 					<p>{{select_form.max_time.label}}{{ select_form.max_time }} </p>
 					<p>{{select_form.min_time.label}}{{ select_form.min_time }} </p>
 					<input type="submit" value="Update Query" name="action" />
 					<div class="formParamDescription">
 					{% if data %}Current size: {{data|length}}{% else %}None selected.{% endif %}<br/>
-					</div>
-				</div>
-				<div class="formBlock">
-					<div class="formBlockTitle">Image Settings</div>
+                    </div>
+   </div>
+  <div class="row">
+  <h2>Image Settings</h2>
 					<p> <label for="width">Img Width</label> <input type="text" name="width" id="width" value="{{width}}" /> </p>
 					<p> <label for="height">Img Height</label> <input type="text" name="height" id="height" value="{{height}}" /> </p>
-				</div>
-				<div class="formBlock">
-					<div class="formBlockTitle">Generator Settings</div>
-					{% for param in params %}
-						<label for="param{{param.name}}">{{param.name}}</label> 
-						<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}" />
-						<div class="formParamDescription">{{param.description}}</div>
-					{% endfor %} 
-				</div>
-			</div>
-		</div>
-	</div>
+    </div>
+  <div class="row">
+  <h2>Generator Settings</h2>
+        {% for param in params %}
+            <label for="param{{param.name}}">{{param.name}} - {{param.description}}</label>
+            <input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}" />
+        {% endfor %} 
+  </div>
+
+  <div class="row">
+  <h2>Generator Python Code</h2>
+
 	<div class="controlPanel" style="min-width:500px; min-height:500px">
-		<input type="submit" value="Save Code" name="action"/>
-		<input type="submit" value="Run" name="action"/><br/>
 		<div class="codeInput">
 		{{ code_form.code_field }}<br>
 		</div>
 		<input type="submit" value="Save Code" name="action"/>
 		<input type="submit" value="Run" name="action"/>
 	</div>
-	<div class="outputBlock">
-		<div class="mainOutput">
-			<h3>Generated image</h3>
-			<img class="bigPic" src="/{% if output %}{{output}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
-		</div>
-		<div>
-			<h3>Data Used</h3>
+  </div>
+
+  <div class="row">
+      <h2>Output</h2>
+        <img class="bigPic" src="/{% if output %}{{output}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+    </div>
+
+  <div class="row">
+        <h2>Data Used</h2>
 			<div class="dataDisplay">
 				{% for datum in data %}
 				<div class="dataEntry">
@@ -82,21 +88,12 @@
 				</div>
 				{%endfor %}
 			</div>
-		</div>
-	</div>
+</div>
 	</form>
-	<br/>
-	<div class="bigListSubList">
-		<div class="bigListSublistTitle">Previous Output</div>
-		{% for output in generator.get_recent_output %}
-		<div class="outputContainer">
-			<img src="/{{output.filename}}" class="smallPic"/><br />
-			{{output.modified}}
-		</div>
-		{% endfor %}
-	</div>
-	
+
 {% else %}
-    <h1>Generator not found</h1>
+  <div class="row">
+    <h2>Generator not found</h2>
+  </div>
 {% endif %}
-</body>
+{%endblock%}

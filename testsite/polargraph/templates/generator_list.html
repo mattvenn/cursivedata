@@ -1,32 +1,30 @@
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}All generators{% endblock %}
+{% block content %}
 {% if generator_list %}
-<div class="bigList">
-	<div class="bigListTitle">Generators</div>
+
     {% for generator in generator_list %}
-    	<div class="bigListItem">
-    		<div class="bigListInfo">
-				<div class="objectTitle"><a href="{% url polargraph:show_generator generator.id %}">{{ generator.name }}</a></div>
+    <div class="row">
+        <h2><a href="{% url polargraph:show_generator generator.id %}">{{ generator.name }}</a></h2>
 				<div class="description"> {{generator.description}} </div>
-				<div class="objectInfo">Last Used: {{generator.last_used}}</div>
-				<div class="objectInfo">Last Edited: {{generator.last_updated}}</div>
-    		</div>
-			<div class="bigListSublist">
-				<div class="bigListSublistTitle">Previous Output</div>
+    </div>
+
+    <div class="row">
+    <ul class="block-grid three-up">
 				{% for output in generator.get_recent_output %}
-					<div class="outputContainer">
-						<img src="/{{output.filename}}" class="smallPic"/><br/>
+                <li>
+						<img src="/{{output.filename}}" />
 						{{output.modified}}
-					</div>
+                </li>
 				{% endfor %}
-			</div>	
-        </div>
+                </ul>
+    </div>
     {% endfor %}
-</div>
+
 {% else %}
-    <h1>No endpoints are available.</h1>
+    <div class="row">
+    <h1>No generators are available.</h1>
+    </div>
 {% endif %}
-</body>
+        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_endpoint %}">Create a new endpoint</a></div> </h4> </div>
+{% endblock %}
