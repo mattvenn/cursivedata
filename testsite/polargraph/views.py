@@ -82,6 +82,18 @@ def create_source(request):
     except COSMSource.DoesNotExist:
         raise Http404
         """
+"""
+    if request.method == 'POST': # If the form has been submitted...
+        form = PipelineCreation(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            pipeline = form.save(commit=False);
+            pipeline.init_data();
+            return HttpResponseRedirect('/polargraph/pipeline/'+str(pipeline.id)+"/") # Redirect after POST
+    else:
+        form = PipelineCreation() # An unbound form
+
+    return render(request, 'pipeline_create.html', { 'form': form,
+"""
 
 def show_pipeline(request, pipelineID):
     try:
@@ -90,6 +102,14 @@ def show_pipeline(request, pipelineID):
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
             pipeline.reset()
+        if act == "Modify":
+            form = PipelineModify(request.POST) # A form bound to the POST data
+            if form.is_valid(): # All validation rules pass
+                #better way of doing this?
+                pipeline.data_store = form.cleaned_data['data_store']
+                pipeline.generator = form.cleaned_data['generator']
+                pipeline.endpoint = form.cleaned_data['endpoint']
+                pipeline.save()
         elif act == "Begin":
             pipeline.begin()
         elif act == "End":
@@ -117,7 +137,8 @@ def show_pipeline(request, pipelineID):
         elif act != "none":
             print "Unknown action:",act
         
-        context = {"pipeline":pipeline}
+        form = PipelineModify(instance=pipeline) # An unbound form
+        context = {"pipeline":pipeline, "form": form}
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404
@@ -371,6 +392,11 @@ class EndpointCreation(ModelForm):
         model = Endpoint
         fields = ( 'name', 'device', 'location' )
         
+
+class PipelineModify(ModelForm):
+    class Meta:
+        model = Pipeline
+        fields = ( 'data_store', 'generator', 'endpoint' )
 
 class PipelineCreation(ModelForm):
     class Meta:
