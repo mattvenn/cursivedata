@@ -12,6 +12,8 @@ urlpatterns = patterns('',
     url(r'^pipeline/(?P<pipelineID>\d+)/$', views.show_pipeline, name='show_pipeline'),
 
     url(r'^sources/?$', views.list_sources, name='list_sources'),
+    url(r'^sources/(?P<sourceID>\d+)/$', views.show_source, name='show_source'),
+    url(r'^sources/create/?$', views.create_source, name='create_source'),
     
     #Do stuff to pipelines
     url(r'^pipeline/create/?$', views.create_pipeline, name='create_pipeline'),

@@ -40,7 +40,24 @@ def list_generators(request):
 
 
 
-def show_pipeline(request, pipelineID):
+def create_source(request):
+    if request.method == 'POST': # If the form has been submitted...
+        form = COSMSourceCreation(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            source = form.save(commit=False);
+            #what is the right way to do this?
+            ds = DataStore(name="Data for feed id " + str(source.feed_id))
+            ds.save()
+            source.data_store_id = ds.id
+            source.save()
+            return HttpResponseRedirect('/polargraph/sources/'+str(source.id)+"/") # Redirect after POST
+    else:
+        form = COSMSourceCreation() # An unbound form
+
+    return render(request, 'source_create.html', {
+        'form': form,
+    })
+    """
     try:
         act = request.POST.get('action',"none")
         if request.method == 'POST' and act == "Create COSM": # If the form has been submitted...
@@ -53,6 +70,22 @@ def show_pipeline(request, pipelineID):
                     'feed_id':"96779",
                     'api_key':"WsH6oBOmVbflt5ytsSYHYVGQzCaSAKw0Ti92WHZzajZHWT0g",
                     }) # An unbound form
+        
+        if act == "Create COSM" and cosm_form.is_valid():
+            if cosm_form.is_valid(): # All validation rules pass
+                cosm_source = cosm_form.save(commit=False);
+                cosm_source.data_store=pipeline.data_store
+                cosm_source.save()
+
+        context = {"source":cosm_source, "cosm_form":cosm_form}
+        return render(request,"source_create.html",context)
+    except COSMSource.DoesNotExist:
+        raise Http404
+        """
+
+def show_pipeline(request, pipelineID):
+    try:
+        act = request.POST.get('action',"none")
         
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
@@ -81,26 +114,6 @@ def show_pipeline(request, pipelineID):
                 if key.startswith("param"):
                     pipeline.state.params[key.replace("param","")]= float(value)
             pipeline.state.save()
-        elif act == "Create COSM" and cosm_form.is_valid():
-            if cosm_form.is_valid(): # All validation rules pass
-                cosm_source = cosm_form.save(commit=False);
-                cosm_source.data_store=pipeline.data_store
-                cosm_source.save()
-        elif re.match("^COSM.*", act) :
-            m = re.match("COSM (\w+) (\d+)", act)
-            cos_act = m.group(1)
-            cos_id = m.group(2)
-            cs = COSMSource.objects.get(id=cos_id)
-            if cos_act == "Enable" :
-                if not cs.is_running():
-                    cs.start_trigger()
-            if cos_act == "Disable" :
-                if cs.is_running():
-                    cs.stop_trigger()
-            if cos_act == "Delete" :
-                if cs.is_running():
-                    cs.stop_trigger()
-                cs.delete()
         elif act != "none":
             print "Unknown action:",act
         
@@ -109,6 +122,27 @@ def show_pipeline(request, pipelineID):
     except Pipeline.DoesNotExist:
         raise Http404
     
+def show_source(request,sourceID):
+    try:
+        act = request.POST.get('action',"none")
+
+        cs = COSMSource.objects.get(id=sourceID)
+        if act == "Enable" :
+            if not cs.is_running():
+                cs.start_trigger()
+        if act == "Disable" :
+            if cs.is_running():
+                cs.stop_trigger()
+        if act == "Delete" :
+            if cs.is_running():
+                cs.stop_trigger()
+            cs.delete()
+            return HttpResponseRedirect('/polargraph/sources') # Redirect after delete
+
+        context = {"source":cs}
+        return render(request,"source_display.html",context)
+    except COSMSource.DoesNotExist:
+        raise Http404
 
 def show_endpoint(request, endpointID):
     try:
@@ -330,4 +364,5 @@ class PipelineCreation(ModelForm):
 class COSMSourceCreation(ModelForm):
     class Meta:
         model = COSMSource
-        fields = ( 'cosm_url', 'feed_id', 'stream_id', 'api_key', 'url_base', 'add_location', 'use_stream_id', 'add_feed_title', 'add_feed_id')
+        #fields = ( 'cosm_url', 'feed_id', 'stream_id', 'api_key', 'url_base', 'add_location', 'use_stream_id', 'add_feed_title', 'add_feed_id')
+        fields = ( 'feed_id', 'stream_id' )

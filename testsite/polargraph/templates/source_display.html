@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Source {{source.id }}{% endblock %}
+{% block content %}
+{% if source %}
+  <div class="row">
+    <h2>Source {{source.id}}</h2>
+  </div>
+
+        <div class="row">
+          <div class="large-12 columns">
+				<div class="description">last updated: {{source.last_updated}} with {{source.last_value}}.</div>
+                <div>link: <a href="https://cosm.com/feeds/{{source.feed_id}}">{{source.feed_id}}/{{source.stream_id}}</a></div>
+			</div>
+			</div>
+		</div>
+		
+  <div class="row">
+    <h2>Controls</h2>
+  </div>
+
+        <div class="row">
+          <div class="large-12 columns">
+				<form action="{% url polargraph:show_source source.id %}" method="POST">
+					{% csrf_token %}
+						<div class="cosmAction">
+							{% if source.is_running %}
+							<button class="button" type="submit" value="Disable"
+								name="action">Disable</button>
+							{% else %}
+							<button class="button" type="submit" value="Enable"
+								name="action">Enable</button>
+							{% endif %}
+							<button class="button" type="submit" value="Delete"
+								name="action">Delete</button>
+				</form>
+            </div>
+        </div>
+	
+
+</div>
+	
+{% else %}
+    <h1>Source not found</h1>
+{% endif %}
+{% endblock %}

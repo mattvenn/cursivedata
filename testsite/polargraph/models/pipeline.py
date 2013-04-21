@@ -34,7 +34,7 @@ class Pipeline( DrawingState ) :
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000,default="",blank=True)
     generator = models.ForeignKey( Generator)
-    data_store = models.OneToOneField( DataStore)
+    data_store = models.ForeignKey( DataStore)
     state = models.OneToOneField( GeneratorState)
     endpoint = models.ForeignKey( "Endpoint")
 
@@ -108,9 +108,11 @@ class Pipeline( DrawingState ) :
                 .order_by('-modified') \
                 .filter(pipeline=self,status="complete",filetype="svg") \
                 .exclude(run_id= self.run_id)[start:end]
+    """
     #Gets all the cosm triggers on this pipeline
     def get_cosm_triggers(self):
         return COSMSource.objects.filter(data_store=self.data_store)
+    """
     
     #Gets the current values for all parameters as a dict
     def get_param_dict(self):
@@ -118,10 +120,12 @@ class Pipeline( DrawingState ) :
         
     #Sets up a datastore and generator state for use
     def init_data(self,force=False,save=True):
+        """
         if (not self.data_store_id) or force:
             ds = DataStore(name="Data for"+str(self.name))
             ds.save()
             self.data_store = ds
+        """
         if (not self.state_id) or force :
             gs = GeneratorState(name="Data for"+str(self.name), generator=self.generator)
             gs.save()
