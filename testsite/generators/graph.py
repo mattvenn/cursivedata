@@ -6,7 +6,7 @@ todo:
 from django.utils.datetime_safe import datetime
 
 def get_x(point,params):
-    return get_minute(point['time']) % params.get("MaxTime")
+    return get_minute(point.date) % params.get("MaxTime")
 
 #turns a date into minutes
 def get_minute(date):
@@ -27,7 +27,7 @@ def process(drawing,data,params,internal_state) :
     
     #Run through all the data points
     for point in data.get_current():
-        y = float(point['value'])
+        y = float(point.data['value'])
         if y > params.get("MaxY"):
             y = params.get("MaxY")
         #flip y

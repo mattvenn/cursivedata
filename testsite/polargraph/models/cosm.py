@@ -42,7 +42,7 @@ class COSMSource( models.Model ):
         #print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
-        datapoint = {"time":time}
+        datapoint = {}
         if self.add_location :
             datapoint['location'] = {}
             datapoint['location']['lat'] = msg["environment"]["location"]["lat"]
@@ -56,7 +56,8 @@ class COSMSource( models.Model ):
             datapoint["feed_id"] = msg["environment"]["id"]
         if self.add_feed_id :
             datapoint["feed_title"] = msg["environment"]["title"]
-        self.data_store.add_data([datapoint])
+        data = {"date":time,"data":datapoint}
+        self.data_store.add_data([data])
         self.last_updated = timezone.now()
         self.last_value = value
         self.save()

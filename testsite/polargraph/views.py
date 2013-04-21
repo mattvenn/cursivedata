@@ -18,6 +18,11 @@ def index(request):
     context = {"pipeline_list":latest_pipelines}
     return render(request,"index.html",context)
 
+def list_sources(request):
+    latest_sources = COSMSource.objects.order_by('-last_updated')[:50]
+    context = {"source_list":latest_sources}
+    return render(request,"sources_list.html",context)
+
 def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
     context = {"pipeline_list":latest_pipelines}
