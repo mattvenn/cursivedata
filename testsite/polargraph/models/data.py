@@ -13,7 +13,9 @@ import csv
 import polargraph.svg as svg
 import requests
 import dateutil.parser
-from copy import copy,deepcopy
+import jsonfield
+
+
 
 
 #This takes in data that's been produced by some process and a) makes current stuff
@@ -24,19 +26,15 @@ from copy import copy,deepcopy
 # When you get the data, all the time fields will be datetime objects
 class DataStore( models.Model ) :
     name = models.CharField(max_length=200)
-    current_data = models.CharField(max_length=20000,default=json.dumps([]))
-    current = None
-    historic_data = models.CharField(max_length=40000,default=json.dumps([]))
     available = models.BooleanField(default=False)
     fresh=False
     
     #After the data's been used, add it to the history and clear the current data
-    def clear_current(self) : 
-        current = json.loads(self.current_data)
-        hist = json.loads(self.historic_data)
-        self.historic_data=json.dumps(hist+current)
-        self.current = []
-        self.store_current(self.current)
+    def clear_current(self):
+        for datapoint in DataPoint.objects.filter(current=True, datastore=self) :
+            datapoint.current=False
+            datapoint.save()
+            
         self.available=False
         self.fresh=False
         self.save()
@@ -47,33 +45,19 @@ class DataStore( models.Model ) :
     # data fields holding doubles
     # For scalar sources, one data field called val
     def get_current(self) : 
-        if not self.current:
-            self.current = json.loads(self.current_data)
-            for entry in self.current :
-                self.deserialise_time(entry)
-        return self.current
+        return DataPoint.objects.filter(current=True, datastore=self)
     
     def get_historic(self):
-        historic = json.loads(self.historic_data)
-        for entry in historic :
-            self.deserialise_time(entry)
-        return historic
+        return DataPoint.objects.filter(current=False, datastore=self)
     
     def get_historic_size(self):
-        return len( self.get_historic() )
+        return DataPoint.objects.filter(current=False, datastore=self).count()
+
     def get_current_size(self):
-        return len( self.get_current() )
+        return DataPoint.objects.filter(current=True, datastore=self).count()
     
     def query(self,max_records=None,max_time=None,min_time=None):
-        data = self.get_historic() + self.get_current() 
-        print "Orig size", len(data)
-        if max_time :
-            data = filter(lambda d: d["time"].toordinal() < max_time.toordinal(), data)
-        if min_time :
-            data = filter(lambda d: d["time"].toordinal() > min_time.toordinal(), data)
-        if max_records :
-            if (len(data) > max_records ):
-	            data = data[-max_records:]
+        data = DataPoint.objects.filter(date__range=[min_time,max_time] , datastore=self)[:max_records]
         print "Final size", len(data)
         return data
     
@@ -96,19 +80,10 @@ class DataStore( models.Model ) :
         self.available=True
         self.fresh=True
         for entry in data :
-            self.deserialise_time(entry)
-        try:
-            cur = self.get_current()
-            total = cur + data
-            self.store_current(total)
-            self.save()
-            print "Saved data length:",len(self.current_data)
-        #this happens because we run out of space FIXME!
-        except ValueError:
-            print "problem with current data! - wiping it"
-            self.clear_all()
-            self.save()
-
+            #Make a new DataPoint with the given time and data
+            datapoint = DataPoint(data=entry["data"],date=entry["date"],current=True,datastore=self)
+            #Save it
+            datapoint.save()
 
     
     def load_from_csv(self,data, time_field=None):
@@ -117,10 +92,16 @@ class DataStore( models.Model ) :
         print "Adding data to store",str(self)
         for row in reader:
             print "Row:",row
+            #Find the time field, get a date, and delete it from the data dict (use now() as a default)
+            #Create a dict with {date=date, data=data} and append
+            datapoint = {}
             if time_field :
-                row['time_ser'] = row[time_field]
+                datapoint['date'] = row[time_field]
                 del row[time_field]
-            data.append(row)
+            else:
+                datapoint['date'] = timezone.now()
+            datapoint['data'] = row
+            data.append(datapoint)
         self.update_current_data(data)
     
     def load_from_csv_file(self,datafile,time_field=None):
@@ -129,23 +110,19 @@ class DataStore( models.Model ) :
         
     
     def clear_historic_data(self):
-        self.historic_data = json.dumps([])
-        self.save()
+        DataPoint.objects.filter(current=False, datastore=self).delete()
         
     def clear_all(self):
-        self.historic_data = json.dumps([])
-        self.current_data = json.dumps([])
-        self.current = []
-        self.save()
+        DataPoint.objects.filter(datastore=self).delete()
         
     def mark_stale(self):
         self.fresh=False
         self.save()
         
+    """ 
     def load_current(self):
         cur = json.loads(self.current_data)
         return cur
-    
     def store_current(self, current ):
         self.current = current or []
         current = deepcopy(self.current)
@@ -171,8 +148,19 @@ class DataStore( models.Model ) :
             date_str = entry.get('time',timezone.now().isoformat())
             entry['time'] = dateutil.parser.parse(date_str)
     
+    """
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.id)
+
+    class Meta:
+        app_label = 'polargraph'
+
+#store data in a separate table
+class DataPoint( models.Model ):
+    data = jsonfield.JSONField(default={})
+    date = models.DateTimeField(default=timezone.now)
+    datastore = models.ForeignKey( DataStore )
+    current = models.BooleanField(default=True)
 
     class Meta:
         app_label = 'polargraph'
