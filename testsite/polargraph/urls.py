@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     
     #Show endpoints
     url(r'^endpoint/?$', views.list_endpoints, name='list_endpoints'),
+    url(r'^endpoint/create/?$', views.create_endpoint, name='create_endpoint'),
     url(r'^endpoint/(?P<endpointID>\d+)/$', views.show_endpoint, name='show_endpoint'),
     
     #Do stuff with endpoints

@@ -117,7 +117,7 @@ def show_pipeline(request, pipelineID):
         elif act != "none":
             print "Unknown action:",act
         
-        context = {"pipeline":pipeline, "cosm_form":cosm_form}
+        context = {"pipeline":pipeline}
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:
         raise Http404
@@ -193,11 +193,11 @@ def create_generator(request):
         
     
 class GeneratorSource(forms.Form):
-    source_id = forms.ModelChoiceField(queryset=Generator.objects.all(),label="Select")
+    source_id = forms.ModelChoiceField(queryset=Generator.objects.all(),label="Base this generator on another one")
     source_file  = forms.FileField(label="Upload new file (not implemented yet)",required=False)
-    name = forms.CharField(label="Human Readable Name",initial="New Generator")
+    name = forms.CharField(label="Name",initial="New Generator")
     description = forms.CharField(label="Describe your generator",initial="This generator does .... ",
-                           widget = forms.widgets.Textarea(attrs={'cols': 80, 'rows': 20}) )
+                           widget = forms.widgets.Textarea(attrs={'cols': 80, 'rows': 1}) )
     module_name = forms.CharField(label="Choose a unique filename",initial="filename")
     
     def clean_module_name(self):
@@ -278,7 +278,7 @@ class SelectOrMakeDataStore(forms.Form):
         self.data_store.save()
     def load_csv(self,file,time_field):
         if self.data_store :
-            data_store.load_from_csv(file.read().split("\n"),time_field=time_field)
+            self.data_store.load_from_csv(file.read().split("\n"),time_field=time_field)
     
 class DataStoreSettings(forms.Form):
     max_time = forms.DateTimeField(label="Data Before",required=False)
@@ -336,6 +336,20 @@ def update(request, pipelineID):
         raise Http404
     return HttpResponse(pipeline.update())
     
+def create_endpoint( request ):
+    if request.method == 'POST': # If the form has been submitted...
+        form = EndpointCreation(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            endpoint = form.save(commit=False);
+            endpoint.save()
+            return HttpResponseRedirect('/polargraph/endpoint/'+str(endpoint.id)+"/") # Redirect after POST
+    else:
+        form = EndpointCreation() # An unbound form
+
+    return render(request, 'endpoint_create.html', {
+        'form': form,
+    })
+
 def create_pipeline( request ):
     if request.method == 'POST': # If the form has been submitted...
         form = PipelineCreation(request.POST) # A form bound to the POST data
@@ -352,12 +366,18 @@ def create_pipeline( request ):
 
 
 
+class EndpointCreation(ModelForm):
+    class Meta:
+        model = Endpoint
+        fields = ( 'name', 'device', 'location' )
+        
+
 class PipelineCreation(ModelForm):
     class Meta:
         model = Pipeline
-        fields = ( 'name', 'description', 'generator', 'endpoint', 'img_width', 'img_height' )
+        fields = ( 'name', 'description', 'data_store', 'generator', 'endpoint', 'img_width', 'img_height' )
         widgets = {
-            'description': Textarea(attrs={'cols': 60, 'rows': 10}),
+            'description': Textarea(attrs={'cols': 60, 'rows': 1}),
             'name': TextInput(attrs={'size': 60}),
         }
 
