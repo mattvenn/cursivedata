@@ -1,0 +1,47 @@
+footer {
+  background-color: black;
+  color: white;
+  padding-top: 3em;
+}
+
+footer .links {
+  width: 30%;
+  float: left;
+}
+
+footer h3 {
+  color: white;
+}
+ 
+.hero-background {
+  background: URL('http://farm9.staticflickr.com/8466/8139078216_ac482a0e75_b.jpg');
+  background-repeat: none;
+ /* width: 100%;*/
+/*  padding-left: 16%;*/
+  height: 500px;
+}
+.top-bar {
+  padding-left: 15%;
+  padding-right: 15%;
+}
+.key-action {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+/* picture stuff */
+.smallPic {
+	max-width: 150px;
+	max-height: 150px;
+}
+
+.medPic {
+	max-width: 250px;
+	max-height: 250px;
+}
+
+.bigPic {
+	max-width: 400px;
+	max-height: 5000px;
+}
+
