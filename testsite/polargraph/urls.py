@@ -10,6 +10,8 @@ urlpatterns = patterns('',
     #Show pipelines
     url(r'^pipeline/?$', views.list_pipelines, name='list_pipelines'),
     url(r'^pipeline/(?P<pipelineID>\d+)/$', views.show_pipeline, name='show_pipeline'),
+
+    url(r'^sources/?$', views.list_sources, name='list_sources'),
     
     #Do stuff to pipelines
     url(r'^pipeline/create/?$', views.create_pipeline, name='create_pipeline'),
