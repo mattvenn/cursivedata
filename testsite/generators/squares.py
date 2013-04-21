@@ -15,12 +15,11 @@ def process(drawing,data,params,internal_state) :
     aggregate = internal_state.get("aggregate",0)
     square_num = int(internal_state.get("square_num",0))
     grid = drawing.get_grid(nx=params.get("Xdiv"),ny=params.get("Ydiv"))
-    key = 'value'
 
     for point in data.get_current():
-        aggregate += float(point[key])
+        aggregate += float(point.data['value'])
         #allow user to determine how fast the graph is drawn again
-        cell_index = get_minute(point['time'])
+        cell_index = get_minute(point.date)
         #work out where to draw
         cell = grid.cell(cell_index)
         cx, cy = cell.cent()
@@ -74,18 +73,12 @@ def get_name() : return "Squares"
 def get_description() : return "every 10 minutes start drawing squares about a common point. Each square is worth a certain value. Subsequent squares are drawn larger, and can be rotated"
 
 def can_run(data,params,internal_state):
-    key = 'value'
     aggregate = internal_state.get("aggregate",0)
     for point in data.get_current():
-        try:
-            aggregate += float(point[key])
-            if aggregate > params.get("Value"):
-                print "squares can run"
-                return True
-        except KeyError:
-            print "bad key in data, expected %s" % (key)
-            print "wiping data store data"
-            data.clear_all()
+        aggregate += float(point.data['value'])
+        if aggregate > params.get("Value"):
+            print "squares can run"
+            return True
     print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
     return False
 
