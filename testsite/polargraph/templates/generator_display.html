@@ -9,7 +9,6 @@
   <div class="row">
         <form action="{% url polargraph:show_generator generator.id %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="objectType">Generator</div>
             <div class="objectTitle">{{ generator.name }}</div>
             <div class="description"> {{generator.description}} </div>
             <div class="objectInfo"> Last Used: {{generator.last_used}} </div>
@@ -17,7 +16,7 @@
    </div> 
 
   <div class="row">
-    <h2>datastore</h2>
+    <h2>Datastore</h2>
     <ul class="block-grid three-up">
         <li>
 					<p>{{ds_form.data_store_id.label}}{{ ds_form.data_store_id }} </p>
@@ -39,7 +38,7 @@
     </div>
 
   <div class="row">
-    <h2>data to use</h2>
+    <h2>Data to use</h2>
 					<p>{{select_form.max_records.label}}{{ select_form.max_records }} </p>
 					<p>{{select_form.max_time.label}}{{ select_form.max_time }} </p>
 					<p>{{select_form.min_time.label}}{{ select_form.min_time }} </p>
