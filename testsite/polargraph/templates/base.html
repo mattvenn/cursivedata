@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+    <title>Polarbot - {% block title %}{% endblock %}</title>
+
+  <link rel="stylesheet" href="{{MEDIA_URL}}normalize.css" />
+  <link rel="stylesheet" href="{{MEDIA_URL}}foundation.css" />
+   <link rel="stylesheet" href="{{MEDIA_URL}}drawbot.css" />
+  
+
+    <script src="{{ MEDIA_URL }}slider.js"></script>
+  <script src="{{MEDIA_URL}}js/vendor/custom.modernizr.js"></script>
+
+</head>
+<body onload="load()">
+  <nav class="top-bar">
+  <ul class="title-area">
+    <!-- Title Area -->
+    <li class="name">
+      <h1><a href="index.html">Polarbot</a></h1>
+    </li>
+    <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+  </ul>
+
+  <section class="top-bar-section">
+    <!-- Left Nav Section -->
+    <ul class="left">
+      <li class="divider"></li>
+      <li><a href="gallery.html">Visualisations</a></li>
+      <li class="divider"></li>
+      <li><a href="getpolarbot.html">Get a Polarbot</a></li>
+      <li class="divider"></li>
+      <li><a href="howitworks.html">How it works</a></li>
+      <li class="divider"></li>
+    </ul>
+
+    <!-- Right Nav Section -->
+    <ul class="right">
+      <li class="divider hide-for-small"></li>
+      <li><a href="login.html">Login</a>
+
+      <!-- <li class="has-form">
+        <form>
+          <div class="row collapse">
+            <div class="small-8 columns">
+              <input type="text">
+            </div>
+            <div class="small-4 columns">
+              <a href="#" class="alert button">Search</a>
+            </div>
+          </div>
+        </form>
+      </li>
+      <li class="divider show-for-small"></li> -->
+      <li class="has-form">
+        <a href="signup.html"class="button" href="#">Get Started</a>
+      </li>
+    </ul>
+  </section>
+</nav>
+
+        {% block content %}{% endblock %}
+
+<footer>
+  <div class="row">
+    <div class="three columns">
+      <h3>Polarbot</h3>
+      <p><a href="login.html">Login</a> / <a href="signup.html">Signup</a><p>
+      <p><a href="howitworks.html">How it works</a></p>
+    </div>
+    <div class="three columns">
+      <h3>Be Inspired</h3>
+      <p><a href="gallery.html">Gallery</a></p>
+      <p><a href="patternmaker.html">Pattern Maker</a></p>
+       <p><a href="sources.html">Demo Sources</a></p>
+    </div>
+    <div class="three columns">
+      <h3>Get Started</h3>
+     <p><a href="getpolarbot.html">Get a Polarbot</a></p>
+     <p><a href="register.html">Register a Bot</a></p>
+     <p><a href="setup.html">Bot Setup</a></p>
+    </div>
+    <div class="three columns">
+      <h3>Contact Us</h3>
+      <p>Polarbot is created by a bunch of peeps. Get in touch here...</p>
+    </div>
+  </div>
+</footer>
+      
+      
+   <script>
+  document.write('<script src=' +
+  ('__proto__' in {} ? '{{MEDIA_URL}}js/vendor/zepto' : 'js/vendor/jquery') +
+  '.js><\/script>')
+  </script>
+  
+  <script src="{{MEDIA_URL}}js/foundation.min.js"></script>
+  <!--
+  
+  <script src="js/foundation/foundation.js"></script>
+  
+  <script src="js/foundation/foundation.dropdown.js"></script>
+  
+  <script src="js/foundation/foundation.alerts.js"></script>
+  
+  <script src="js/foundation/foundation.clearing.js"></script>
+  
+  <script src="js/foundation/foundation.placeholder.js"></script>
+  
+  <script src="js/foundation/foundation.forms.js"></script>
+  
+  <script src="js/foundation/foundation.cookie.js"></script>
+  
+  <script src="js/foundation/foundation.joyride.js"></script>
+  
+  <script src="js/foundation/foundation.magellan.js"></script>
+  
+  <script src="js/foundation/foundation.orbit.js"></script>
+  
+  <script src="js/foundation/foundation.reveal.js"></script>
+  
+  <script src="js/foundation/foundation.tooltips.js"></script>
+  
+  <script src="js/foundation/foundation.topbar.js"></script>
+  
+  -->
+  
+  <script>
+    $(document).foundation();
+  </script>
+</body>
+</html>
