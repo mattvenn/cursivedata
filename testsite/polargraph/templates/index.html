@@ -1,16 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Index{% endblock %}
 {% block content %}
-	<div class="row">
-		<a href="{% url polargraph:list_pipelines %}"> <h1>Pipelines</h1> </a>
-	</div>
-	<div class="row">
-		<a href="{% url polargraph:list_generators %}"> <h1>Generators</h1> </a>
-	</div>
-	<div class="row">
-		<a href="{% url polargraph:list_endpoints %}"> <h1>Endpoints</h1> </a>
-	</div>
-	<div class="row">
-		<a href="{% url polargraph:list_sources %}"> <h1>Sources</h1> </a>
+
+<!-- Section which explains what Polarbot is and what people can do with it. -->
+  <div class="row hero-background">
+    <div class="four column">
+      <h3>The Polarbot draws abstract patterns from real-world data. It's a drawing robot which scales to any size and let's you experiment with <a href="/polargraph/generator">algorithms</a> and <a href="/polargraph/sources">data visualisations</a>.</h3>
+      <p>Currently there are <em>{{ endpoints }}</em> bots living in people's homes, sketching <em>{{ generators }}</em> visualisations.</p>
+    </div>
+  </div>
+
+<!-- Section for current and latest drawings -->
+  <div class="row">
+    <h2>Latest Visualisations</h2>
+  </div>
+  <div class="row">
+    <ul class="block-grid three-up">
+    {% for pipeline in latest_pipelines %}
+      <li>
+        <img src="/{{pipeline.last_svg_file}}" />
+        <p><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></p>
+      </li>
+    {% endfor %}
+    </ul>
+</div>
+
+<!-- Section to explain process of how people can create own drawings highlighting all the ways people can get involved e.g. pattern making, adding a data source, digital drawing making even if they don't own a bot themselves yet.-->
+	<div class="row"><h2>Useful links</h2></div>
+    <div class="row">
+    <ul>
+    <li>
+		<a href="{% url polargraph:list_pipelines %}">Pipelines</a>
+        </li><li>
+		<a href="{% url polargraph:list_generators %}">Generators</a>
+        </li><li>
+		<a href="{% url polargraph:list_endpoints %}">Endpoints</a>
+        </li><li>
+		<a href="{% url polargraph:list_sources %}">Sources</a>
+        </li>
+    </ul>
+    </div>
 	</div>
 {% endblock %}

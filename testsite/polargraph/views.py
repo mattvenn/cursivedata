@@ -14,8 +14,10 @@ from django import forms
 import re
 
 def index(request):
-    latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
-    context = {"pipeline_list":latest_pipelines}
+    latest_pipelines = Pipeline.objects.order_by('-last_updated')[:3]
+    generators = Generator.objects.count()
+    endpoints = Endpoint.objects.count()
+    context = {"latest_pipelines":latest_pipelines, "generators" : generators, "endpoints" : endpoints}
     return render(request,"index.html",context)
 
 def list_sources(request):
