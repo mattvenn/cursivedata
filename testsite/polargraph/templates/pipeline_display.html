@@ -1,10 +1,15 @@
-<html>
-<head>
-<script src="{{ MEDIA_URL }}slider.js"></script>
-<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
-</head>
-<body onload="load()">
+{% extends "base.html" %}
+{% block title %}Pipeline{% endblock %}
+{% block content %}
+
 		{% if pipeline %}
+  <div class="row">
+    <h2>{{pipeline.name}}</h2>
+        <h4 class="subheader">
+        <div class="objectInfo">{{pipeline.description}}</div>
+        </h4>
+  </div>
+
 	<div class="controlPanel">
 		<div class="controlColumn">
 			<div class="controlDescription">
@@ -45,7 +50,7 @@
 							<div class="formParamDescription">{{param.description}}</div>
 						</p>
 						{% endfor %} 
-						<input type="submit" value="Update Parameters" name="action" />
+						<input class="button" type="submit" value="Update Parameters" name="action" />
 				</form>
 				</div>
 			</div>
@@ -56,9 +61,9 @@
 				<div class="inputForm actionForm">
 					<div class="formBlock">
 						<div class="formBlockTitle">Controls</div>
-						<input type="submit" value="Reset" name="action" />
-						<input type="submit" value="Begin" name="action" />
-						<input type="submit" value="End" name="action" />
+						<input class="button" type="submit" value="Reset" name="action" />
+						<input class="button" type="submit" value="Begin" name="action" />
+						<input class="button" type="submit" value="End" name="action" />
 					</div>
 					<div class="formBlock">
 						<div class="formBlockTitle">Layout</div>
@@ -72,9 +77,9 @@
 								<label for="pipeHeight">Height:</label>
 								<input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}" /><br />
 							</p>
-							<input type="submit" value="Auto Size" name="action" />
+							<input class="button" type="submit" value="Auto Size" name="action" />
 							<div class="formParamDescription">Auto size will set the width to the robot's drawing width</div>
-							<input type="submit" value="Update Size" name="action" />
+							<input class="button" type="submit" value="Update Size" name="action" />
 							<div class="formParamDescription">Changing image size will reset the drawing</div>
 						</div>
 						
@@ -92,7 +97,7 @@
 								<label for="printWidth">Width</label>
 								<input type="text" name="printWidth" id="printWidth" value="{{pipeline.print_width}}" />
 							</p>
-							<input type="submit" value="Update Print Location" name="action" /><br />
+							<input class="button" type="submit" value="Update Print Location" name="action" /><br />
 							<div class="formParamDescription">
 								Endpoint drawing area is: {{pipeline.endpoint.img_width}}mm by {{pipeline.endpoint.img_height}}mm
 							</div>
@@ -100,7 +105,7 @@
 					</div>
 					<div class="formBlock">
 						<span class="formBlockTitle">Add COSM Feed</span>
-						{{ cosm_form.as_p }} <input type="submit" value="Create COSM" name="action" />
+						{{ cosm_form.as_p }} <input class="button" type="submit" value="Create COSM" name="action" />
 					</div>
 					<div class="formBlock">
 					<span class="formBlockTitle">Existing COSM Triggers</span>
@@ -114,13 +119,13 @@
 							</div>
 						<div class="cosmAction">
 							{% if cosm.is_running %}
-							<button type="submit" value="COSM Disable {{cosm.id}}"
+							<button class="button" type="submit" value="COSM Disable {{cosm.id}}"
 								name="action">Disable</button>
 							{% else %}
-							<button type="submit" value="COSM Enable {{cosm.id}}"
+							<button class="button" type="submit" value="COSM Enable {{cosm.id}}"
 								name="action">Enable</button>
 							{% endif %}
-							<button type="submit" value="COSM Delete {{cosm.id}}"
+							<button class="button" type="submit" value="COSM Delete {{cosm.id}}"
 								name="action">Delete</button>
 						</div>
 					</div>
@@ -161,4 +166,4 @@
 	{% else %}
 	<h1>Pipeline not found</h1>
 	{% endif %}
-</body>
+{% endblock %}

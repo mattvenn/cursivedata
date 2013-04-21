@@ -1,8 +1,6 @@
-<html>
-<head>
-	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}main.css" />
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block content %}
 	<div class="col">
 		<a href="{% url polargraph:list_pipelines %}"> <h1>Pipelines</h1> </a>
 	</div>
@@ -15,6 +13,4 @@
 	<div class="col">
 		<a href="{% url polargraph:list_pipelines %}"> <h1>People</h1> </a>
 	</div>
-
-</body>
-</html>
+{% endblock %}
