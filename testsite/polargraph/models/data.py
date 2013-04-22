@@ -57,7 +57,9 @@ class DataStore( models.Model ) :
         return DataPoint.objects.filter(current=True, datastore=self).count()
     
     def query(self,max_records=None,max_time=None,min_time=None):
-        data = DataPoint.objects.filter(date__range=[min_time,max_time] , datastore=self)[:max_records]
+        #min and max time need checking for valid dates.
+#        data = DataPoint.objects.filter(date__range=[min_time,max_time] , datastore=self)[:max_records]
+        data = DataPoint.objects.filter(datastore=self)[:max_records]
         print "Final size", len(data)
         return data
     
@@ -76,7 +78,7 @@ class DataStore( models.Model ) :
     
     #this throws an error when its fields get too long, but the error is supressed somewhere
     def update_current_data(self,data):
-        print "Adding data:",data
+        print "Adding %d lines of data:" % len(data)
         self.available=True
         self.fresh=True
         for entry in data :
@@ -91,7 +93,7 @@ class DataStore( models.Model ) :
         data = []
         print "Adding data to store",str(self)
         for row in reader:
-            print "Row:",row
+            #print "Row:",row
             #Find the time field, get a date, and delete it from the data dict (use now() as a default)
             #Create a dict with {date=date, data=data} and append
             datapoint = {}
@@ -102,6 +104,7 @@ class DataStore( models.Model ) :
                 datapoint['date'] = timezone.now()
             datapoint['data'] = row
             data.append(datapoint)
+        print "loaded %d lines" % len(data)
         self.update_current_data(data)
     
     def load_from_csv_file(self,datafile,time_field=None):
@@ -155,6 +158,12 @@ class DataStore( models.Model ) :
     class Meta:
         app_label = 'polargraph'
 
+class FakeDataStore(DataStore):
+    def load_data(self,data):
+        self.current = data
+    def get_current(self):
+        return self.current
+    
 #store data in a separate table
 class DataPoint( models.Model ):
     data = jsonfield.JSONField(default={})
