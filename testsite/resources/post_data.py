@@ -67,7 +67,9 @@ if __name__ == '__main__':
             #could we do this all in one go?
             for line in data[args.stream_id]:
                 print line
-                push_data([{"data": '{"value":%d}' % line["value"],"date":line["at"]}],)
+                print line["value"]
+                print line["at"]
+                push_data([{"data": '{"value":%s}' % line["value"],"date":line["at"]}],)
         else:
             print "no such stream_id, choose from ", data.keys()
     else:
