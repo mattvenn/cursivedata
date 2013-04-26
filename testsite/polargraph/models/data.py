@@ -76,7 +76,7 @@ class DataStore( models.Model ) :
             print "datastore has no pipeline to run"
         print "Post-Pipeline Data length:",len(self.get_current())
     
-    #this throws an error when its fields get too long, but the error is supressed somewhere
+    #data is a list with each member containing a date and a data field
     def update_current_data(self,data):
         print "Adding data:",data
         self.available=True
