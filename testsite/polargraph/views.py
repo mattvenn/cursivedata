@@ -104,7 +104,7 @@ def show_pipeline(request, pipelineID):
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
             pipeline.reset()
-        if act == "Modify":
+        elif act == "Modify":
             form = PipelineModify(request.POST) # A form bound to the POST data
             if form.is_valid(): # All validation rules pass
                 #better way of doing this?
@@ -137,7 +137,7 @@ def show_pipeline(request, pipelineID):
                     pipeline.state.params[key.replace("param","")]= float(value)
             pipeline.state.save()
         elif act != "none":
-            print "Unknown action:",act
+            print "Unknown pipeline action:",act
         
         form = PipelineModify(instance=pipeline) # An unbound form
         context = {"pipeline":pipeline, "form": form}
