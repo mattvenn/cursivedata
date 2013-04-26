@@ -18,7 +18,7 @@
     <ul class="block-grid three-up">
     {% for pipeline in latest_pipelines %}
       <li>
-        <img src="/{{pipeline.last_svg_file}}" />
+        <img src="/{{pipeline.full_svg_file}}" />
         <p><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></p>
       </li>
     {% endfor %}
