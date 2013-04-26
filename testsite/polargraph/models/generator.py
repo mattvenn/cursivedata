@@ -10,7 +10,7 @@ from imp import find_module, load_module
 import jsonfield
 from polargraph.models.drawing_state import StoredOutput, DrawingState
 from django.utils.datetime_safe import datetime
-from polargraph.models.data import DataStore
+from polargraph.models.data import DataStore,  FakeDataStore
 from polargraph.drawing import Drawing
 
 
@@ -171,8 +171,8 @@ class GeneratorState( models.Model ):
 ## param_<x> for params
 class GeneratorRunner(DrawingState):        
     def run(self,generator,input_data,input_params,width,height):
-        data = DataStore()
-        data.current = input_data
+        data = FakeDataStore()
+        data.load_data(input_data)
         
         state = generator.get_state(False) 
         print "State:",state.state

@@ -260,6 +260,7 @@ def show_generator(request, generatorID):
         filename = None
         
         data = select_form.query_data_store(ds_form.data_store)
+        print "loaded %d lines" % len(data)
         
         act = request.POST.get('action',"none")
         if act == "Run" :
@@ -270,6 +271,8 @@ def show_generator(request, generatorID):
         elif act == "Create Datastore":
             ds_form.create_data_store(request.POST.get("ds_name","Unnamed Datastore"))
         elif act == "Import CSV":
+            ds_form.load_csv(request.FILES['csv_file'], "Time")
+        elif act == "Update Query":
             ds_form.load_csv(request.FILES['csv_file'], "Time")
         elif act == "Save Code":
             code_form = GeneratorCode(request.POST)
@@ -289,7 +292,7 @@ def show_generator(request, generatorID):
 
 class SelectOrMakeDataStore(forms.Form):
     data_store_id = forms.ModelChoiceField(queryset=DataStore.objects.all(),label="Select")
-    csv_file  = forms.FileField(label="Load CSV Data into current datastore",required=False)
+    csv_file  = forms.FileField(label="Load CSV Data - needs a header with Time,value",required=False)
     ds_name = forms.CharField(label="New DS Name",initial="New Datastore")
     data_store = None
     
@@ -302,6 +305,8 @@ class SelectOrMakeDataStore(forms.Form):
     def load_csv(self,file,time_field):
         if self.data_store :
             self.data_store.load_from_csv(file.read().split("\n"),time_field=time_field)
+        else:
+            print "generator doesn't have a data store yet"
     
 class DataStoreSettings(forms.Form):
     max_time = forms.DateTimeField(label="Data Before",required=False)
