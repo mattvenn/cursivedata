@@ -34,7 +34,7 @@ class Pipeline( DrawingState ) :
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000,default="",blank=True)
     generator = models.ForeignKey( Generator)
-    data_store = models.ForeignKey( DataStore)
+    data_store = models.OneToOneField( DataStore)
     state = models.OneToOneField( GeneratorState)
     endpoint = models.ForeignKey( "Endpoint")
 
