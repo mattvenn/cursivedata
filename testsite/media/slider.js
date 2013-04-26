@@ -11,9 +11,9 @@
         //slider.min = min;
         //slider.max = max;
 
-        slider.value = max;
+        slider.value = slider.max;
         var slider = document.getElementById('slider');
-        slider.dataset.oldValue = "" + max;
+        slider.dataset.oldValue = "" + slider.max;
         toggleVis("slider");
     }
     function toggleVis(sliderID)
