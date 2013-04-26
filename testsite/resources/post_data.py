@@ -13,48 +13,16 @@ def push_data( input_data ):
         "input_data": input_data,
         "name": "UPDATED!"
         }
-    """
-    data = {
-      "environment": 
-      {
-        "description": "",
-        "feed": "http:\/\/api.cosm.com\/v2\/feeds\/343",
-        "id": 343,
-        "location": 
-        {
-          "lat": 55.74479,
-          "lng": -3.18157,
-          "name": "location description"
-        },
-        "title": "test feed yes"
-      },
-      "id": 1,
-      "threshold_value": 9.0,
-      "timestamp": timestamp,
-      "triggering_datastream": 
-      {
-        "id": "0",
-        "url": "http:\/\/api.cosm.com\/v2\/feeds\/343\/datastreams\/0",
-        "at": timestamp,
-        "value": 
-        {
-          "value": args.value,
-          "max_value": 9.99650150341,
-          "min_value": 0.00471012639984
-        }
-      },
-      "type": "gte",
-      "url": "http:\/\/api.cosm.com\/v2\/triggers\/1"
-    }
-    r = requests.post(args.url + str(args.cosmsourceid) + "/",headers=headers,data=json.dumps(data))
-    """
     r = requests.patch(args.url + str(args.datastore) + "/",headers=headers,data=json.dumps(data))
     print r.status_code
-    try:
-        pprint.pprint(json.loads(r.text))
-    except:
-        print >>sys.stderr, r.text
-        raise
+    if r.text:
+        try:
+            dat = json.loads(r.text)
+            if dat.has_key('traceback'):
+                print dat["traceback"]
+        except:
+            print >>sys.stderr, r.text
+            raise
 
 def calculate_datetime_from_minute():
    now = datetime.datetime.now()
@@ -99,9 +67,9 @@ if __name__ == '__main__':
             #could we do this all in one go?
             for line in data[args.stream_id]:
                 print line
-                push_data([{"value":line["value"],"time":line["at"]}],)
+                push_data([{"data": '{"value":%d}' % line["value"],"date":line["at"]}],)
         else:
             print "no such stream_id, choose from ", data.keys()
     else:
         timestamp = calculate_datetime_from_minute()
-        push_data([{"value":args.value,"time":timestamp}],)
+        push_data([{"data": '{"value":%d}' % args.value,"date":timestamp}],)
