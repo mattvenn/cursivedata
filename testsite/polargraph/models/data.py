@@ -72,6 +72,8 @@ class DataStore( models.Model ) :
         if hasattr(self, 'pipeline'):
             print "Trying to run pipline: ",self.pipeline
             self.pipeline.update(self)
+        else:
+            print "datastore has no pipeline to run"
         print "Post-Pipeline Data length:",len(self.get_current())
     
     #this throws an error when its fields get too long, but the error is supressed somewhere
