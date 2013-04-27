@@ -12,7 +12,7 @@ def get_division(date,params):
     mins =  (minute + hour * 60)
     division = mins / int( params.get('circle_t') / params.get('divide') )
     division = division % params.get('divide')
-    return division
+    return int(division)
 
 def get_seconds(date):
     seconds = int( date.strftime("%s") ) # minute 0 -59
@@ -30,7 +30,8 @@ def get_xy_from_div(drawing,params,div):
     return(x,y)
 
 def process(drawing,data,params,internal_state) :
-    last_length = internal_state.get("last_length",0)
+    divs = int(params.get('divide'))
+    last_length = internal_state.get("last_length",[0 for i in range(divs)])
     last_div = internal_state.get("last_div", 0 )
     last_val = internal_state.get("last_val",0)
 
@@ -38,33 +39,38 @@ def process(drawing,data,params,internal_state) :
     circle_c = 2 * math.pi * circle_r
     bar_width = circle_c / params.get("divide")
     for point in data.get_current():
+        if point.data['value'] < last_val:
+            #something happened to the data and we need to reset last_val
+            last_val = point.data['value']
         value = point.data['value'] - last_val
-        print "---"
-        print value, last_val
         last_val = value
         div = get_division(point.date,params)
         if div != last_div:
-            last_length = 0
             last_div = div 
         length = float(value) / params.get('value')
         (x,y) = get_xy_from_div(drawing,params,div)
         angle = div * (360 / params.get('divide'))
         angle -= 180
         transform = "rotate(%d,%d,%d)" % (angle,x,y)
-        print div,last_length,length
-        drawing.rect(x,y+last_length,bar_width,length,transform = transform)
-#        drawing.text(div,x,y,size=20,transform = transform)
-        last_length += length
+        print "value: ", value
+        print "div: ", div
+        print "l length:",last_length[div]
+        print "length:", length
+        if length:
+            drawing.rect(x,y+last_length[div],bar_width,length,transform = transform)
+            last_length[div] += length
 
     internal_state["last_length"]=last_length
     internal_state["last_div"]= last_div
     internal_state["last_val"] = point.data['value'] 
     return None
 
+##all this stuff needs a bit of work, been hacked at mfuk
 def begin(drawing,params,internal_state) :
 #    print "Starting drawing squares: ",map(str,params)
-    drawing.circle(drawing.width/2,drawing.height/2,params.get("circle_r")-20)
-    internal_state["last_length"]=0
+    drawing.circle(drawing.width/2,drawing.height/2,params.get("circle_r")-5)
+    divs = int(params.get('divide'))
+    internal_state["last_length"]= [0 for i in range(divs)]
     internal_state["last_div"]= 0
     internal_state["last_val"] = 0
     text_len = 60
@@ -81,6 +87,7 @@ def end(drawing,params,internal_state) :
     
 def get_params() :
     return  [ 
+        #changing this needs to update the internal state, as we store an array of this number
         {"name":"divide", "default": 12, "description":"divide circle into this many sections" },
         {"name":"circle_t", "default": 720, "description":"the whole circle is worth this many minutes" },
         {"name":"value", "default":50, "description":"an input value of this will draw a 1mm bar" },
