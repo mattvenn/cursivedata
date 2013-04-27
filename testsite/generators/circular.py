@@ -32,22 +32,22 @@ def get_xy_from_div(drawing,params,div):
 def process(drawing,data,params,internal_state) :
     divs = int(params.get('divide'))
     last_length = internal_state.get("last_length",[0 for i in range(divs)])
-    last_div = internal_state.get("last_div", 0 )
-    last_val = internal_state.get("last_val",0)
+    last_div = int(internal_state.get("last_div", 0 ))
+    last_val = float(internal_state.get("last_val",0))
 
     circle_r = params.get("circle_r")
     circle_c = 2 * math.pi * circle_r
     bar_width = circle_c / params.get("divide")
     for point in data.get_current():
-        if point.data['value'] < last_val:
+        if float(point.data['value']) < last_val:
             #something happened to the data and we need to reset last_val
-            last_val = point.data['value']
-        value = point.data['value'] - last_val
+            last_val = float(point.data['value'])
+        value = float(point.data['value']) - last_val
         last_val = value
         div = get_division(point.date,params)
         if div != last_div:
             last_div = div 
-        length = float(value) / params.get('value')
+        length = value / params.get('value')
         (x,y) = get_xy_from_div(drawing,params,div)
         angle = div * (360 / params.get('divide'))
         angle -= 180
