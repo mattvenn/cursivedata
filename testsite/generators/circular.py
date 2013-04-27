@@ -63,13 +63,13 @@ def process(drawing,data,params,internal_state) :
 
 def begin(drawing,params,internal_state) :
 #    print "Starting drawing squares: ",map(str,params)
-    drawing.circle(drawing.width/2,drawing.height/2,params.get("circle_r")-10)
+    drawing.circle(drawing.width/2,drawing.height/2,params.get("circle_r")-20)
     internal_state["last_length"]=0
     internal_state["last_div"]= 0
     internal_state["last_val"] = 0
     text_len = 60
     text_height = 20
-    drawing.text('#mfuk',drawing.width/2-text_len/2,drawing.height/2+text_height/2,size=40)
+    drawing.text('#mfuk',drawing.width/2-text_len/2,drawing.height/2+text_height/2,size=27)
 #    drawing.circle(drawing.width/2,drawing.width/2,params.get("circle_r")+20)
 #    drawing.circle(drawing.width/2,drawing.width/2,params.get("circle_r")+40)
 #    drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
