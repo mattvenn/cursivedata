@@ -282,7 +282,10 @@ class GCodeOutput( models.Model ):
         return "data/output/gcode/"+str(self.id)+".gcode"
     
     def delete(self):
-        os.remove(self.get_filename())
+        try:
+            os.remove(self.get_filename())
+        except OSError:
+            pass
         super(GCodeOutput, self).delete()
     
     class Meta:
