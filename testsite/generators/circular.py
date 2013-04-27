@@ -30,35 +30,41 @@ def get_xy_from_div(drawing,params,div):
     return(x,y)
 
 def process(drawing,data,params,internal_state) :
-    last_length = internal_state.get("last_length",0)
-    last_div = internal_state.get("last_div", 0 )
-    last_val = internal_state.get("last_val",0)
+    last_length = float(internal_state.get("last_length",0))
+    last_div = float(internal_state.get("last_div", 0 ))
+    last_val = float(internal_state.get("last_val",0))
 
     circle_r = params.get("circle_r")
     circle_c = 2 * math.pi * circle_r
     bar_width = circle_c / params.get("divide")
     for point in data.get_current():
-        value = point.data['value'] - last_val
-        print "---"
-        print value, last_val
+        if last_val == 0:
+            last_val = point.data['value']
+            print "started with val", last_val
+            continue
+        value = float(point.data['value']) - float(last_val)
         last_val = value
         div = get_division(point.date,params)
         if div != last_div:
             last_length = 0
             last_div = div 
+
         length = float(value) / params.get('value')
         (x,y) = get_xy_from_div(drawing,params,div)
         angle = div * (360 / params.get('divide'))
         angle -= 180
         transform = "rotate(%d,%d,%d)" % (angle,x,y)
-        print div,last_length,length
+        print "value:", value
+        print "x,y:", x, y
+        print "div:", div
+        print "length:", length
         drawing.rect(x,y+last_length,bar_width,length,transform = transform)
 #        drawing.text(div,x,y,size=20,transform = transform)
         last_length += length
 
     internal_state["last_length"]=last_length
     internal_state["last_div"]= last_div
-    internal_state["last_val"] = point.data['value'] 
+    internal_state["last_val"] = float(point.data['value'])
     return None
 
 def begin(drawing,params,internal_state) :
@@ -67,9 +73,9 @@ def begin(drawing,params,internal_state) :
     internal_state["last_length"]=0
     internal_state["last_div"]= 0
     internal_state["last_val"] = 0
-    text_len = 60
+    text_len = 70
     text_height = 20
-    drawing.text('#mfuk',drawing.width/2-text_len/2,drawing.height/2+text_height/2,size=40)
+    drawing.text('#mfuk',drawing.width/2-text_len/2,drawing.height/2+text_height/2,size=30)
 #    drawing.circle(drawing.width/2,drawing.width/2,params.get("circle_r")+20)
 #    drawing.circle(drawing.width/2,drawing.width/2,params.get("circle_r")+40)
 #    drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
