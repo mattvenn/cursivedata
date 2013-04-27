@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import random
 import requests
 import json
 import datetime
@@ -24,12 +25,14 @@ def push_data( input_data ):
             print >>sys.stderr, r.text
             raise
 
-def calculate_datetime_from_minute():
+def calculate_datetime_from_minute(minute):
    now = datetime.datetime.now()
-   if args.minute:
-       hours = int(args.minute / 60)
-       mins = args.minute % 60
+   if minute:
+       hours = int(minute / 60)
+       mins = minute % 60
+
        then = datetime.datetime(now.year,now.month,now.day,hours,mins,0) 
+       print then
    else:
        then = now
    return then.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -53,6 +56,9 @@ if __name__ == '__main__':
     parser.add_argument('--minute',
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
+    parser.add_argument('--random',
+        action='store', dest='random', type=int, default='1000',
+        help="create random data")
     parser.add_argument('--file',
         action='store', dest='file', help="historical data")
     parser.add_argument('--stream-id',
@@ -72,6 +78,20 @@ if __name__ == '__main__':
                 push_data([{"data": '{"value":%s}' % line["value"],"date":line["at"]}],)
         else:
             print "no such stream_id, choose from ", data.keys()
+    elif args.random:
+        #generate random data
+
+        last_min = 0
+        last_value = 0
+        for i in range(args.random):
+            minute = last_min + 1 #random.randint(1,30)+last_min
+            timestamp = calculate_datetime_from_minute(minute)
+            value = last_value + 10 #random.randint(1,20)
+            data = [{"data": '{"value":%d}' % value,"date":timestamp}]
+            print data
+            push_data(data)
+            last_value = value
+            last_min = minute
     else:
-        timestamp = calculate_datetime_from_minute()
+        timestamp = calculate_datetime_from_minute(args.minute)
         push_data([{"data": '{"value":%d}' % args.value,"date":timestamp}],)
