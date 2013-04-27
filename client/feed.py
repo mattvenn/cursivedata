@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import time
+import fcntl
 import datetime
 import string
 import argparse
@@ -19,6 +20,7 @@ import requests
 
 class FeedParseError(Exception):
     pass
+
 
 #queries the robot for all its config
 def get_robot_config():
@@ -324,6 +326,17 @@ if __name__ == '__main__':
 
     print "started ", datetime.datetime.now()
     gcodes = []
+
+    #locking
+    file = "/tmp/feed.lock"
+    fd = open(file,'w')
+    try:
+        print "check lock"
+        fcntl.lockf(fd,fcntl.LOCK_EX | fcntl.LOCK_NB)
+        print "ok"
+    except IOError:
+        print "another process is running with lock. quitting!", file
+        exit(1)
 
     #get serial init first, as lots depends on getting data from the robot
     if not args.norobot:
