@@ -1,3 +1,9 @@
+input[type="range"] {
+    width: 600px;
+}
+.rangeVal.input[type="text"] {
+    width: 200px;
+}
 footer {
   background-color: black;
   color: white;
