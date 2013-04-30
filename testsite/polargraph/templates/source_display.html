@@ -10,7 +10,8 @@
           <div class="large-12 columns">
 				<div class="description">last updated: {{source.last_updated}} with {{source.last_value}}.</div>
                 <div>datastore id: {{source.data_store}}</div>
-                <div>link: <a href="https://cosm.com/feeds/{{source.feed_id}}">{{source.feed_id}}/{{source.stream_id}}</a></div>
+                <div><a href="https://cosm.com/feeds/{{source.feed_id}}">
+                <img src="https://api.cosm.com/v2/feeds/{{source.feed_id}}/datastreams/{{source.stream_id}}.png?width=940&height=250&colour=%232ba6cb&duration=1day&show_axis_labels=true&detailed_grid=true&scale=auto&timezone=London"/></a>
 			</div>
 			</div>
 		</div>

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import random
+import time
 import requests
 import json
 import datetime
@@ -84,14 +85,16 @@ if __name__ == '__main__':
         last_min = 0
         last_value = 0
         for i in range(args.random):
-            minute = last_min + 1 #random.randint(1,30)+last_min
-            timestamp = calculate_datetime_from_minute(minute)
-            value = last_value + 10 #random.randint(1,20)
+            minute = last_min + random.randint(5,15)
+            #timestamp = calculate_datetime_from_minute(minute)
+            timestamp = calculate_datetime_from_minute(0)
+            value = last_value + random.randint(3,10)
             data = [{"data": '{"value":%d}' % value,"date":timestamp}]
             print data
             push_data(data)
             last_value = value
             last_min = minute
+            time.sleep(60)
     else:
         timestamp = calculate_datetime_from_minute(args.minute)
         push_data([{"data": '{"value":%d}' % args.value,"date":timestamp}],)

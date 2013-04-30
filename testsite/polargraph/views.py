@@ -100,17 +100,21 @@ def create_source(request):
 def show_pipeline(request, pipelineID):
     try:
         act = request.POST.get('action',"none")
-        
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
             pipeline.reset()
         elif act == "Modify":
+            print act 
             form = PipelineModify(request.POST) # A form bound to the POST data
+#            import pdb; pdb.set_trace()
+            print form.errors
+
             if form.is_valid(): # All validation rules pass
                 #better way of doing this?
                 pipeline.data_store = form.cleaned_data['data_store']
                 pipeline.generator = form.cleaned_data['generator']
                 pipeline.endpoint = form.cleaned_data['endpoint']
+                print "new endpoint:", form.cleaned_data['endpoint']
                 pipeline.save()
         elif act == "Begin":
             pipeline.begin()
