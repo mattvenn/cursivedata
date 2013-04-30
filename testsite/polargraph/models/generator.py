@@ -65,6 +65,7 @@ class Generator( models.Model ) :
     def __unicode__(self):
         return self.name
     @staticmethod
+
     def create_from_file(module_name) :
         mod = Generator.get_file( module_name )
         g = Generator( name=mod.get_name(), description=mod.get_description(), module_name=module_name )
@@ -130,6 +131,7 @@ class Parameter( models.Model ) :
     default = models.FloatField(default=0,blank=True)
     description = models.CharField(default="Some parameter",blank=True,max_length=1000)
     generator = models.ForeignKey( Generator )
+
     def __unicode__(self):
         return self.name
 
