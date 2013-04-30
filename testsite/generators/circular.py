@@ -1,6 +1,5 @@
 """
 bugs:
-  with squareIncMM an odd number, the squares don't join up properly...
 """
 from django.utils.datetime_safe import datetime
 import math
