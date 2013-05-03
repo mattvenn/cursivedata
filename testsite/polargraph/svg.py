@@ -3,12 +3,18 @@ Created on 6 Jan 2013
 
 @author: dmrust
 '''
-import time
+import time,copy
 from pysvg.parser import parse
 import sys
 import cairosvg
 from xml.parsers.expat import ExpatError
 
+
+def get_dimensions(svg_file):
+    parsed = parse(svg_file)
+    #rewind to avoid an error when the file is parsed again
+    svg_file.seek(0)
+    return (float(parsed.getAttribute('width')),float(parsed.getAttribute('height')))
 
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
