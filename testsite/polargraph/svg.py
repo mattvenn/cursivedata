@@ -20,7 +20,9 @@ def get_dimensions(svg_file):
 #NOTE: currently just copies one file to the other
 def append_svg_to_file( fragment_file, main_file ):
     try:
+        print "parsing main file", main_file
         svg_main = parse(main_file)
+        print "parsing frag file", fragment_file
         svg_frag = parse(fragment_file)
         svg_id = int(time.time())
         for e in svg_frag.getAllElements():
@@ -32,7 +34,7 @@ def append_svg_to_file( fragment_file, main_file ):
             svg_main.addElement( e )
         svg_main.save(main_file)
     except (ExpatError, IOError) as e:
-        print "couldn't open either %s or %s: %s" % (fragment_file,main_file,e)
+        print "problem appending %s to %s: %s" % (fragment_file,main_file,e)
         raise
     clear_blank_lines(main_file)
 

@@ -1,3 +1,9 @@
+    function toDateTime(secs)
+    {
+    var t = new Date(1970,0,1);
+    t.setSeconds(secs);
+    return t;
+    }
     function load()
     {
         var slider = document.getElementById("slider");
@@ -25,7 +31,7 @@
         var newValue = slider.value;
         var oldValue = slider.dataset.oldValue;
         slider.dataset.oldValue = newValue;
-        sliderText.value = slider.value;
+        sliderText.value = toDateTime(slider.value);
         if (oldValue == newValue)
             return
         else if (oldValue > newValue) {
