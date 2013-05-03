@@ -28,7 +28,7 @@
 
         <div class="row">
           <div class="large-12 columns">
-				<form action="{% url polargraph:show_endpoint endpoint.id %}" method="POST">
+				<form action="{% url polargraph:show_endpoint endpoint.id %}" enctype="multipart/form-data" method="POST">
 					{% csrf_token %}
 						<input class="button" type="submit" value="Calibrate" name="action"/>
 						<input class="button" type="submit" value="Reset" name="action"/>
@@ -37,6 +37,8 @@
 	                    {% else %}
 						<input class="button" type="submit" value="Pause" name="action"/>
 	                    {% endif %}
+                        <input type="file" name="svgfile"/>
+                        <input class="button" type="submit" name="action" value="Upload SVG"/>
 				</form>
             </div>
         </div>
