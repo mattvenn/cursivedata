@@ -178,6 +178,9 @@ def show_endpoint(request, endpointID):
         if act == "Calibrate":
             print "Calibrating..."
             endpoint.calibrate()
+        elif act == "Upload SVG":
+            print "uploading svg"
+            endpoint.load_external_svg(request.FILES['svgfile'])
         elif act == "Reset":
             print endpoint.reset()
         elif act == "Resume":
