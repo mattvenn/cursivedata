@@ -58,7 +58,7 @@ if __name__ == '__main__':
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
     parser.add_argument('--random',
-        action='store', dest='random', type=int, default='1000',
+        action='store', dest='random', type=int, default=None,
         help="create random data")
     parser.add_argument('--file',
         action='store', dest='file', help="historical data")
@@ -94,7 +94,6 @@ if __name__ == '__main__':
             push_data(data)
             last_value = value
             last_min = minute
-            time.sleep(60)
     else:
         timestamp = calculate_datetime_from_minute(args.minute)
         push_data([{"data": '{"value":%d}' % args.value,"date":timestamp}],)
