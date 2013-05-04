@@ -180,7 +180,12 @@ def show_endpoint(request, endpointID):
             endpoint.calibrate()
         elif act == "Upload SVG":
             print "uploading svg"
-            endpoint.load_external_svg(request.FILES['svgfile'])
+            width = request.POST.get("width","0")
+            if width == "":
+                width = 0
+            endpoint.load_external_svg(request.FILES['svgfile'],int(width))
+        elif act == "Move Area":
+            print endpoint.movearea()
         elif act == "Reset":
             print endpoint.reset()
         elif act == "Resume":

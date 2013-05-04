@@ -68,9 +68,9 @@ class Endpoint( DrawingState ):
         self.y_max = self.top_margin + self.img_height
  
        
-    def load_external_svg(self,svg_file):
+    def load_external_svg(self,svg_file,width):
         transform = Transform()
-        transform.build_from_endpoint(self,svg_file)
+        transform.build_from_endpoint(self,svg_file,width)
         self._input_svg(svg_file,transform)
 
     def input_svg(self,svg_file, pipeline ):
@@ -235,6 +235,17 @@ class Endpoint( DrawingState ):
         n = self.get_next()
         n.served = True
         n.save()
+    
+    def movearea(self):
+        so = GCodeOutput(endpoint=self)
+        so.save()
+        f = open(so.get_filename(),'w')
+        f.write("g%f,%f\n" % ( self.side_margin, self.top_margin ))
+        f.write("g%f,%f\n" % ( self.width - self.side_margin , self.top_margin ))
+        f.write("g%f,%f\n" % ( self.width - self.side_margin , self.height ))
+        f.write("g%f,%f\n" % ( self.side_margin , self.height ))
+        f.write("g%f,%f\n" % ( self.side_margin, self.top_margin ))
+        f.close()
 
     def calibrate(self):
         so = GCodeOutput(endpoint=self)
@@ -286,11 +297,18 @@ class Transform( models.Model ):
         self.yoffset = pipeline.print_top_left_y
         self.scale = pipeline.print_width / pipeline.img_width
 
-    def build_from_endpoint(self,endpoint,svg_file):
-        (width,height) = svg.get_dimensions(svg_file)
-        self.xoffset = endpoint.side_margin
+    def build_from_endpoint(self,endpoint,svg_file,width):
+        (svgwidth,svgheight) = svg.get_dimensions(svg_file)
+        if width > endpoint.img_width:
+            print "not scaling larger than endpoint"
+            width = endpoint.img_width
+        if width == 0:
+            print "not using a 0 width"
+            width = endpoint.img_width
+        #put it in the middle of the page
+        self.xoffset = (endpoint.width - width ) / 2
         self.yoffset = endpoint.top_margin
-        self.scale = endpoint.img_width / width
+        self.scale = width / svgwidth
         #FIXME scale results in a pic too big. 
         self.scale *= 0.90
 
