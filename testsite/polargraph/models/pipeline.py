@@ -61,7 +61,17 @@ class Pipeline( DrawingState ) :
             self.generator.process_data( Drawing(svg_document), data, params, internal_state )
             self.state.save()
             data.clear_current()
-            self.add_svg( svg_document )
+            if len(svg_document.getXML()) == 0:
+                print "!!! found empty XML"
+                import pdb; pdb.set_trace()
+#            if self.id == 4:
+#                import pdb; pdb.set_trace()
+#                print svg_document.getXML()
+            try:
+                self.add_svg( svg_document )
+            except Exception:
+                #import pdb; pdb.set_trace()
+                pass
             self.generator.update_last_used()
             print "Generator run OK!"
         else:

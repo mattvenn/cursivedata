@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import random
+import time
 import requests
 import json
 import datetime
@@ -57,7 +58,7 @@ if __name__ == '__main__':
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
     parser.add_argument('--random',
-        action='store', dest='random', type=int, default='1000',
+        action='store', dest='random', type=int, default=None,
         help="create random data")
     parser.add_argument('--file',
         action='store', dest='file', help="historical data")
@@ -84,9 +85,10 @@ if __name__ == '__main__':
         last_min = 0
         last_value = 0
         for i in range(args.random):
-            minute = last_min + 1 #random.randint(1,30)+last_min
-            timestamp = calculate_datetime_from_minute(minute)
-            value = last_value + 10 #random.randint(1,20)
+            minute = last_min + random.randint(5,15)
+            #timestamp = calculate_datetime_from_minute(minute)
+            timestamp = calculate_datetime_from_minute(0)
+            value = last_value + random.randint(3,10)
             data = [{"data": '{"value":%d}' % value,"date":timestamp}]
             print data
             push_data(data)

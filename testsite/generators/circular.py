@@ -1,6 +1,5 @@
 """
 bugs:
-  with squareIncMM an odd number, the squares don't join up properly...
 """
 from django.utils.datetime_safe import datetime
 import math
@@ -35,15 +34,24 @@ def process(drawing,data,params,internal_state) :
     last_div = int(internal_state.get("last_div", 0 ))
     last_val = float(internal_state.get("last_val",0))
 
+    #we're starting - not sure about this logic
+    if internal_state["start"] == 1:
+        print "circles starting with new data!!"
+        internal_state["start"] = 0
+        last_val = float(data.get_current()[0].data["value"])
+        print "init last_val to: ", last_val
+
     circle_r = params.get("circle_r")
     circle_c = 2 * math.pi * circle_r
     bar_width = circle_c / params.get("divide")
     for point in data.get_current():
+        #something happened to the data and we need to reset last_val
         if float(point.data['value']) < last_val:
-            #something happened to the data and we need to reset last_val
             last_val = float(point.data['value'])
+
         value = float(point.data['value']) - last_val
-        last_val = value
+        last_val = float(point.data['value'])
+
         div = get_division(point.date,params)
         if div != last_div:
             last_div = div 
@@ -62,7 +70,7 @@ def process(drawing,data,params,internal_state) :
 
     internal_state["last_length"]=last_length
     internal_state["last_div"]= last_div
-    internal_state["last_val"] = point.data['value'] 
+    internal_state["last_val"] = last_val
     return None
 
 ##all this stuff needs a bit of work, been hacked at mfuk
@@ -73,6 +81,7 @@ def begin(drawing,params,internal_state) :
     internal_state["last_length"]= [0 for i in range(divs)]
     internal_state["last_div"]= 0
     internal_state["last_val"] = 0
+    internal_state["start"] = 1
     text_len = 60
     text_height = 20
     drawing.text('#mfuk',drawing.width/2-text_len/2,drawing.height/2+text_height/2,size=27)

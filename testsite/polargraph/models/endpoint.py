@@ -66,11 +66,20 @@ class Endpoint( DrawingState ):
         self.y_min = self.top_margin
         self.x_max = self.side_margin + self.img_width
         self.y_max = self.top_margin + self.img_height
-   
+ 
+       
+    def load_external_svg(self,svg_file,width):
+        transform = Transform()
+        transform.build_from_endpoint(self,svg_file,width)
+        self._input_svg(svg_file,transform)
+
     def input_svg(self,svg_file, pipeline ):
-  #      print "Adding SVG"
-#        import pdb; pdb.set_trace()
-        current_drawing = self.transform_svg(svg_file,pipeline)
+        transform = Transform()
+        transform.build_from_pipeline(pipeline)
+        self._input_svg(svg_file,transform)
+
+    def _input_svg(self,svg_file,transform):
+        current_drawing = self.transform_svg(svg_file,transform)
 #          print current_drawing.getXML()
         #this will save out the latest svg as a file
         self.add_svg(current_drawing)
@@ -113,14 +122,14 @@ class Endpoint( DrawingState ):
         return current_drawing
 
     #returns an svg document (not a file)
-    def transform_svg(self, svg_file, pipeline): 
+    def transform_svg(self, svg_file, transform): 
         current_drawing = self.create_svg_doc()
-        xoffset = pipeline.print_top_left_x
-        yoffset = pipeline.print_top_left_y
-        scale = pipeline.print_width / pipeline.img_width
+        xoffset = transform.xoffset
+        yoffset = transform.yoffset
+        scale = transform.scale
         svg_data = parse(svg_file)
 
-        #set up pipeline's transform
+        #set up transform
         tr = pysvg.builders.TransformBuilder()
         tr.setScaling(scale)
         trans = str(xoffset) + " " + str(yoffset) 
@@ -185,13 +194,13 @@ class Endpoint( DrawingState ):
                 outy = y 
 
                 #validate, the +-1mm is to account for rounding errors
-                if outx > self.x_max + 1:
+                if outx > self.x_max:
                     raise EndpointConversionError("gcode x too large %f > %f" % (outx,self.x_max))
-                if outy > self.y_max + 1:
+                if outy > self.y_max:
                     raise EndpointConversionError("gcode y too large %f > %f" % (outy,self.y_max))
-                if outx < self.x_min - 1:
+                if outx < self.x_min:
                     raise EndpointConversionError("gcode x too small %f < %f" % (outx,self.x_min))
-                if outy < self.y_min - 1:
+                if outy < self.y_min:
                     raise EndpointConversionError("gcode y too small %f < %f" % (outy,self.y_min))
 
                 polar_code += "g%.1f,%.1f\n" %  (outx,outy) 
@@ -226,6 +235,17 @@ class Endpoint( DrawingState ):
         n = self.get_next()
         n.served = True
         n.save()
+    
+    def movearea(self):
+        so = GCodeOutput(endpoint=self)
+        so.save()
+        f = open(so.get_filename(),'w')
+        f.write("g%f,%f\n" % ( self.side_margin, self.top_margin ))
+        f.write("g%f,%f\n" % ( self.width - self.side_margin , self.top_margin ))
+        f.write("g%f,%f\n" % ( self.width - self.side_margin , self.height ))
+        f.write("g%f,%f\n" % ( self.side_margin , self.height ))
+        f.write("g%f,%f\n" % ( self.side_margin, self.top_margin ))
+        f.close()
 
     def calibrate(self):
         so = GCodeOutput(endpoint=self)
@@ -270,6 +290,27 @@ class Endpoint( DrawingState ):
 
     class Meta:
         app_label = 'polargraph'
+
+class Transform( models.Model ):
+    def build_from_pipeline(self,pipeline):
+        self.xoffset = pipeline.print_top_left_x
+        self.yoffset = pipeline.print_top_left_y
+        self.scale = pipeline.print_width / pipeline.img_width
+
+    def build_from_endpoint(self,endpoint,svg_file,width):
+        (svgwidth,svgheight) = svg.get_dimensions(svg_file)
+        if width > endpoint.img_width:
+            print "not scaling larger than endpoint"
+            width = endpoint.img_width
+        if width == 0:
+            print "not using a 0 width"
+            width = endpoint.img_width
+        #put it in the middle of the page
+        self.xoffset = (endpoint.width - width ) / 2
+        self.yoffset = endpoint.top_margin
+        self.scale = width / svgwidth
+        #FIXME scale results in a pic too big. 
+        self.scale *= 0.90
 
 class GCodeOutput( models.Model ):
     endpoint = models.ForeignKey(Endpoint)

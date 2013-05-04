@@ -3,18 +3,40 @@ Created on 6 Jan 2013
 
 @author: dmrust
 '''
-import time
+import time,copy
 from pysvg.parser import parse
 import sys
 import cairosvg
 from xml.parsers.expat import ExpatError
 
 
+def get_dimensions(svg_file):
+    parsed = parse(svg_file)
+    #rewind to avoid an error when the file is parsed again
+    svg_file.seek(0)
+    width = parsed.getAttribute('width')
+    height = parsed.getAttribute('height')
+    pixtomm = 3.55
+    #FIXME bad way of handling svg sizes
+    if width.endswith("px"):
+        width = float(width.rstrip("px"))
+    else:
+        width = float(width)
+
+    if height.endswith("px"):
+        height = float(height.rstrip("px"))
+    else:
+        height = float(height)
+
+    return (width,height)
+
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
 def append_svg_to_file( fragment_file, main_file ):
     try:
+        print "parsing main file", main_file
         svg_main = parse(main_file)
+        print "parsing frag file", fragment_file
         svg_frag = parse(fragment_file)
         svg_id = int(time.time())
         for e in svg_frag.getAllElements():
@@ -26,7 +48,7 @@ def append_svg_to_file( fragment_file, main_file ):
             svg_main.addElement( e )
         svg_main.save(main_file)
     except (ExpatError, IOError) as e:
-        print "couldn't open either %s or %s: %s" % (fragment_file,main_file,e)
+        print "problem appending %s to %s: %s" % (fragment_file,main_file,e)
         raise
     clear_blank_lines(main_file)
 
