@@ -306,11 +306,15 @@ class Transform( models.Model ):
             print "not using a 0 width"
             width = endpoint.img_width
         #put it in the middle of the page
-        self.xoffset = (endpoint.width - width ) / 2
-        self.yoffset = endpoint.top_margin
+        self.xoffset = (endpoint.img_width - width ) / 2
+        self.yoffset = 0
         self.scale = width / svgwidth
+
+        print "width of svg", svgwidth
+        print "desired width", width
+        print "scale", self.scale
         #FIXME scale results in a pic too big. 
-        self.scale *= 0.90
+        #self.scale *= 0.90
 
 class GCodeOutput( models.Model ):
     endpoint = models.ForeignKey(Endpoint)
