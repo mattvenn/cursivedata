@@ -116,7 +116,8 @@ class TestPipeline(TestCase):
 
     def run_and_check_size(self,sq_height,sq_width):
         #this runs the pipeline
-        data = [{ 'value' : 4000 }]
+        timestamp = str(timezone.now())
+        data = [{ 'data' : '{"value":4000}', "date" : timestamp }]
         self.data_store.add_data(data)
 
         #robot margins
