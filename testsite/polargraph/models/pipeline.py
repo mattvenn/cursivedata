@@ -37,6 +37,7 @@ class Pipeline( DrawingState ) :
     data_store = models.OneToOneField( DataStore)
     state = models.OneToOneField( GeneratorState)
     endpoint = models.ForeignKey( "Endpoint")
+    paused = models.BooleanField(default=False)
 
     print_top_left_x = models.FloatField(default=0)
     print_top_left_y = models.FloatField(default=0)
@@ -48,9 +49,21 @@ class Pipeline( DrawingState ) :
     def __unicode__(self):
         return self.name
 
+    def resume(self):
+        self.paused = False
+        self.save()
+        self.update()
+
+    def pause(self):
+        self.paused = True
+        self.save()
+
     #Executes the pipeline by running the generator on the next bit of data
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
     def update( self, data=None ) :
+        if self.paused:
+            print "pipeline paused"
+            return
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state

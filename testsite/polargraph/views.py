@@ -105,7 +105,7 @@ def show_pipeline(request, pipelineID):
             pipeline.reset()
         elif act == "Modify":
             print act 
-            form = PipelineModify(request.POST) # A form bound to the POST data
+            form = PipelineModify(request.POST,instance=pipeline) # A form bound to the POST data
 #            import pdb; pdb.set_trace()
             print form.errors
 
@@ -116,6 +116,12 @@ def show_pipeline(request, pipelineID):
                 pipeline.endpoint = form.cleaned_data['endpoint']
                 print "new endpoint:", form.cleaned_data['endpoint']
                 pipeline.save()
+        elif act == "Resume":
+            print "resume"
+            pipeline.resume()
+        elif act == "Pause":
+            print "pause"
+            print pipeline.pause()
         elif act == "Begin":
             pipeline.begin()
         elif act == "End":
@@ -143,7 +149,7 @@ def show_pipeline(request, pipelineID):
         elif act != "none":
             print "Unknown pipeline action:",act
         
-        form = PipelineModify(instance=pipeline) # An unbound form
+        form = PipelineModify(instance=pipeline) 
         context = {"pipeline":pipeline, "form": form}
         return render(request,"pipeline_display.html",context)
     except Pipeline.DoesNotExist:

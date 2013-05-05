@@ -33,6 +33,11 @@
 						<input class="button" type="submit" value="Reset" name="action" />
 						<input class="button" type="submit" value="Begin" name="action" />
 						<input class="button" type="submit" value="End" name="action" />
+	                    {% if pipeline.paused %}
+						<input class="button" type="submit" value="Resume" name="action"/>
+	                    {% else %}
+						<input class="button" type="submit" value="Pause" name="action"/>
+	                    {% endif %}
 					</div>
                 </form>
 
