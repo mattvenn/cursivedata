@@ -91,11 +91,11 @@
                 <!--<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />-->
                 <!-- someone please fix this terrible shit -->
                 <div style="background:#fff">
-                    <embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /><br/>
+                    <a href="/{{pipeline.full_svg_file}}"><embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /></a><br/>
                     </div>
                     <input id="slider" width="600px" type="range" min="0" max="0" step="1" onchange="toggleVis()">
                     <input id="rangeVal" type="text" size="8" /><br>
-                    <a href="/{{pipeline.full_svg_file}}">link to image</a>
+                    
                 </div>
         <!--
 		<div class="mainOutput">

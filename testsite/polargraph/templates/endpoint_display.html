@@ -57,7 +57,8 @@
     <ul class="block-grid three-up">
             <li>
 			<div class="outputContainer">
-                <img src="/{% if endpoint.full_svg_file %}{{endpoint.full_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/>
+                <a href="/{{endpoint.full_svg_file}}">
+                <img src="/{% if endpoint.full_svg_file %}{{endpoint.full_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/></a>
 				{{output.modified}}
 			</div>
 		{% for output in endpoint.get_recent_output %}
