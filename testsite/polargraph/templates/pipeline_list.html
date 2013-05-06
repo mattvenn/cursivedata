@@ -32,5 +32,7 @@
     <h2>No pipelines are available.</h2>
     </div>
 {% endif %}
+    {% if user.is_authenticated %}
         <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_pipeline %}">Create a new pipeline</a></div> </h4> </div>
+    {% endif %}
 {%endblock%}

@@ -14,12 +14,17 @@
             <div class="formParamDescription">
                 Endpoint drawing area is: {{pipeline.endpoint.img_width}}mm by {{pipeline.endpoint.img_height}}mm
             </div>
+            {% if user.is_authenticated %}
                 <form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input class="button" type="submit" value="Modify" name="action" />
+                </form>
+            {% endif %}
         </h4>
+
       </div>
+        {% if user.is_authenticated %}
 
       <div class="row">
         <ul class="block-grid three-up">
@@ -85,6 +90,7 @@
             </li>
             </ul>
 		</div>
+    {% endif %}
     
     <div class="row">
             <h2>Current drawing</h2>
