@@ -42,7 +42,13 @@
     <!-- Right Nav Section -->
     <ul class="right">
       <li class="divider hide-for-small"></li>
-      <li><a href="/login">Login</a>
+      <li>
+
+            {% if user.is_authenticated %}
+              <a href="/logout">Logout</a>
+            {% else %}
+              <a href="/login">Login</a>
+            {% endif %}
 
       <!-- <li class="has-form">
         <form>
