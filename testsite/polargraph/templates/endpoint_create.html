@@ -6,6 +6,7 @@
     <h2>Create a new endpoint</h2>
   </div>
   <div class="row">
+    
 	<form action="{% url polargraph:create_endpoint %}" method="POST">
 		{% csrf_token %}
 		{{ form.as_p }}
