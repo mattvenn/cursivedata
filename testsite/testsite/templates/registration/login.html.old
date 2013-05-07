@@ -1,5 +1,0 @@
-{% extends "admin/login.html" %}
-
-{% block branding %}
-<h1 id="site-name">Drawbot Login</h2>
-{% endblock %}
