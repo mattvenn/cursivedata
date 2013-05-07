@@ -1,5 +1,6 @@
 # Create your views here.
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from polargraph.models import *
@@ -42,6 +43,7 @@ def list_generators(request):
 
 
 
+@login_required
 def create_source(request):
     if request.method == 'POST': # If the form has been submitted...
         form = COSMSourceCreation(request.POST) # A form bound to the POST data
@@ -211,6 +213,7 @@ def show_endpoint(request, endpointID):
     except Endpoint.DoesNotExist:
         raise Http404
 
+@login_required
 def create_generator(request):
     create_form = GeneratorSource()
     create_message = None;
@@ -251,6 +254,7 @@ class GeneratorSource(forms.Form):
         return data
     
         
+@login_required
 def show_generator(request, generatorID):
     try:
         generator = Generator.objects.get(pk=generatorID)
@@ -381,7 +385,8 @@ def update(request, pipelineID):
     except Pipeline.DoesNotExist:
         raise Http404
     return HttpResponse(pipeline.update())
-    
+   
+@login_required
 def create_endpoint( request ):
     if request.method == 'POST': # If the form has been submitted...
         form = EndpointCreation(request.POST) # A form bound to the POST data
@@ -396,6 +401,7 @@ def create_endpoint( request ):
         'form': form,
     })
 
+@login_required
 def create_pipeline( request ):
     if request.method == 'POST': # If the form has been submitted...
         form = PipelineCreation(request.POST) # A form bound to the POST data
