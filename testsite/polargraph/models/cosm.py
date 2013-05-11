@@ -41,7 +41,7 @@ class COSMSource( models.Model ):
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
     def receive_data(self,msg):
-        print "DS:",str(self.pipelines),"Got message for pipeilnes:",str(msg)
+        print "DS:",str(self.pipelines),"Got message for pipelines:",str(msg)
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         datapoint = {}

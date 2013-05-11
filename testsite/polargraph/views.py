@@ -426,7 +426,7 @@ class EndpointCreation(ModelForm):
 class PipelineModify(ModelForm):
     class Meta:
         model = Pipeline
-        fields = ( 'sources', 'generator', 'endpoint' )
+        fields = ( 'name', 'sources', 'generator', 'endpoint' )
 
 class PipelineCreation(ModelForm):
     class Meta:
