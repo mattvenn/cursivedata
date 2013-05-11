@@ -29,11 +29,10 @@ def push_data( input_data ):
 def calculate_datetime_from_minute(minute):
    now = datetime.datetime.now()
    if minute:
+       print "minute", minute
        hours = int(minute / 60)
        mins = minute % 60
-
        then = datetime.datetime(now.year,now.month,now.day,hours,mins,0) 
-       print then
    else:
        then = now
    return then.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -94,6 +93,11 @@ if __name__ == '__main__':
             push_data(data)
             last_value = value
             last_min = minute
+    elif args.minute:
+        timestamp = calculate_datetime_from_minute(args.minute)
+        data = [{"data": '{"value":%d}' % args.value,"date":timestamp}]
+        print data
+        push_data(data)
     else:
         timestamp = calculate_datetime_from_minute(args.minute)
         push_data([{"data": '{"value":%d}' % args.value,"date":timestamp}],)
