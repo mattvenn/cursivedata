@@ -126,7 +126,7 @@ class Pipeline( DrawingState ) :
             return StoredOutput(endpoint=self.endpoint,pipeline=self,generator=self.generator,run_id=self.run_id,filetype=output_type,status=status)
     
     #Gets recent output which is not the current run
-    def get_recent_output(self,start=0,end=8):
+    def get_recent_output(self,start=0,end=3):
         return StoredOutput.objects \
                 .order_by('-modified') \
                 .filter(pipeline=self,status="complete",filetype="svg") \
