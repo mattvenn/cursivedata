@@ -1,17 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Source {{source.id }}{% endblock %}
+{% block title %}Source {{source.name }}{% endblock %}
 {% block content %}
 {% if source %}
   <div class="row">
-    <h2>Source {{source.id}}</h2>
+    <h2>{{source.name}}</h2>
   </div>
 
         <div class="row">
           <div class="large-12 columns">
 				<div class="description">last updated: {{source.last_updated}} with {{source.last_value}}.</div>
-                <div>datastore id: {{source.data_store}}</div>
                 <div><a href="https://cosm.com/feeds/{{source.feed_id}}">
                 <img src="https://api.cosm.com/v2/feeds/{{source.feed_id}}/datastreams/{{source.stream_id}}.png?width=940&height=250&colour=%232ba6cb&duration=1day&show_axis_labels=true&detailed_grid=true&scale=auto&timezone=London"/></a>
+                <div>used by pipelines:</div>
+                <ul>
+                    {% for pipeline in source.pipelines.all %}
+                    <li><a href="{% url polargraph:show_pipeline pipeline.id %}">pipeline {{pipeline.id}}</a></li>
+                    {% endfor %}
+                </ul>
 			</div>
 			</div>
 		</div>

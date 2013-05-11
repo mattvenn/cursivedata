@@ -7,7 +7,7 @@
         <h2>{{pipeline.name}}</h2>
             <h4 class="subheader">
             <div class="objectInfo">{{pipeline.name}} {{pipeline.description}}</div>
-            <div class="objectInfo">Source: {{pipeline.data_store_id}}</div>
+            <div class="objectInfo">Source: {{pipeline.sources}}</div>
             <div class="objectInfo">Generator: <a href="{% url polargraph:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>, last used: {{ pipeline.generator.last_used }}, last updated: {{ pipeline.generator.last_updated }}</div>
             <div> <a href="{% url polargraph:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a></div>
 
