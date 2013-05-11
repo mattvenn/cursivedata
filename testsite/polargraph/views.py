@@ -373,7 +373,11 @@ def get_gcode(request, endpointID ):
     if consume:
         print "Consuming..."
         endpoint.consume()
-    wrapper = FileWrapper(file(filename))
+    try:
+        wrapper = FileWrapper(file(filename))
+    except IOError:
+        print "no gcode file when we expected one"
+        raise Http404
     response = HttpResponse(wrapper, content_type='text/plain')
     response['Content-Length'] = os.path.getsize(filename)
     return response
