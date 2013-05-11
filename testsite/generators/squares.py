@@ -15,6 +15,7 @@ def process(drawing,data,params,internal_state) :
     aggregate = internal_state.get("aggregate",0)
     square_num = int(internal_state.get("square_num",0))
     grid = drawing.get_grid(nx=params.get("Xdiv"),ny=params.get("Ydiv"))
+    circle = int(params.get("Circle",0))
 
     for point in data.get_current():
         aggregate += float(point.data['value'])
@@ -42,7 +43,11 @@ def process(drawing,data,params,internal_state) :
                 rotate = int(square_num*params.get("Rotate")) % 360 
                 transform = "rotate(%d,%d,%d)" % (rotate,cx,cy)
             hWidth = width/2
-            drawing.rect(cx-hWidth,cy-hWidth,width,width,id=id,transform = transform)
+            if not circle:
+                drawing.rect(cx-hWidth,cy-hWidth,width,width,id=id,transform = transform)
+            else:
+                drawing.circle(cx,cy,width/2)
+                
             aggregate -= params.get("Value")
             #increment squares
             square_num += 1
@@ -67,6 +72,7 @@ def get_params() :
         {"name":"SquareInc", "default":2, "description":"amount subsequent squares increase in size" },
         {"name":"Rotate", "default":0, "description":"rotate degrees" },
         {"name":"Value", "default":3000, "description":"value of each square" },
+        {"name":"Circle", "default":0, "description":"set to 1 to make circles instead" },
             ]
 
 def get_name() : return "Squares"
