@@ -6,6 +6,7 @@ Created on 2 Feb 2013
 import pysvg
 import colorsys
 import pysvg.text as txt
+from pysvg.parser import parse
 from pysvg.shape import *
 import math
 
@@ -74,6 +75,20 @@ class Drawing:
     #Takes a number, and turns it into document coordinates. At the moment, just makes a string, but could e.g. add "mm" if necessary
     def dc(self,coord):
         return str(coord)
+
+    #allows loading external svgs into the drawing
+    def import_svg(self,svg_file):
+        try:
+            svg_parsed = parse(svg_file)
+            for e in svg_parsed.getAllElements():
+                self.doc.addElement( e )
+        except (ExpatError, IOError) as e:
+            print "problem parsing %s:%s" % (svg_file,e)
+            raise
+
+    def load_svg(self,svg_file):
+        svg_parsed = parse(svg_file)
+        return svg_parsed
 
 class Grid:
     def __init__(self, drawing, nx=None, ny=None ):
