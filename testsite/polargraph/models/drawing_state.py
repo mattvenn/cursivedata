@@ -57,7 +57,7 @@ class DrawingState( models.Model ):
         doc = self.create_svg_doc( createRect=True)
         doc.save(filename)
     
-    #Create an empty svg doc with the given width and height
+    #Create an empty svg doc with the given width and height (mm)
     def create_svg_doc(self,width=-1,height=-1,createRect=False):
         if width == -1:
             width = self.img_width

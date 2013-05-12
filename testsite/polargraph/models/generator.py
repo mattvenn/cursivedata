@@ -187,7 +187,7 @@ class GeneratorRunner(DrawingState):
         for (key, value) in input_params.iteritems():
             params[key] = value
         internal = {}
-        doc = self.create_svg_doc(width, height)
+        doc = self.create_svg_doc(width, height) #in mm
         drwg = Drawing( doc )
         generator.begin_drawing( drwg, params, internal )
         generator.process_data(  drwg, data, params, internal )
