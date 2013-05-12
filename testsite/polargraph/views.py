@@ -264,7 +264,7 @@ def show_generator(request, generatorID):
             
         ds_form.get_data_store()
                 
-        #Setup width and height
+        #Setup width and height (mm)
         width = int(request.POST.get("width","400"))
         height = int(request.POST.get("height","400"))
         
