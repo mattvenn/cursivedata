@@ -1,6 +1,7 @@
 # Create your views here.
 
 from django.contrib.auth.decorators import login_required
+from django.forms.extras.widgets import SelectDateWidget
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from polargraph.models import *
@@ -331,8 +332,8 @@ class SelectOrMakeDataStore(forms.Form):
             print "generator doesn't have a data store yet"
     
 class DataStoreSettings(forms.Form):
-    max_time = forms.DateTimeField(label="Data Before",required=False)
-    min_time = forms.DateTimeField(label="Data After",required=False)
+    max_time = forms.DateTimeField(widget=SelectDateWidget,label="Data Before",required=False)
+    min_time = forms.DateTimeField(widget=SelectDateWidget,label="Data After",required=False)
     max_records = forms.IntegerField(label="Limit records to",required=False)
     def get_params(self):
         return { "max_date": self.max_date, 
