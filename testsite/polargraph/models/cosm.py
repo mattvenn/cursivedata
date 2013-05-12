@@ -16,14 +16,16 @@ from polargraph.models.data import DataStore
 from django.utils.datetime_safe import datetime
 import re
 
-#Represents a COSM trigger, and maps it to a data_store, parsing any messages sent
+#Represents a COSM trigger which can be connected to any pipelines
 class COSMSource( models.Model ):
-    data_store = models.ForeignKey( DataStore )
+    name = models.CharField(max_length=100,default="Unknown Source")
+    pipelines = models.ManyToManyField( 'Pipeline', blank=True )
     feed_id = models.CharField(max_length=400,default="96779")
     stream_id = models.CharField(max_length=400,default="1")
     api_key = models.CharField(max_length=400,default="WsH6oBOmVbflt5ytsSYHYVGQzCaSAKw0Ti92WHZzajZHWT0g")
     cosm_trigger_id = models.CharField(max_length=50,blank=True)
-    url_base = models.CharField(max_length=200,default="http://mattvenn.net:8080")
+    #FIXME hardcoded port
+    url_base = models.CharField(max_length=200,default="http://mattvenn.net:8090")
     cosm_url=models.CharField(max_length=200,default="http://api.cosm.com/v2/triggers/")
     #Add in the lat/lon to any data recieved
     add_location = models.BooleanField(default=False)
@@ -39,7 +41,7 @@ class COSMSource( models.Model ):
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
     def receive_data(self,msg):
-        #print "DS:",str(self.data_store_id),"Got message for data_store:",str(msg)
+        print "DS:",str(self.pipelines),"Got message for pipelines:",str(msg)
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         datapoint = {}
@@ -57,7 +59,8 @@ class COSMSource( models.Model ):
         if self.add_feed_id :
             datapoint["feed_title"] = msg["environment"]["title"]
         data = {"date":time,"data":datapoint}
-        self.data_store.add_data([data])
+        for pipeline in self.pipelines.all():
+            pipeline.add_data([data])
         self.last_updated = timezone.now()
         self.last_value = value
         self.save()
@@ -73,7 +76,7 @@ class COSMSource( models.Model ):
             url = "http://"+url
         data["url"]=url
         
-        print "Setting up COSM trigger for data_store",self.data_store_id,\
+        print "Setting up COSM trigger for pipelines",self.pipelines,\
             " from feed:",self.feed_id,", stream:",self.stream_id,", API Key: ",self.api_key
         print "Pointing to URL:",data['url']
         r=requests.post(self.cosm_url,data=json.dumps(data),headers = headers)
@@ -112,3 +115,6 @@ class COSMSource( models.Model ):
     
     class Meta:
         app_label = 'polargraph'
+
+    def __unicode__(self):
+        return "Cosm: "+self.name+" ("+self.cosm_trigger_id+")"

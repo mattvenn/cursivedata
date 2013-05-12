@@ -6,10 +6,9 @@
     {% for source in source_list %}
   <div class="row">
 				
-    <h2><a href="{% url polargraph:show_source source.id %}">{{ source.id }}</a></h2>
+    <h2><a href="{% url polargraph:show_source source.id %}">{{ source.name }}</a></h2>
         <h4 class="subheader">
 				<div class="description">last updated: {{source.last_updated}} with {{source.last_value}}.</div>
-                <div>link: <a href="https://cosm.com/feeds/{{source.feed_id}}">{{source.feed_id}}/{{source.stream_id}}</a></div>
         </h4>
     </div>
     {% endfor %}

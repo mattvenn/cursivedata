@@ -144,6 +144,7 @@ INSTALLED_APPS = (
     # Third party libraries
     'tastypie',
     'django_nose',
+    'south',
 
     # Our apps
     'landing',

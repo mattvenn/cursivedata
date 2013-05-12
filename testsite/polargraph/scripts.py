@@ -31,15 +31,19 @@ def test_creating_pipeline():
     g1s.save()
     e1 = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=500, height=400, top_margin=100, side_margin=100)
     e1.save()
-    d1 = DataStore()
-    print d1.id
-    d1.save()
-    p1 = Pipeline(name="Test Pipeline " + str(num),data_store=d1, generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
+    #d1 = DataStore()
+    #print d1.id
+    #d1.save()
+    print("Making pipeline object")
+    p1 = Pipeline(name="Test Pipeline " + str(num), generator=g1, endpoint=e1,state=g1s, last_updated=timezone.now() )
     p1.description = "Example pipeline created by test script. Number "+str(num)
+    print("Saving pipeline object")
     p1.save()
     print "P1:",str(p1)
-    p1.update(d1)
-    ce = COSMSource(data_store=d1)
+    #p1.update(d1)
+    ce = COSMSource()
+    ce.save()
+    ce.pipelines.add(p1)
     ce.save()
     print "COSM:",ce.id
-    return {"pipeline":p1, "data_store":d1, "cosm_source":ce }
+    return {"pipeline":p1, "cosm_source":ce }

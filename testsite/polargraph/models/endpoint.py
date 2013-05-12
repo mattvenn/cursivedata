@@ -85,10 +85,6 @@ class Endpoint( DrawingState ):
         self.add_svg(current_drawing)
         #easy comment out gcode for speedier testing.
         if True:
-            #now make the gcode
-            so = GCodeOutput(endpoint=self)
-            so.save()
-            print "creating gcode in ", so.get_filename()
             #transform the current svg for the robot
             current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
@@ -98,7 +94,14 @@ class Endpoint( DrawingState ):
             self.save()
 
             #convert it to gcode
-            self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
+            try:
+                so = GCodeOutput(endpoint=self)
+                so.save()
+                print "creating gcode in ", so.get_filename()
+                self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
+            except EndpointConversionError, e:
+                print "problem converting svg:", e
+                so.delete()
 
     #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
     #returns an svg document (not a file)
@@ -153,6 +156,7 @@ class Endpoint( DrawingState ):
         print pycam_args
         p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
         stdout,stderr = p.communicate()
+
         self.parse_gcode_to_polar(tmp_gcode,polarfile)
         os.close(fd)
         os.remove(tmp_gcode)

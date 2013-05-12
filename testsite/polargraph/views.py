@@ -49,12 +49,7 @@ def create_source(request):
     if request.method == 'POST': # If the form has been submitted...
         form = COSMSourceCreation(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            source = form.save(commit=False);
-            #what is the right way to do this?
-            ds = DataStore(name="Data for feed id " + str(source.feed_id))
-            ds.save()
-            source.data_store_id = ds.id
-            source.save()
+            source = form.save();
             return HttpResponseRedirect('/polargraph/sources/'+str(source.id)+"/") # Redirect after POST
     else:
         form = COSMSourceCreation() # An unbound form
@@ -114,7 +109,7 @@ def show_pipeline(request, pipelineID):
 
             if form.is_valid(): # All validation rules pass
                 #better way of doing this?
-                pipeline.data_store = form.cleaned_data['data_store']
+                pipeline.sources = form.cleaned_data['sources']
                 pipeline.generator = form.cleaned_data['generator']
                 pipeline.endpoint = form.cleaned_data['endpoint']
                 print "new endpoint:", form.cleaned_data['endpoint']
@@ -374,7 +369,11 @@ def get_gcode(request, endpointID ):
     if consume:
         print "Consuming..."
         endpoint.consume()
-    wrapper = FileWrapper(file(filename))
+    try:
+        wrapper = FileWrapper(file(filename))
+    except IOError:
+        print "no gcode file when we expected one"
+        raise Http404
     response = HttpResponse(wrapper, content_type='text/plain')
     response['Content-Length'] = os.path.getsize(filename)
     return response
@@ -428,12 +427,12 @@ class EndpointCreation(ModelForm):
 class PipelineModify(ModelForm):
     class Meta:
         model = Pipeline
-        fields = ( 'data_store', 'generator', 'endpoint' )
+        fields = ( 'name', 'sources', 'generator', 'endpoint' )
 
 class PipelineCreation(ModelForm):
     class Meta:
         model = Pipeline
-        fields = ( 'name', 'description', 'data_store', 'generator', 'endpoint', 'img_width', 'img_height' )
+        fields = ( 'name', 'description', 'sources', 'generator', 'endpoint', 'img_width', 'img_height' )
         widgets = {
             'description': Textarea(attrs={'cols': 60, 'rows': 1}),
             'name': TextInput(attrs={'size': 60}),
@@ -443,4 +442,4 @@ class COSMSourceCreation(ModelForm):
     class Meta:
         model = COSMSource
         #fields = ( 'cosm_url', 'feed_id', 'stream_id', 'api_key', 'url_base', 'add_location', 'use_stream_id', 'add_feed_title', 'add_feed_id')
-        fields = ( 'feed_id', 'stream_id' )
+        fields = ( 'name', 'feed_id', 'stream_id' )

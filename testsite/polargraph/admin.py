@@ -15,7 +15,7 @@ class GeneratorAdmin(admin.ModelAdmin):
     ]
 class PipelineAdmin(admin.ModelAdmin):
     model = Pipeline
-    fields = ('img_width','img_height','name','description','generator','endpoint', 'print_top_left_x', 'print_top_left_y', 'print_width' )
+    fields = ('img_width','img_height','name','description','generator','endpoint', 'print_top_left_x', 'print_top_left_y', 'print_width', 'sources' )
 
 
 admin.site.register(Generator,GeneratorAdmin)
