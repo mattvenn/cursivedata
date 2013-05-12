@@ -22,7 +22,9 @@ class Generator( models.Model ) :
     image = models.CharField(max_length=200,default="No Image")
     file_path = models.CharField(max_length=200,default="./generators")
     module_name = models.CharField(max_length=200,unique=True)
+    #last_updated is actually creation date
     last_updated = models.DateTimeField("Last Updated",default=timezone.now())
+    #last_used is when the generator was last used by a pipeline
     last_used = models.DateTimeField("Last Used",default=timezone.now())
     
     module = None
@@ -116,9 +118,12 @@ class Generator( models.Model ) :
     
     def get_recent_output(self,start=0,end=8):
         return StoredOutput.objects.order_by('-modified').filter(generator=self,status="complete",filetype="svg")[start:end]            
+
+    #called by pipeline after an update
     def update_last_used(self):
         self.last_used = timezone.now()
         self.save();
+
     class Meta:
         app_label = 'polargraph'
     def __unicode__(self):
