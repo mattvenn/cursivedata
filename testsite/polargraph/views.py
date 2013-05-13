@@ -27,6 +27,11 @@ def list_sources(request):
     context = {"source_list":latest_sources}
     return render(request,"sources_list.html",context)
 
+def embed_pipeline(request,pipelineID):
+    pipeline = Pipeline.objects.get(pk=pipelineID)
+    context = {"pipeline":pipeline}
+    return render(request,"embed_pipeline.html",context)
+
 def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
     context = {"pipeline_list":latest_pipelines}
