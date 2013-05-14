@@ -152,11 +152,11 @@ class Pipeline( DrawingState ) :
     #Sets up a datastore and generator state for use
     def init_data(self,force=False,save=True):
         if (not self.data_store_id) or force:
-            ds = DataStore(name="Data for"+str(self.name))
+            ds = DataStore(name=str(self.name)+" datastore")
             ds.save()
             self.data_store = ds
         if (not self.state_id) or force :
-            gs = GeneratorState(name="Data for"+str(self.name), generator=self.generator)
+            gs = GeneratorState(name="generator state for "+str(self.name), generator=self.generator)
             gs.save()
             self.state = gs
         if save:
