@@ -29,8 +29,8 @@ if __name__ == '__main__':
     default_url = 'http://api.cosm.com/v2/triggers/'
 
     parser = argparse.ArgumentParser(description="manage triggers")
-    parser.add_argument('--key-file', required=True,
-        action='store', dest='key_file', help="key file")
+    parser.add_argument('--key-file',
+        action='store', dest='key_file', help="key file, default is default.key", default="default.key")
     parser.add_argument('--url',
         action='store', dest='url', default=default_url,
         help="url of the api")
