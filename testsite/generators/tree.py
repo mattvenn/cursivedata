@@ -22,9 +22,8 @@ def process(drawing,data,params,internal_state) :
         current_minute = get_minute(point.date) 
         aggregate += float(point.data['value'])
         print "aggregate:", aggregate
-        print "minute:", minute
         print "current minute", current_minute
-        print "interval", interval
+        print "minute + interval", minute + interval
         #if we've got enough time & aggregate to draw a leaf
         if (current_minute > (minute + interval)) and aggregate > 0:
 
@@ -36,7 +35,7 @@ def process(drawing,data,params,internal_state) :
             starty = 0
             startx =  random.randint(border, drawing.width-border)
             while starty > (drawing.height / 2) or starty < border:
-              starty = random.randint(0, drawing.height)
+                starty = random.randint(0, drawing.height)
             print "drawing leaf at", startx,starty,aggregate
             draw_leaf(drawing,startx,starty,rotate,aggregate / scale)
 
@@ -104,7 +103,7 @@ def write_scale(drawing,params):
 def get_params() :
     return  [ 
         #changing this needs to update the internal state, as we store an array of this number
-        {"name":"value", "default":1, "description":"an input value of this will draw a 1mm bar" },
+        {"name":"value", "default":1, "description":"an input value of this will draw a leaf the same size as the scale leaf" },
         {"name":"interval", "default":10, "description":"how long (minutes) to wait before drawing a new leaf" },
 # params can only be floats        {"name":"text", "default":'text', "description":"text for centre" },
             ]
