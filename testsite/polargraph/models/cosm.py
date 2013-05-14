@@ -25,7 +25,7 @@ class COSMSource( models.Model ):
     api_key = models.CharField(max_length=400,default="WsH6oBOmVbflt5ytsSYHYVGQzCaSAKw0Ti92WHZzajZHWT0g")
     cosm_trigger_id = models.CharField(max_length=50,blank=True)
     #FIXME hardcoded port
-    url_base = models.CharField(max_length=200,default="http://mattvenn.net:8090")
+    url_base = models.CharField(max_length=200,default="http://mattvenn.net:8080")
     cosm_url=models.CharField(max_length=200,default="http://api.cosm.com/v2/triggers/")
     #Add in the lat/lon to any data recieved
     add_location = models.BooleanField(default=False)
