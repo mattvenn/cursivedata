@@ -57,11 +57,21 @@ class DataStore( models.Model ) :
         return DataPoint.objects.filter(current=True, datastore=self).count()
     
     def query(self,max_records=None,max_time=None,min_time=None):
-        #min and max time need checking for valid dates.
-#        data = DataPoint.objects.filter(date__range=[min_time,max_time] , datastore=self)[:max_records]
-        data = DataPoint.objects.filter(datastore=self)[:max_records]
+
+        #last part nasty because data doesn't support negative indexing
+        """
+        if min_time:
+            data = DataPoint.objects.filter(date__range=[min_time] , datastore=self).order_by('-id')[:max_records]
+        elif max_time:
+            data = DataPoint.objects.filter(date__range=[max_time] , datastore=self).order_by('-id')[:max_records]
+        elif min_time and max_time:
+            data = DataPoint.objects.filter(date__range=[min_time,max_time] , datastore=self).order_by('-id')[:max_records]
+        else:
+            data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
+        """
+        data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
         print "Final size", len(data)
-        return data
+        return data.reverse()
     
     #Adds the data to the current data and sets available to true
     #Data must be a list of dicts 
