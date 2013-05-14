@@ -197,6 +197,12 @@ def show_endpoint(request, endpointID):
             print endpoint.movearea()
         elif act == "Reset":
             print endpoint.reset()
+        elif act == "Start Gcode":
+            endpoint.generate_gcode = True;
+            endpoint.save()
+        elif act == "Stop Gcode":
+            endpoint.generate_gcode = False;
+            endpoint.save()
         elif act == "Resume":
             print "resume"
             endpoint.resume()

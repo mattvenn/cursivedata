@@ -16,6 +16,7 @@ import subprocess
 import os
 
 
+# a fantastic error class!
 class EndpointConversionError(Exception):
     pass
 
@@ -41,6 +42,7 @@ i.e. translate them by side_margin and top_margin
 '''
 class Endpoint( DrawingState ):
     name = models.CharField(max_length=200,default="default")
+    generate_gcode = models.BooleanField(default=False)
     device = models.CharField(max_length=200,default="web")
     #Width of the robot - not width of the drawing, which is img_width
     width = models.FloatField(max_length=200,default=200)
@@ -78,22 +80,23 @@ class Endpoint( DrawingState ):
         transform.build_from_pipeline(pipeline)
         self._input_svg(svg_file,transform)
 
+    #how to name this?
     def _input_svg(self,svg_file,transform):
         current_drawing = self.transform_svg(svg_file,transform)
-#          print current_drawing.getXML()
+
         #this will save out the latest svg as a file
         self.add_svg(current_drawing)
-        #easy comment out gcode for speedier testing.
-        if True:
-            #transform the current svg for the robot
-            current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
-            #write it out as an svg
-            self.robot_svg_file = self.get_robot_svg_filename()
-            current_drawing.save(self.robot_svg_file)
-            self.save()
+        #transform the current svg for the robot
+        current_drawing = self.transform_svg_for_robot(self.last_svg_file)
 
-            #convert it to gcode
+        #write it out as an svg
+        self.robot_svg_file = self.get_robot_svg_filename()
+        current_drawing.save(self.robot_svg_file)
+        self.save()
+
+        #convert it to gcode
+        if self.generate_gcode:
             try:
                 so = GCodeOutput(endpoint=self)
                 so.save()

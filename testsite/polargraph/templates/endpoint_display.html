@@ -16,6 +16,7 @@
 				Side margin: {{endpoint.side_margin}}<br/>
 				Top margin: {{endpoint.top_margin}}<br/>
 				Status: {{endpoint.status}}<br/>
+				Creating gcode: {{endpoint.generate_gcode}}<br/>
 				Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a><br/>
 				Files left to serve: {{files_left}}<br/> 
 			</div>
@@ -35,6 +36,11 @@
 						<input class="button" type="submit" value="Calibrate" name="action"/>
 						<input class="button" type="submit" value="Move Area" name="action"/>
 						<input class="button" type="submit" value="Reset" name="action"/>
+	                    {% if endpoint.generate_gcode %}
+						<input class="button" type="submit" value="Stop Gcode" name="action"/>
+	                    {% else %}
+						<input class="button" type="submit" value="Start Gcode" name="action"/>
+	                    {% endif %}
 	                    {% if endpoint.paused %}
 						<input class="button" type="submit" value="Resume" name="action"/>
 	                    {% else %}
