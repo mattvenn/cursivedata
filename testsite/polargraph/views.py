@@ -296,7 +296,7 @@ def show_generator(request, generatorID):
         elif act == "Import CSV":
             ds_form.load_csv(request.FILES['csv_file'], "Time")
         elif act == "Update Query":
-            ds_form.load_csv(request.FILES['csv_file'], "Time")
+            pass
         elif act == "Save Code":
             code_form = GeneratorCode(request.POST)
             code_form.save_code(generator)
@@ -334,15 +334,17 @@ class SelectOrMakeDataStore(forms.Form):
 class DataStoreSettings(forms.Form):
     max_time = forms.DateTimeField(widget=SelectDateWidget,label="Data Before",required=False)
     min_time = forms.DateTimeField(widget=SelectDateWidget,label="Data After",required=False)
-    max_records = forms.IntegerField(label="Limit records to",required=False)
+    max_records = forms.IntegerField(label="Limit records to last",required=False)
+    
     def get_params(self):
         return { "max_date": self.max_date, 
                 "min_date":self.min_date, "max_records":self.max_records}
+
     def query_data_store(self,data_store):
         if not data_store:
             return []
         if self.is_valid( ):
-	        return data_store.query(max_time=self.cleaned_data['max_time'],
+            return data_store.query(max_time=self.cleaned_data['max_time'],
                                     min_time=self.cleaned_data['min_time'],
                                     max_records=self.cleaned_data['max_records'])
         return data_store.query()
