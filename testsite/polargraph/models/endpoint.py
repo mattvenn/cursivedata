@@ -177,7 +177,7 @@ class Endpoint( DrawingState ):
         contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
         lastX = None
         lastY = None
-        polar_code=""
+        polar_code=[]
         for line in gcodes:
             s = startCode.match(line)
             c = contCode.match(line)
@@ -188,11 +188,12 @@ class Endpoint( DrawingState ):
                 y = s.group(3)
                 z = float(s.group(4))
                 if z > 0 :
-                    #don't draw
-                    polar_code += "d0\n"
+                    #don't draw, but ensure previous gcode also wasn't d0
+                    if len(polar_code) and polar_code[-1] != 'd0':
+                        polar_code.append("d0")
                 else:
                     #draw
-                    polar_code += "d1\n"
+                    polar_code.append("d1")
             elif c: 
                 x = float(c.group(1) or lastX)
                 y = float(c.group(2) or lastY)
@@ -210,13 +211,15 @@ class Endpoint( DrawingState ):
                 if outy < self.y_min:
                     raise EndpointConversionError("gcode y too small %f < %f" % (outy,self.y_min))
 
-                polar_code += "g%.1f,%.1f\n" %  (outx,outy) 
+                polar_code.append("g%.1f,%.1f" %  (outx,outy))
                 lastX = x
                 lastY = y
 
         file = open(outfile,"w")
         #print "writing polar file to ", outfile
-        file.write(polar_code)
+        for line in polar_code:
+            file.write(line + "\n")
+        file.close()
                 
     def get_next_filename(self):
         n = self.get_next()
