@@ -442,7 +442,7 @@ class EndpointCreation(ModelForm):
 class PipelineModify(ModelForm):
     class Meta:
         model = Pipeline
-        fields = ( 'name', 'sources', 'generator', 'endpoint' )
+        fields = ( 'name', 'sources', 'generator', 'endpoint', 'auto_begin_days' )
 
 class PipelineCreation(ModelForm):
     class Meta:

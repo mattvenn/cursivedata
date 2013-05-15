@@ -44,6 +44,9 @@ class Pipeline( DrawingState ) :
     print_top_left_y = models.FloatField(default=0)
     print_width = models.FloatField( default=500 )
 
+    auto_begin_days = models.IntegerField( default=0 )
+    next_auto_begin_date = models.DateTimeField( blank=True,null=True)
+
     def save(self, *args, **kwargs):
         if not self.pk:
             self.init_data(save=False)
@@ -72,6 +75,22 @@ class Pipeline( DrawingState ) :
         if self.paused:
             print "pipeline paused"
             return
+        #check if we need to do an auto begin
+        if self.auto_begin_days:
+            #might need to initialise
+            if self.next_auto_begin_date == None:
+                #set to tomorrow
+                now = timezone.now()
+                self.next_auto_begin_date = timezone.now().replace(hour=0,minute=0,second=0,microsecond=0)+timezone.timedelta(days=1)
+                self.save()
+            #if it's time to auto begin
+            elif timezone.now() > self.next_auto_begin_date:
+                #update the next auto time
+                self.next_auto_begin_date = timezone.now().replace(hour=0,minute=0,second=0,microsecond=0)+timezone.timedelta(days=self.auto_begin_days)
+                self.save()
+                print ">>>pipeline", self.name, " auto begin"
+                self.begin()
+
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state
