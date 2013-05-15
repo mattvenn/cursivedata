@@ -163,11 +163,11 @@ def show_pipeline(request, pipelineID):
 def show_source(request,sourceID):
     try:
         act = request.POST.get('action',"none")
-
+        port = request.META['SERVER_PORT']
         cs = COSMSource.objects.get(id=sourceID)
         if act == "Enable" :
             if not cs.is_running():
-                cs.start_trigger()
+                cs.start_trigger(port)
         if act == "Disable" :
             if cs.is_running():
                 cs.stop_trigger()

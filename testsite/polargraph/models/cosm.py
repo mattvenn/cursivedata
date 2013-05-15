@@ -24,8 +24,7 @@ class COSMSource( models.Model ):
     stream_id = models.CharField(max_length=400,default="1")
     api_key = models.CharField(max_length=400,default="WsH6oBOmVbflt5ytsSYHYVGQzCaSAKw0Ti92WHZzajZHWT0g")
     cosm_trigger_id = models.CharField(max_length=50,blank=True)
-    #FIXME hardcoded port
-    url_base = models.CharField(max_length=200,default="http://mattvenn.net:8080")
+    url_base = models.CharField(max_length=200,default="http://mattvenn.net")
     cosm_url=models.CharField(max_length=200,default="http://api.cosm.com/v2/triggers/")
     #Add in the lat/lon to any data recieved
     add_location = models.BooleanField(default=False)
@@ -65,13 +64,13 @@ class COSMSource( models.Model ):
         self.last_value = value
         self.save()
         
-    def start_trigger(self):
+    def start_trigger(self,port):
         headers= {'content-type': 'application/json'}
         headers['X-ApiKey'] = self.api_key
         data = { "trigger_type":"change" }
         data["environment_id"]=self.feed_id
         data["stream_id"]=self.stream_id 
-        url = self.get_url()
+        url = self.get_url(port)
         if not re.match("^http://",url):
             url = "http://"+url
         data["url"]=url
@@ -110,8 +109,8 @@ class COSMSource( models.Model ):
             return True
         return False
         
-    def get_url(self):
-        return self.url_base+"/api/v1/cosm/"+str(self.id)+"/"
+    def get_url(self,port):
+        return self.url_base + ":" + port +"/api/v1/cosm/"+str(self.id)+"/"
     
     class Meta:
         app_label = 'polargraph'
