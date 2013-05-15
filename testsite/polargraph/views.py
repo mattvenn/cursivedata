@@ -9,6 +9,7 @@ from polargraph.models.generator import GeneratorRunner
 from django.shortcuts import render
 import os
 import shutil
+import RSS
 from django.forms.models import ModelForm
 from django.forms.widgets import Textarea, TextInput
 from django.utils.datetime_safe import datetime
@@ -17,9 +18,10 @@ import re
 
 def index(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:3]
+    latest_news = RSS.getLatestNews()
     generators = Generator.objects.count()
     endpoints = Endpoint.objects.count()
-    context = {"latest_pipelines":latest_pipelines, "generators" : generators, "endpoints" : endpoints}
+    context = {"latest_pipelines":latest_pipelines, "generators" : generators, "endpoints" : endpoints, 'latest_news': latest_news}
     return render(request,"index.html",context)
 
 def list_sources(request):

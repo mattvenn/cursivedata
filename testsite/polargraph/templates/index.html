@@ -25,6 +25,20 @@
     </ul>
 </div>
 
+  <div class="row">
+        <h2>Latest news</h2>
+  </div>
+  <div class="row">
+ {% if latest_news %}
+            {% for story in latest_news %}
+<!--                <p class="news">{{ story.date }}</p> -->
+                                <h3><a class="news" href="{{ story.url }}">{{ story.title }}</a></h3>
+                <p class="news">{{ story.summary|safe }}</p><br>
+            {% endfor %}
+        {% endif %}
+        <!-- <a href="http://www.mattvenn.net/tag/rtdv/">View older stories >>></a> -->
+
+</div>
 <!-- Section to explain process of how people can create own drawings highlighting all the ways people can get involved e.g. pattern making, adding a data source, digital drawing making even if they don't own a bot themselves yet.-->
 	</div>
 {% endblock %}
