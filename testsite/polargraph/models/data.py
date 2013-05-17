@@ -59,17 +59,15 @@ class DataStore( models.Model ) :
     def query(self,max_records=None,max_time=None,min_time=None):
 
         #last part nasty because data doesn't support negative indexing
-        """
-        if min_time:
-            data = DataPoint.objects.filter(date__range=[min_time] , datastore=self).order_by('-id')[:max_records]
-        elif max_time:
-            data = DataPoint.objects.filter(date__range=[max_time] , datastore=self).order_by('-id')[:max_records]
-        elif min_time and max_time:
+        if min_time and max_time:
             data = DataPoint.objects.filter(date__range=[min_time,max_time] , datastore=self).order_by('-id')[:max_records]
+        elif min_time:
+            data = DataPoint.objects.filter(date__gt=min_time , datastore=self).order_by('-id')[:max_records]
+        elif max_time:
+            data = DataPoint.objects.filter(date__lt=max_time , datastore=self).order_by('-id')[:max_records]
         else:
             data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
-        """
-        data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
+        #data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
         print "Final size", len(data)
         return data.reverse()
     
