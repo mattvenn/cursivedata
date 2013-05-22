@@ -7,15 +7,17 @@
   <meta name="viewport" content="width=device-width" />
     <title>Polarbot - {% block title %}{% endblock %}</title>
 
-  <link rel="stylesheet" href="{{MEDIA_URL}}normalize.css" />
-  <link rel="stylesheet" href="{{MEDIA_URL}}foundation.css" />
    <link rel="stylesheet" href="{{MEDIA_URL}}drawbot.css" />
-  
-
+  <link rel="stylesheet" href="{{MEDIA_URL}}foundation.css" />
+    <link rel="stylesheet" href="{{MEDIA_URL}}nivo/css/default.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{MEDIA_URL}}nivo/css/nivo-slider.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{MEDIA_URL}}nivo/css/style.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="{{MEDIA_URL}}nivo/js/jquery-1.9.0.min.js"></script>
+    <script type="text/javascript" src="{{MEDIA_URL}}nivo/js/jquery.nivo.slider.js"></script>
     <script src="{{ MEDIA_URL }}slider.js"></script>
-  <script src="{{MEDIA_URL}}js/vendor/custom.modernizr.js"></script>
-
 </head>
+
+
 <body onload="load()">
   <nav class="top-bar">
   <ul class="title-area">
@@ -100,13 +102,6 @@
 </footer>
       
       
-   <script>
-  document.write('<script src=' +
-  ('__proto__' in {} ? '{{MEDIA_URL}}js/vendor/zepto' : 'js/vendor/jquery') +
-  '.js><\/script>')
-  </script>
-  
-  <script src="{{MEDIA_URL}}js/foundation.min.js"></script>
   <!--
   
   <script src="js/foundation/foundation.js"></script>
@@ -137,8 +132,5 @@
   
   -->
   
-  <script>
-    $(document).foundation();
-  </script>
 </body>
 </html>
