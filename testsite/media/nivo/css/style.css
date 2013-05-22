@@ -1,0 +1,35 @@
+/*=================================*/
+/* Nivo Slider Demo
+/* November 2010
+/* By: Gilbert Pellegrom
+/* http://dev7studios.com
+/*=================================*/
+
+.row {
+	width: 940px;
+	max-width: 100%;
+	min-width: 768px;
+	margin: 0 auto;
+}
+ 
+.nivo-caption {
+	width:50%;
+	background:rgba(255,255,255,0.5);
+	height:35%;
+	padding:15px;
+	margin-bottom:15px;
+}
+
+.nivo-caption h3 {
+	font-size:1.7em;
+	line-height:1.2;
+	color:#000;
+	font-weight:bold;
+}
+
+/*====================*/
+/*=== Other Styles ===*/
+/*====================*/
+.clear {
+	clear:both;
+}
