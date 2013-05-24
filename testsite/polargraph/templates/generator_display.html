@@ -73,13 +73,24 @@
   </div>
 
   <div class="row">
-      <h2>Output</h2>
+      <h2>Graphic Output</h2>
         <img class="bigPic" src="/{% if output %}{{output}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/> 
     </div>
 
   <div class="row">
+      <h2>Debug Output</h2>
+        {% if output_lines %}
+        <div style="height:300px;overflow:auto;padding:5px;">
+        {% for line in output_lines %}{{line}}<br>{% endfor %}
+        </div>{% endif %}
+
+    </div>
+
+
+  <div class="row">
         <h2>Data Used</h2>
-			<div class="dataDisplay">
+            <div style="height:300px;overflow:auto;padding:5px;">
+			<!--<div class="dataDisplay">-->
 				{% for datum in data %}
 				<div class="dataEntry">
 					<span class="dataTime">At {{datum.date}}</span>
