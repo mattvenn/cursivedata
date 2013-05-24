@@ -289,6 +289,7 @@ def show_generator(request, generatorID):
         params = generator.get_param_dict(param_values)
         
         filename = None
+        output_lines = []
         
         data = select_form.query_data_store(ds_form.data_store)
         print "loaded %d lines" % len(data)
