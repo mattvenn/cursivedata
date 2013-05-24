@@ -296,7 +296,7 @@ def show_generator(request, generatorID):
         act = request.POST.get('action',"none")
         if act == "Run" :
             if ds_form.data_store :
-                filename = GeneratorRunner().run(generator,data,param_values,width,height)
+                (filename,output_lines) = GeneratorRunner().run(generator,data,param_values,width,height)
             else:
                 print "No data store setup"
         elif act == "Create Datastore":
@@ -314,9 +314,10 @@ def show_generator(request, generatorID):
         code_form = GeneratorCode()
         code_form.load_code(generator)
         
+#        import ipdb; ipdb.set_trace()
         context = {"generator":generator,"output":filename, "data_store":ds_form.data_store, 
                     "width":width, "height":height, "params":params, "data": data,
-                    "ds_form":ds_form, "select_form":select_form, "code_form":code_form }
+                    "ds_form":ds_form, "select_form":select_form, "code_form":code_form, "output_lines": output_lines }
         return render(request,"generator_display.html",context)
     except Generator.DoesNotExist:
         raise Http404

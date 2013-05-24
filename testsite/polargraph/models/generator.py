@@ -176,6 +176,8 @@ class GeneratorState( models.Model ):
 #ds_settings is a DataStoreSettings, which can give query params
 #params is a Dict, with:
 ## param_<x> for params
+from cStringIO import StringIO
+import sys
 class GeneratorRunner(DrawingState):        
     def run(self,generator,input_data,input_params,width,height):
         data = FakeDataStore()
@@ -189,12 +191,27 @@ class GeneratorRunner(DrawingState):
         internal = {}
         doc = self.create_svg_doc(width, height) #in mm
         drwg = Drawing( doc )
+        #capture prints to stdout
+        backup = sys.stdout
+        sys.stdout = StringIO()
+        #do the processing
         generator.begin_drawing( drwg, params, internal )
         generator.process_data(  drwg, data, params, internal )
         generator.end_drawing( drwg, params, internal )
+        #grab the output
+        out = sys.stdout.getvalue()
+        output_lines = []
+        #take opportunity to supress inkscape warnings...
+        for line in out.splitlines():
+            if not line.endswith("not found in:svg"):
+                output_lines.append(line)
+            
+        #set the stdout back to normal
+        sys.stdout.close()
+        sys.stdout = backup
         fn = self.filename()
         doc.save(fn)
-        return fn;
+        return (fn,output_lines);
         
     
     def filename(self):
