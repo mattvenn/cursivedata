@@ -289,7 +289,7 @@ if __name__ == '__main__':
         action='store', dest='serialport', default='/dev/ttyACM0',
         help="serial port to listen on")
     parser.add_argument('--url',
-        action='store', dest='url', default='http://mattvenn.net:8080',
+        action='store', dest='url', default='http://cursivedata.co.uk',
         help="url of the server")
     parser.add_argument('--store',
         action='store', dest='store_file', 
