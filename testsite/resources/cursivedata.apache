@@ -5,7 +5,7 @@
   ServerName  www.cursivedata.co.uk
   ServerAlias cursivedata.co.uk
   DocumentRoot /home/polarsite/polargraphenergymonitor/testsite
-  WSGIDaemonProcess cursivedata display-name=cursivedata user=polarsite group=polarsite processes=2 threads=15 python-path=/home/polarsite/.virtualenvs/polarsite/lib/python2.6/site-packages/:/home/polarsite/polargraphenergymonitor/testsite/
+  WSGIDaemonProcess cursivedata display-name=cursivedata user=polarsite group=polarsite processes=2 threads=15 python-path=/home/polarsite/.virtualenvs/polarsite/lib/python2.6/site-packages/:/home/polarsite/polargraphenergymonitor/testsite/ home=/home/polarsite/polargraphenergymonitor/testsite/
   WSGIProcessGroup cursivedata
   WSGIScriptAlias / /home/polarsite/polargraphenergymonitor/testsite/testsite/wsgi.py
 
