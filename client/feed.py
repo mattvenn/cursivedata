@@ -144,7 +144,7 @@ def update_robot_status():
         print "failed to update"
     
 def fetch_data():
-    url = args.url + '/polargraph/endpoint_data/' + fetch_robot_id() + "/?consume=true"
+    url = args.url + '/endpoint_data/' + fetch_robot_id() + "/?consume=true"
     if args.verbose:
         print "fetching from", url
     gcodes = []
