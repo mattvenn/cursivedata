@@ -23,7 +23,6 @@ v1_api.register(EndpointResource())
 urlpatterns = patterns('',
      url(r'^admin/', include(admin.site.urls)),
 
-     url(r'^polargraph/', include('polargraph.urls',namespace='polargraph',app_name='polargraph')),
      
      url(r'^api/', include(v1_api.urls)), #e.g. /api/v1/datastore/?format=json
      
@@ -36,4 +35,7 @@ urlpatterns = patterns('',
      url(r'^logout', 'django.contrib.auth.views.logout',
          {'next_page': reverse_lazy('landing')}, name='logout'),
      url(r'^$', 'landing.views.landing', name='landing'),
+
+     #url(r'^polargraph/', include('polargraph.urls',namespace='polargraph',app_name='polargraph')),
+     url(r'^', include('polargraph.urls',namespace='polargraph',app_name='polargraph')),
 )
