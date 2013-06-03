@@ -116,7 +116,7 @@ class Generator( models.Model ) :
                            "value":param_values.get(param.name,param.default)})
         return params
     
-    def get_recent_output(self,start=0,end=8):
+    def get_recent_output(self,start=0,end=3):
         return StoredOutput.objects.order_by('-modified').filter(generator=self,status="complete",filetype="svg")[start:end]            
 
     #called by pipeline after an update
