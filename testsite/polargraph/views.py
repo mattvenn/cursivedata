@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.forms.extras.widgets import SelectDateWidget
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
+from django.core.urlresolvers import reverse
 from polargraph.models import *
 from polargraph.models.generator import GeneratorRunner
 from django.shortcuts import render
 import os
 import shutil
+
 import RSS
 from django.forms.models import ModelForm
 from django.forms.widgets import Textarea, TextInput
@@ -57,50 +59,13 @@ def create_source(request):
         form = COSMSourceCreation(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             source = form.save();
-            return HttpResponseRedirect('/polargraph/sources/'+str(source.id)+"/") # Redirect after POST
+            return HttpResponseRedirect(reverse('polargraph:show_source',args=[source.id])) # Redirect after POST
     else:
         form = COSMSourceCreation() # An unbound form
 
     return render(request, 'source_create.html', {
         'form': form,
     })
-    """
-    try:
-        act = request.POST.get('action',"none")
-        if request.method == 'POST' and act == "Create COSM": # If the form has been submitted...
-            cosm_form = COSMSourceCreation(request.POST) # A form bound to the POST data
-        else:
-            cosm_form = COSMSourceCreation( {
-                    'url_base':request.get_host(),
-                    'cosm_url':"http://api.cosm.com/v2/triggers/",
-                    'stream_id':"1",
-                    'feed_id':"96779",
-                    'api_key':"WsH6oBOmVbflt5ytsSYHYVGQzCaSAKw0Ti92WHZzajZHWT0g",
-                    }) # An unbound form
-        
-        if act == "Create COSM" and cosm_form.is_valid():
-            if cosm_form.is_valid(): # All validation rules pass
-                cosm_source = cosm_form.save(commit=False);
-                cosm_source.data_store=pipeline.data_store
-                cosm_source.save()
-
-        context = {"source":cosm_source, "cosm_form":cosm_form}
-        return render(request,"source_create.html",context)
-    except COSMSource.DoesNotExist:
-        raise Http404
-        """
-"""
-    if request.method == 'POST': # If the form has been submitted...
-        form = PipelineCreation(request.POST) # A form bound to the POST data
-        if form.is_valid(): # All validation rules pass
-            pipeline = form.save(commit=False);
-            pipeline.init_data();
-            return HttpResponseRedirect('/polargraph/pipeline/'+str(pipeline.id)+"/") # Redirect after POST
-    else:
-        form = PipelineCreation() # An unbound form
-
-    return render(request, 'pipeline_create.html', { 'form': form,
-"""
 
 def show_pipeline(request, pipelineID):
     try:
@@ -164,10 +129,11 @@ def show_source(request,sourceID):
     try:
         act = request.POST.get('action',"none")
         port = request.META['SERVER_PORT']
+        domain = request.META['SERVER_NAME']
         cs = COSMSource.objects.get(id=sourceID)
         if act == "Enable" :
             if not cs.is_running():
-                cs.start_trigger(port)
+                cs.start_trigger(domain,port)
         if act == "Disable" :
             if cs.is_running():
                 cs.stop_trigger()
@@ -175,7 +141,7 @@ def show_source(request,sourceID):
             if cs.is_running():
                 cs.stop_trigger()
             cs.delete()
-            return HttpResponseRedirect('/polargraph/sources') # Redirect after delete
+            return HttpResponseRedirect(reverse('polargraph:list_sources')) # Redirect after delete
 
         context = {"source":cs}
         return render(request,"source_display.html",context)
@@ -239,7 +205,7 @@ def create_generator(request):
             g = Generator( name=name, description=description, module_name=module_name )
             shutil.copy(source.get_filename(), g.get_filename())
             g.save()
-            return HttpResponseRedirect('/polargraph/generator/'+str(g.id)+"/") # Redirect after POST
+            return HttpResponseRedirect(reverse('polargraph:show_generator',args=[g.id])) # Redirect after POST
     context = {"create":create_form}
     r = render(request,"generator_create.html",context)
     return r;
@@ -410,7 +376,7 @@ def create_endpoint( request ):
         if form.is_valid(): # All validation rules pass
             endpoint = form.save(commit=False);
             endpoint.save()
-            return HttpResponseRedirect('/polargraph/endpoint/'+str(endpoint.id)+"/") # Redirect after POST
+            return HttpResponseRedirect(reverse('polargraph:show_endpoint', args=[endpoint.id])) # Redirect after POST
     else:
         form = EndpointCreation() # An unbound form
 
@@ -425,7 +391,7 @@ def create_pipeline( request ):
         if form.is_valid(): # All validation rules pass
             pipeline = form.save(commit=False);
             pipeline.init_data();
-            return HttpResponseRedirect('/polargraph/pipeline/'+str(pipeline.id)+"/") # Redirect after POST
+            return HttpResponseRedirect(reverse('polargraph:show_pipeline',args=[pipeline.id])) # Redirect after POST
     else:
         form = PipelineCreation() # An unbound form
 
@@ -458,5 +424,4 @@ class PipelineCreation(ModelForm):
 class COSMSourceCreation(ModelForm):
     class Meta:
         model = COSMSource
-        #fields = ( 'cosm_url', 'feed_id', 'stream_id', 'api_key', 'url_base', 'add_location', 'use_stream_id', 'add_feed_title', 'add_feed_id')
         fields = ( 'name', 'feed_id', 'stream_id' )
