@@ -17,7 +17,7 @@
 				Top margin: {{endpoint.top_margin}}<br/>
 				Status: {{endpoint.status}}<br/>
 				Creating gcode: {{endpoint.generate_gcode}}<br/>
-				Latest Data: <a href="/polargraph/endpoint_data/{{endpoint.id}}/">latest data</a><br/>
+				Latest Data: <a href="{% url polargraph:get_gcode endpoint.id %}">latest data</a><br/>
 				Files left to serve: {{files_left}}<br/> 
 			</div>
 			</div>

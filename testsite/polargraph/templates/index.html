@@ -12,7 +12,7 @@
                 <a href="#"><img src="{{MEDIA_URL}}nivo/images/polarbot-mfuk.jpg" alt="" title="#htmlcaption-3" /></a>
             </div>
             <div id="htmlcaption-1" class="nivo-html-caption">
-                <h3>CursiveData draws patterns from <a href="/polargraph/sources">realtime data</a>. Slowly growing <a href="/polargraph/pipeline">visualisations</a> can be sent to websites or <a href="http://mattvenn.net">drawing robots</a>.</h3> 
+                <h3>CursiveData draws patterns from <a href="{% url polargraph:list_sources %}">realtime data</a>. Slowly growing <a href="{% url polargraph:list_pipelines %}">visualisations</a> can be sent to websites or <a href="{% url polargraph:list_endpoints %}">drawing robots</a>.</h3> 
             </div>
         </div>
 
@@ -43,13 +43,6 @@
 	    });
 	});
 	</script>
-<!--  <div class="row hero-background">
-    <div class="four column">
-      <h3>The Polarbot draws abstract patterns from real-world data. It's a drawing robot which scales to any size and let's you experiment with <a href="/polargraph/generator">algorithms</a> and <a href="/polargraph/sources">data visualisations</a>.</h3>
-      <p>Currently there are <em>{{ endpoints }}</em> bots living in people's homes, sketching <em>{{ generators }}</em> visualisations.</p>
-    </div>
-  </div>
--->
 <!-- Section for current and latest drawings -->
   <div class="row">
     <h2>Latest Visualisations</h2>
