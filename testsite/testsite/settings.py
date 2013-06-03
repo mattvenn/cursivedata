@@ -12,6 +12,7 @@ except ImportError:
 from django.core.urlresolvers import reverse_lazy
 
 PROJECT_ROOT = path.dirname(path.dirname(__file__))
+LOGIN_REDIRECT_URL = '/'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
