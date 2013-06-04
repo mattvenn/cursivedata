@@ -9,13 +9,19 @@
   WSGIProcessGroup cursivedata
   WSGIScriptAlias / /home/polarsite/polargraphenergymonitor/testsite/testsite/wsgi.py
 
-#	Alias /boxes /var/www/cursivedata/boxDXFs
-#	<Directory /var/www/cursivedata/boxDXFs/>
-#		AddType application/octet-stream .DXF 
-#		SetHandler none
-#		Order allow,deny
-#		Allow from all
-#	</Directory>
+	Alias /data /home/polarsite/polargraphenergymonitor/testsite/data
+	<Directory /home/polarsite/polargraphenergymonitor/testsite/data>
+		SetHandler none
+		Order allow,deny
+		Allow from all
+	</Directory>
+
+	Alias /media /home/polarsite/polargraphenergymonitor/testsite/media
+	<Directory /home/polarsite/polargraphenergymonitor/testsite/media>
+		SetHandler none
+		Order allow,deny
+		Allow from all
+	</Directory>
 
   # Logfiles
   ErrorLog  /home/polarsite/polargraphenergymonitor/testsite/log/error.log
