@@ -35,9 +35,9 @@
       <li class="divider"></li>
       <li><a href="{% url polargraph:list_pipelines %}">Visualisations</a></li>
       <li class="divider"></li>
-      <li><a href="http://mattvenn.net/contact">Get a Polarbot</a></li>
+      <li><a href="{% url getarobot %}">Get a Polarbot</a></li>
       <li class="divider"></li>
-      <li><a href="{% url polargraph:index %}">How it works</a></li>
+      <li><a href="{% url about %}">About</a></li>
       <li class="divider"></li>
     </ul>
 
@@ -49,7 +49,7 @@
             {% if user.is_authenticated %}
               <a href="{% url logout %}">Logout</a>
             {% else %}
-              <a href="{% url login %}">Login</a>
+              <a href="{% url login %}?next={{request.path}}">Login</a>
             {% endif %}
 
       <!-- <li class="has-form">
@@ -69,31 +69,31 @@
   </section>
 </nav>
 
+		{% if error_message %}<div id="error">Error: {{ error_message }}</div>{% endif %}
         {% block content %}{% endblock %}
 
 <footer>
   <div class="row">
     <div class="three columns">
       <h3>Cursive Data</h3>
-      <p><a href="{% url login %}">Login</a> / <a href="/login">Signup</a><p>
-      <p><a href="{% url polargraph:index %}">How it works</a></p>
+      <p><a href="{% url login %}">Login</a><p>
+      <p><a href="{% url about %}">About</a></p>
     </div>
     <div class="three columns">
       <h3>Be Inspired</h3>
       <p><a href="{% url polargraph:list_pipelines %}">Gallery</a></p>
-      <p><a href="{% url polargraph:list_generators %}">Pattern Maker</a></p>
-       <p><a href="{% url polargraph:list_sources %}">Sources</a></p>
+      <p><a href="{% url polargraph:list_generators %}">Pattern Makers</a></p>
+       <p><a href="{% url polargraph:list_sources %}">Data Sources</a></p>
        <p><a href="{% url polargraph:list_endpoints %}">Endpoints</a></p>
     </div>
     <div class="three columns">
       <h3>Get Started</h3>
-     <p><a href="http://mattvenn.net/polargraph">Get a Polarbot</a></p>
-     <p><a href="{% url polargraph:create_endpoint %}">Register a Bot</a></p>
-     <p><a href="{% url polargraph:create_endpoint %}">Bot Setup</a></p>
+     <p><a href="{% url getarobot %}">Get a Polarbot</a></p>
+     <p><a href="{% url polargraph:create_endpoint %}">Register a Polarbot</a></p>
     </div>
     <div class="three columns">
       <h3>Contact Us</h3>
-      <p>Cursive Data is created by a bunch of peeps. <a href="http://mattvenn.net/contact">Get in touch here...</a></p>
+      <p><a href="{% url polargraph:contact %}">Get in touch</a></p>
     </div>
   </div>
 </footer>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Contact{% endblock %}
+{% block content %}
+
+  <div class="row">
+    <h2>Contact us</h2>
+		
+                <form name="contactform" action="/contact" method="post">
+				{% csrf_token %}
+					<table border="0" cellspacing="5px" cellpadding="20px">
+                        <tr>
+							<td width="100px"><label id="id_name">Name:</label></td>
+							<td width="500px"><input type="text" name="name" value="" id="name" /></td>
+						</tr>
+                        <tr>
+							<td><label id="id_email">Email:</label></td>
+                        	<td><input type="text" name="email" value="" id="Email" /></td>
+                        <tr>
+							<td valign="top"><label id="id_message">Message:</label></td>
+                        	<td><textarea name="message" rows="8" cols="37"></textarea></td>
+					</table>
+                <input class="button" type="submit" value="Submit."/>
+			</div>
+            </form>
+			
+			
+
+</div><!-- END CONTENT-->
+{% endblock %}
