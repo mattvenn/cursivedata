@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url
+from django.views.generic.simple import direct_to_template
 
 from polargraph import views
 
@@ -32,5 +33,8 @@ urlpatterns = patterns('',
     url(r'^generator/?$', views.list_generators, name='list_generators'),
     url(r'^generator/create/?$', views.create_generator, name='create_generator'),
     url(r'^generator/(?P<generatorID>\d+)/$', views.show_generator, name='show_generator'),
+
+    url(r'^contact',  views.contact, name='contact'),
+    url(r'^contact/thankyou', direct_to_template, {'template': 'thankyou.html'}, name="thankyou"),
 )
 
