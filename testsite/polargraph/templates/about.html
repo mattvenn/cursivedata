@@ -4,42 +4,22 @@
 
   <div class="row">
     <h2>What is Cursive Data?</h2>
-        <p>Cursive Data is a web service for turning real time data into evolving data visualisations. The visualisations can be embedded into a website, or they can be sent to an internet connected plotter that will draw the data as it arrives.
-        </p>
-
-    <h2>How are robots involved?</h2>
+<p>The project started as a way of making energy usage data more accessible to people not interested in graphs or numbers.
+</p>
+<p>
+As <a href="{% url polargraph:list_sources %}">real time data</a> is received one of a number of <a href="{% url polargraph:list_generators %}">pattern generators</a> is used to create a new frame that becomes part of a slowly growing <a href="{% url polargraph:list_pipelines %}">visualisation</a>.
+</p>
+<p>
+The visualisations can simply be embedded onto a website, or more interestingly brought to life by a drawing robot.
+</p>
         <iframe width="640" height="360" src="http://www.youtube.com/embed/DS6PdULJhOE?feature=player_embedded" frameborder="0" allowfullscreen></iframe>
-        <p><a href="http://mattvenn.net">Matt Venn</a> was wondering how to make energy data more accessible for those not interested in graphs or tables of data. The aim became to create physical representation of the energy data. Among many ideas considered, a <a href="https://www.google.co.uk/search?q=%22v+plotter%22,+polargraph&safe=off&source=lnms&tbm=isch&sa=X&ei=laqtUZDtAoiNO7a8AQ&ved=0CAoQ_AUoAQ&biw=1066&bih=594">v plotter type robot</a> was chosen for simplicity and cost. A <a href="http://mattvenn.net/files/Polargraph_MattVenn.pdf">document further explaining the idea is available here.</a>
-        </p>
-
-    <h2>License</h2>
-        <p>The site's software, the robot's software and hardware are available under an open source license.</p>
-
-    <h2>Code & Software</h2>
-        <p>
-        <ul>
-            <li><a href="https://github.com/mattvenn/polargraphenergymonitor">Site software</a></li>
-            <li><a href="https://github.com/mattvenn/arduinosketchbook/tree/master/energyPlotter/leonardoTests">Robot software</a></li>
-            <li><a href="https://github.com/mattvenn/eagle-circuit-designs/blob/master/energy%20plotter/polarplotter%20allegro%20v4.sch">Robot hardware</a></li>
-       </ul> 
-        </p>
-
-    <h2>Support</h2>
-    <p>
-        There is currently no support given for use of the site or for building or using the robot. We have a <a href="https://groups.google.com/forum/?fromgroups=#!forum/polargraph-energy-robot">mailing list here.</a>.
-    </p>
-
-    <h2>People</h2>
-    <p>Many people have helped us to get here! In no particular order:</p>
-    <ul>
-    <li><a href="http://stuartchilds.com/">Stuart Childs</a> - help with robot hardware</li>
-    <li><a href="http://www.mo-seph.com/">Dave Murray-Rust</a> - software</li>
-    <li><a href="https://twitter.com/gnublade">Andy Kilner</a> - software</li>
-    <li><a href="http://craftythingsmade.wordpress.com/">Fee Schmidt-Soltau</a> - user experience, design</li>
-    <li><a href="http://www.carbonvisuals.com/about">Adam Nieman</a> - visualisations</li>
-    <li><a href="http://bristolgreencapital.org/">Bristol Green Capital</a> - funding</li>
-    </ul>
-    
+<p>
+The robots are wall hanging v-plotters or polargraphs. They are designed to exhibit your data in a beautiful way.
+A <a href="http://mattvenn.net/files/Polargraph_MattVenn.pdf">document further explaining the idea is available here.</a>
+</p>
+<p>
+<a href="http://bristolgreencapital.org/">Bristol Green Capital</a> funded the project to develop this website and install a public robot that will draw energy data.
+</p>
 
   </div>
 

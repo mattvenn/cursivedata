@@ -31,6 +31,8 @@ urlpatterns = patterns('',
     url(r'^logout', 'django.contrib.auth.views.logout', {'next_page': reverse_lazy('polargraph:index')}, name='logout'),
 
     url(r'^about', direct_to_template, {'template': 'about.html'}, name="about"),
+    url(r'^people', direct_to_template, {'template': 'people.html'}, name="people"),
+    url(r'^license', direct_to_template, {'template': 'license.html'}, name="license"),
     url(r'^getarobot', direct_to_template, {'template': 'getarobot.html'}, name="getarobot"),
 
     #the polargraph app's urls
