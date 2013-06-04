@@ -5,6 +5,7 @@ from django.forms.extras.widgets import SelectDateWidget
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
+from django.core.mail import send_mail, BadHeaderError
 from polargraph.models import *
 from polargraph.models.generator import GeneratorRunner
 from django.shortcuts import render
@@ -17,6 +18,25 @@ from django.forms.widgets import Textarea, TextInput
 from django.utils.datetime_safe import datetime
 from django import forms
 import re
+
+def contact(request):
+    message = request.POST.get('message', '')
+    from_email = request.POST.get('email', '')
+    subject = "contact from cursivedata"
+    if message and from_email:
+        try:
+            send_mail(subject, message, from_email, ['matt@mattvenn.net'])
+        except BadHeaderError:
+            err_msg = 'Invalid header found.'
+            context = {'error_message': err_msg}
+            return render(request,'contact.html', context)
+        except Exception as e:
+            err_msg = 'Problem sending email: ', e
+            context = {'error_message': err_msg}
+            return render(request,'contact.html', context)
+        return HttpResponseRedirect('/contact/thankyou')
+    else:
+        return render(request,'contact.html')
 
 def index(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:3]
