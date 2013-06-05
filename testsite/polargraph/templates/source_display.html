@@ -7,7 +7,7 @@
   </div>
 
         <div class="row">
-            <h1>Sources</h1>
+            <h2>Sources</h2>
           <div class="large-12 columns">
 				<div class="description">last updated: {{source.last_updated}} with {{source.last_value}}.</div>
 				<div class="description">feed id/stream id: <a href="https://cosm.com/feeds/{{source.feed_id}}">{{source.feed_id}}</a>/{{source.stream_id}}</div>
@@ -53,6 +53,6 @@
 </div>
 	
 {% else %}
-    <h1>Source not found</h1>
+    <h2>Source not found</h2>
 {% endif %}
 {% endblock %}
