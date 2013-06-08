@@ -6,7 +6,7 @@
       <div class="row">
         <h2>{{pipeline.name}}</h2>
             <h4 class="subheader">
-            {% if source.is_live %}
+            {% if pipeline.is_live %}
                 <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
             {% else %}
                 <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
