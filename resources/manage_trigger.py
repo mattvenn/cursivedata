@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="manage triggers")
     parser.add_argument('--key-file',
-        action='store', dest='key_file', help="key file, default is default.key", default="default.key")
+        action='store', dest='key_file', help="key file, default is keys/default.key", default="keys/default.key")
     parser.add_argument('--url',
         action='store', dest='url', default=default_url,
         help="url of the api")
