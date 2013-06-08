@@ -63,6 +63,14 @@ class COSMSource( models.Model ):
         self.last_value = value
         self.save()
         
+    #returns true if updated within last hour
+    @property
+    def is_live(self):
+        live_date = timezone.now()-timezone.timedelta(hours=1)
+        if self.last_updated > live_date:
+            return True
+        return False
+
     def start_trigger(self,domain,port):
         headers= {'content-type': 'application/json'}
         headers['X-ApiKey'] = self.api_key

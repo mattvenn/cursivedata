@@ -12,6 +12,11 @@
 				
     <h2><a href="{% url polargraph:show_source source.id %}">{{ source.name }}</a></h2>
         <h4 class="subheader">
+                {% if source.is_live %}
+                    <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
+                {% else %}
+                    <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
+                {% endif %}
 				<div class="description">last updated: {{source.last_updated}} with {{source.last_value}}.</div>
         </h4>
     </div>
