@@ -13,8 +13,13 @@
   <div class="row">
     <h2><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></h2>
         <h4 class="subheader">
-        <div class="objectInfo">Last Updated on {{pipeline.last_updated}}</div>
+            <div class="objectInfo">Last Updated on {{pipeline.last_updated}}</div>
             <div class="description"> {{pipeline.description}} </div>
+            {% if source.is_live %}
+                <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
+            {% else %}
+                <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
+            {% endif %}
         </h4>
     </div>
 

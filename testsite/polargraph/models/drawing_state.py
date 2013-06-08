@@ -44,6 +44,13 @@ class DrawingState( models.Model ):
         self.last_updated = timezone.now()
         self.save()
 
+    @property
+    def is_live(self):
+        live_date = timezone.now()-timezone.timedelta(hours=1)
+        if self.last_updated > live_date:
+            return True
+        return False
+
     #Change the size of the drawing    
     def update_size(self,width,height):
         changed = self.img_width != width or self.img_height != height
