@@ -15,7 +15,7 @@
         <h4 class="subheader">
             <div class="objectInfo">Last Updated on {{pipeline.last_updated}}</div>
             <div class="description"> {{pipeline.description}} </div>
-            {% if source.is_live %}
+            {% if pipeline.is_live %}
                 <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
             {% else %}
                 <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
