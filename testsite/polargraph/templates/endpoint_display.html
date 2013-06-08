@@ -3,12 +3,16 @@
 {% block content %}
 {% if endpoint %}
   <div class="row">
-    <h2>Robot page</h2>
-    <h4 class="subheader">{{endpoint.name}}</p>
+    <h2>{{endpoint.name}}</h2>
   </div>
 
         <div class="row">
           <div class="large-12 columns">
+            {% if endpoint.is_live %}
+                <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
+            {% else %}
+                <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
+            {% endif %}
 			<div class="description"> {{endpoint.description}} </div>
 			<div class="objectInfo">
 				Device: {{endpoint.device}}<br/>
@@ -19,11 +23,6 @@
 				<!--Creating gcode: {{endpoint.generate_gcode}}<br/>-->
 				Latest Data: <a href="{% url polargraph:get_gcode endpoint.id %}">latest data</a><br/>
 				Files left to serve: {{files_left}}<br/> 
-                {% if endpoint.is_live %}
-                    <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
-                {% else %}
-                    <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
-                {% endif %}
 			</div>
 			</div>
 		</div>

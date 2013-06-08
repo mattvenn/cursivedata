@@ -8,14 +8,14 @@
     {% for endpoint in endpoint_list %}
   <div class="row">
     <h2><a href="{% url polargraph:show_endpoint endpoint.id %}">{{ endpoint.name }}</a></h2>
-        <h4 class="subheader">
-        <div class="objectInfo">Visual updated {{endpoint.last_updated}}, {{endpoint.location}}</div>
-        <div class="objectInfo">Status updated {{endpoint.status_updated}}</div>
         {% if endpoint.is_live %}
             <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
         {% else %}
             <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
         {% endif %}
+        <h4 class="subheader">
+        <div class="objectInfo">Visual updated {{endpoint.last_updated}}, {{endpoint.location}}</div>
+        <div class="objectInfo">Status updated {{endpoint.status_updated}}</div>
         </h4>
   </div>
 
