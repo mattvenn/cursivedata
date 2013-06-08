@@ -1,6 +1,8 @@
 # Create your views here.
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from django.forms.extras.widgets import SelectDateWidget
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
@@ -89,6 +91,9 @@ def create_source(request):
 
 def show_pipeline(request, pipelineID):
     try:
+        user_timezone = request.session.get('current_timezone') or settings.TIME_ZONE
+        if timezone:
+             timezone.activate(user_timezone)
         act = request.POST.get('action',"none")
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
