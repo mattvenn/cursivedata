@@ -5,6 +5,7 @@ Created on 12 Jan 2013
 '''
 
 from django.db import models
+from django.utils import timezone
 import polargraph.svg as svg
 from polargraph.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
@@ -56,6 +57,8 @@ class Endpoint( DrawingState ):
     status = models.CharField(max_length=200,default="default")
     location = models.CharField(max_length=200,default="default")
     robot_svg_file = models.CharField(max_length=200,blank=True)
+    #when the status was last updated
+    status_updated = models.DateTimeField("Last Updated",blank=True,null=True)
 
     def __init__(self, *args, **kwargs):
         super(Endpoint, self).__init__(*args, **kwargs)
@@ -69,6 +72,13 @@ class Endpoint( DrawingState ):
         self.x_max = self.side_margin + self.img_width
         self.y_max = self.top_margin + self.img_height
  
+    #returns true if updated within last hour
+    @property
+    def is_live(self):
+        live_date = timezone.now()-timezone.timedelta(hours=1)
+        if self.status_updated > live_date:
+            return True
+        return False
        
     def load_external_svg(self,svg_file,width):
         transform = Transform()

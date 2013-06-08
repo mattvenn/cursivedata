@@ -16,9 +16,14 @@
 				Side margin: {{endpoint.side_margin}}<br/>
 				Top margin: {{endpoint.top_margin}}<br/>
 				Status: {{endpoint.status}}<br/>
-				Creating gcode: {{endpoint.generate_gcode}}<br/>
+				<!--Creating gcode: {{endpoint.generate_gcode}}<br/>-->
 				Latest Data: <a href="{% url polargraph:get_gcode endpoint.id %}">latest data</a><br/>
 				Files left to serve: {{files_left}}<br/> 
+                {% if endpoint.is_live %}
+                    <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
+                {% else %}
+                    <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
+                {% endif %}
 			</div>
 			</div>
 		</div>

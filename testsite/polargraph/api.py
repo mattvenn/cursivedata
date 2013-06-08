@@ -12,6 +12,7 @@ import django.core.serializers.json
 import json
 from django.utils import simplejson
 from django.http import QueryDict
+from django.utils import timezone
 
 class CustomJSONSerializer(Serializer):
     
@@ -75,5 +76,8 @@ class EndpointResource(ModelResource):
     def obj_update(self, bundle, request=None, **kwargs):
         res = super(EndpointResource, self).obj_update(bundle, request, **kwargs)
         endpoint = bundle.obj
+        endpoint.status_updated = timezone.now()
+        endpoint.save() 
         print "Width: ",endpoint.width," Height:",endpoint.height," top margin:",endpoint.top_margin," side margin:", endpoint.side_margin
+        print "Status: ",endpoint.status," status updated:",endpoint.status_updated
         return res
