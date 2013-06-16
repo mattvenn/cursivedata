@@ -4,27 +4,27 @@
 <VirtualHost 77.73.6.229>
   ServerName  www.cursivedata.co.uk
   ServerAlias cursivedata.co.uk
-  DocumentRoot /home/polarsite/polargraphenergymonitor/testsite
-  WSGIDaemonProcess cursivedata display-name=cursivedata user=polarsite group=polarsite processes=2 threads=15 python-path=/home/polarsite/.virtualenvs/polarsite/lib/python2.6/site-packages/:/home/polarsite/polargraphenergymonitor/testsite/ home=/home/polarsite/polargraphenergymonitor/testsite/
+  DocumentRoot /home/polarsite/polargraphenergymonitor/www
+  WSGIDaemonProcess cursivedata display-name=cursivedata user=polarsite group=polarsite processes=2 threads=15 python-path=/home/polarsite/.virtualenvs/polarsite/lib/python2.6/site-packages/:/home/polarsite/polargraphenergymonitor/www/ home=/home/polarsite/polargraphenergymonitor/www/
   WSGIProcessGroup cursivedata
-  WSGIScriptAlias / /home/polarsite/polargraphenergymonitor/testsite/testsite/wsgi.py
+  WSGIScriptAlias / /home/polarsite/polargraphenergymonitor/www/www/wsgi.py
 
-	Alias /data /home/polarsite/polargraphenergymonitor/testsite/data
-	<Directory /home/polarsite/polargraphenergymonitor/testsite/data>
+	Alias /data /home/polarsite/polargraphenergymonitor/www/data
+	<Directory /home/polarsite/polargraphenergymonitor/www/data>
 		SetHandler none
 		Order allow,deny
 		Allow from all
 	</Directory>
 
-	Alias /media /home/polarsite/polargraphenergymonitor/testsite/media
-	<Directory /home/polarsite/polargraphenergymonitor/testsite/media>
+	Alias /media /home/polarsite/polargraphenergymonitor/www/media
+	<Directory /home/polarsite/polargraphenergymonitor/www/media>
 		SetHandler none
 		Order allow,deny
 		Allow from all
 	</Directory>
 
   # Logfiles
-  ErrorLog  /home/polarsite/polargraphenergymonitor/testsite/log/error.log
-  CustomLog /home/polarsite/polargraphenergymonitor/testsite/log/access.log combined
+  ErrorLog  /home/polarsite/polargraphenergymonitor/www/log/error.log
+  CustomLog /home/polarsite/polargraphenergymonitor/www/log/access.log combined
 </VirtualHost>
 
