@@ -18,19 +18,21 @@ def process(drawing,data,params,internal_state) :
     circle = int(params.get("Circle",0))
 
     for point in data.get_current():
-        aggregate += float(point.data['value'])
-        #allow user to determine how fast the graph is drawn again
         cell_index = get_minute(point.date)
+
+        #if we move to a new cell, start small again
+        if cell_index != internal_state.get("last_cell",0):
+            internal_state["last_cell"] = cell_index
+            print "cell index changed"
+            aggregate = 0
+            square_num = 0
+
+        aggregate += float(point.data['value'])
+
         #work out where to draw
         cell = grid.cell(cell_index)
         cx, cy = cell.cent()
         
-        #if we move to a new cell, start small again
-        if cell_index != internal_state.get("last_cell",0):
-            internal_state["last_cell"] = cell_index
-            print "reset square num"
-            aggregate = 0
-            square_num = 0
         
         print "number:%d\naggregate:%.2f" % (cell_index, aggregate)
         print "x:%d y:%d" % ( cx, cy )
@@ -81,18 +83,21 @@ def get_description() : return "every 10 minutes start drawing squares about a c
 
 def can_run(data,params,internal_state):
     aggregate = internal_state.get("aggregate",0)
+    last_cell_index = internal_state.get("last_cell",0)
+#    import ipdb; ipdb.set_trace()
     for point in data.get_current():
         #if enough time passes, reset aggregate
         cell_index = get_minute(point.date)
-        if cell_index != internal_state.get("last_cell",0):
+        if cell_index != last_cell_index:
             print "resetting aggregate as cell index has changed to", cell_index
-            internal_state["last_cell"] = cell_index
+            last_cell_index = cell_index
             aggregate = 0
         aggregate += float(point.data['value'])
         if aggregate > params.get("Value"):
             print "squares can run"
             return True
     print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
-    internal_state["aggregate"]=aggregate
+  #  internal_state["aggregate"]=aggregate
+  #  internal_state["cell_index"]=last_cell_index
     return False
 
