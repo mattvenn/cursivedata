@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Endpoint {{endpoint.name }}{% endblock %}
+{% block content %}
+{% if endpoint %}
+  <div class="row">
+    <h2>{{endpoint.name}}</h2>
+  </div>
+
+        <div class="row">
+          <div class="large-12 columns">
+            {% if endpoint.is_live %}
+                <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
+            {% else %}
+                <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
+            {% endif %}
+			<div class="description"> {{endpoint.description}} </div>
+			<div class="objectInfo">
+				Device: {{endpoint.device}}<br/>
+				Size: {{endpoint.width}} by {{endpoint.height}}<br/>
+				Side margin: {{endpoint.side_margin}}<br/>
+				Top margin: {{endpoint.top_margin}}<br/>
+				Status: {{endpoint.status}}<br/>
+				<!--Creating gcode: {{endpoint.generate_gcode}}<br/>-->
+				Latest Data: <a href="{% url cursivedata:get_gcode endpoint.id %}">latest data</a><br/>
+				Files left to serve: {{files_left}}<br/> 
+			</div>
+			</div>
+		</div>
+		
+  {% if user.is_authenticated %}
+  <div class="row">
+    <h2>Controls</h2>
+  </div>
+
+        <div class="row">
+          <div class="large-12 columns">
+				<form action="{% url cursivedata:show_endpoint endpoint.id %}" enctype="multipart/form-data" method="POST">
+					{% csrf_token %}
+                    <div>
+						<input class="button" type="submit" value="Calibrate" name="action"/>
+						<input class="button" type="submit" value="Move Area" name="action"/>
+						<input class="button" type="submit" value="Reset" name="action"/>
+	                    {% if endpoint.generate_gcode %}
+						<input class="button" type="submit" value="Stop Gcode" name="action"/>
+	                    {% else %}
+						<input class="button" type="submit" value="Start Gcode" name="action"/>
+	                    {% endif %}
+	                    {% if endpoint.paused %}
+						<input class="button" type="submit" value="Resume" name="action"/>
+	                    {% else %}
+						<input class="button" type="submit" value="Pause" name="action"/>
+	                    {% endif %}
+                    </div>
+                    <div>
+                        <input type="file" name="svgfile"/>
+                        Width: <input type="text" name="width"/>
+                        <input class="button" type="submit" name="action" value="Upload SVG"/>
+                    </div>
+				</form>
+            </div>
+        </div>
+	
+    {% endif %}
+
+    <div class="row">
+    <h2>Latest Visualisations</h2>
+  </div>
+  <div class="row">
+    <ul class="block-grid three-up">
+            <li>
+			<div class="outputContainer">
+                <a href="/{{endpoint.full_svg_file}}">
+                <img src="/{% if endpoint.full_svg_file %}{{endpoint.full_svg_file}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/></a>
+				{{output.modified}}
+			</div>
+		{% for output in endpoint.get_recent_output %}
+            </li>
+            <li>
+			<div class="outputContainer">
+				<img src="/{{output.filename}}" /><br/>
+				{{output.modified}}
+			</div>
+          </li>
+		{% endfor %}
+    </ul>
+</div>
+	
+{% else %}
+    <h2>Endpoint not found</h2>
+{% endif %}
+{% endblock %}
