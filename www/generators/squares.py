@@ -29,6 +29,7 @@ def process(drawing,data,params,internal_state) :
         if cell_index != internal_state.get("last_cell",0):
             internal_state["last_cell"] = cell_index
             print "reset square num"
+            aggregate = 0
             square_num = 0
         
         print "number:%d\naggregate:%.2f" % (cell_index, aggregate)
@@ -81,10 +82,15 @@ def get_description() : return "every 10 minutes start drawing squares about a c
 def can_run(data,params,internal_state):
     aggregate = internal_state.get("aggregate",0)
     for point in data.get_current():
+        #if enough time passes, reset aggregate
+        cell_index = get_minute(point.date)
+        if cell_index != internal_state.get("last_cell",0):
+            aggregate = 0
         aggregate += float(point.data['value'])
         if aggregate > params.get("Value"):
             print "squares can run"
             return True
     print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
+    internal_state["aggregate"]=aggregate
     return False
 
