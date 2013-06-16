@@ -18,8 +18,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Andy Kilner', 'gnublade@gmail.com'),
-    ('Dave Murray-Rust', 'd.murray-rust@ed.ac.uk'),
+    ('Matt Venn', 'matt@mattvenn.net'),
 )
 
 MANAGERS = ADMINS
