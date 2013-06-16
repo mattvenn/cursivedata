@@ -103,7 +103,7 @@ class Pipeline( DrawingState ) :
             data.clear_current()
             if len(svg_document.getXML()) == 0:
                 print "!!! found empty XML"
-                import pdb; pdb.set_trace()
+                #import pdb; pdb.set_trace()
 #            if self.id == 4:
 #                import pdb; pdb.set_trace()
 #                print svg_document.getXML()
