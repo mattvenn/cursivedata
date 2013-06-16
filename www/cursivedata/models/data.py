@@ -45,10 +45,10 @@ class DataStore( models.Model ) :
     # data fields holding doubles
     # For scalar sources, one data field called val
     def get_current(self) : 
-        return DataPoint.objects.filter(current=True, datastore=self)
+        return DataPoint.objects.filter(current=True, datastore=self).order_by('id')
     
     def get_historic(self):
-        return DataPoint.objects.filter(current=False, datastore=self)
+        return DataPoint.objects.filter(current=False, datastore=self).order_by('id')
     
     def get_historic_size(self):
         return DataPoint.objects.filter(current=False, datastore=self).count()
