@@ -7,7 +7,7 @@
     <h2>Edit generator</h2>
   </div>
   <div class="row">
-        <form action="{% url polargraph:show_generator generator.id %}" method="POST" enctype="multipart/form-data">
+        <form action="{% url cursivedata:show_generator generator.id %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="objectTitle">{{ generator.name }}</div>
             <div class="description"> {{generator.description}} </div>

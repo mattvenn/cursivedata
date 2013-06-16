@@ -7,7 +7,7 @@
   </div>
   <div class="row">
     
-	<form action="{% url polargraph:create_endpoint %}" method="POST">
+	<form action="{% url cursivedata:create_endpoint %}" method="POST">
 		{% csrf_token %}
 		{{ form.as_p }}
 		<input class="button" type="submit" value="Submit" />

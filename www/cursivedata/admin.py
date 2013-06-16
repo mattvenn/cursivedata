@@ -1,5 +1,5 @@
 from django.contrib import admin
-from polargraph.models import *
+from cursivedata.models import *
 
 admin.site.register(DataStore)
 admin.site.register(GeneratorState)

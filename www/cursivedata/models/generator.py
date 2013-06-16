@@ -8,10 +8,10 @@ from django.db import models
 from django.utils import timezone
 from imp import find_module, load_module
 import jsonfield
-from polargraph.models.drawing_state import StoredOutput, DrawingState
+from cursivedata.models.drawing_state import StoredOutput, DrawingState
 from django.utils.datetime_safe import datetime
-from polargraph.models.data import DataStore,  FakeDataStore
-from polargraph.drawing import Drawing
+from cursivedata.models.data import DataStore,  FakeDataStore
+from cursivedata.drawing import Drawing
 
 
 #Points to some code and associated parameters which are needed to process data
@@ -125,7 +125,7 @@ class Generator( models.Model ) :
         self.save();
 
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.id)
 
@@ -141,7 +141,7 @@ class Parameter( models.Model ) :
         return self.name
 
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
 
 #This is a running instance of a generator. It has parameter values and a Dict to store internal state
 class GeneratorState( models.Model ):
@@ -169,7 +169,7 @@ class GeneratorState( models.Model ):
         self.state = obj
 
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
 
 #Generator should be self explanatory
 #ds_form is a SelectOrMakeDataStore

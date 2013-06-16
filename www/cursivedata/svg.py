@@ -14,8 +14,20 @@ def get_dimensions(svg_file):
     parsed = parse(svg_file)
     #rewind to avoid an error when the file is parsed again
     svg_file.seek(0)
+    #this is wrong #FIXME
+    #might be 0
     width = parsed.getAttribute('width')
     height = parsed.getAttribute('height')
+
+    #try viewbox
+    if width == None or height == None:
+        viewbox = parsed.get_viewBox()
+        width = viewbox.split(' ')[2]
+        height = viewbox.split(' ')[3]
+    
+    if width == None or height == None:
+        #abort!
+        raise Exception("couldn't get width or height of uploaded svg")
     pixtomm = 3.55
     #FIXME bad way of handling svg sizes
     if width.endswith("px"):

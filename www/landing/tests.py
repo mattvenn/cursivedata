@@ -17,4 +17,4 @@ class LandingPageTest(TestCase):
         self.client.login(username='admin', password='secret')
         landing_page_url = reverse('landing')
         response = self.client.get(landing_page_url)
-        self.assertRedirects(response, reverse('polargraph:index'))
+        self.assertRedirects(response, reverse('cursivedata:index'))

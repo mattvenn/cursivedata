@@ -3,7 +3,7 @@ Created on 12 Jan 2013
 
 @author: dmrust
 '''
-from polargraph.models import *
+from cursivedata.models import *
 from django.utils import timezone
 from django.contrib.auth.models import User
 

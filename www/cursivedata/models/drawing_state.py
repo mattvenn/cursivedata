@@ -5,7 +5,7 @@ Created on 2 Feb 2013
 '''
 from django.db import models
 from django.utils import timezone
-import polargraph.svg as svg
+import cursivedata.svg as svg
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
@@ -169,5 +169,5 @@ class StoredOutput( models.Model ):
         return "data/output/"+str(self.id)+"_"+self.status+"."+self.filetype
         
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
         

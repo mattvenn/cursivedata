@@ -10,9 +10,9 @@ from django.contrib.auth.models import User
 from imp import find_module, load_module
 import json
 import csv
-import polargraph.svg as svg
+import cursivedata.svg as svg
 import requests
-from polargraph.models.data import DataStore
+from cursivedata.models.data import DataStore
 from django.utils.datetime_safe import datetime
 import re
 
@@ -120,7 +120,7 @@ class COSMSource( models.Model ):
         return domain + ":" + port +"/api/v1/cosm/"+str(self.id)+"/"
     
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
 
     def __unicode__(self):
         return "Cosm: "+self.name+" ("+self.cosm_trigger_id+")"

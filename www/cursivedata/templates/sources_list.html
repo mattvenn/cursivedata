@@ -10,7 +10,7 @@
     {% for source in source_list %}
   <div class="row">
 				
-    <h2><a href="{% url polargraph:show_source source.id %}">{{ source.name }}</a></h2>
+    <h2><a href="{% url cursivedata:show_source source.id %}">{{ source.name }}</a></h2>
         <h4 class="subheader">
                 {% if source.is_live %}
                     <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
@@ -27,6 +27,6 @@
     </div>
 {% endif %}
     <div class="row">
-        <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_source %}">Create a new source</a></div> </h4>
+        <h4 class="subheader"> <div class="description"><a href="{% url cursivedata:create_source %}">Create a new source</a></div> </h4>
     </div>
 {% endblock %}

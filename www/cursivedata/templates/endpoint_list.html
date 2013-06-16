@@ -7,7 +7,7 @@
 
     {% for endpoint in endpoint_list %}
   <div class="row">
-    <h2><a href="{% url polargraph:show_endpoint endpoint.id %}">{{ endpoint.name }}</a></h2>
+    <h2><a href="{% url cursivedata:show_endpoint endpoint.id %}">{{ endpoint.name }}</a></h2>
         {% if endpoint.is_live %}
             <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
         {% else %}
@@ -44,5 +44,5 @@
     <h2>No robots found</h2>
     </div>
 {% endif %}
-        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_endpoint %}">Create a new endpoint</a></div> </h4> </div>
+        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url cursivedata:create_endpoint %}">Create a new endpoint</a></div> </h4> </div>
 {% endblock %}

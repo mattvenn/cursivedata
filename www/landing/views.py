@@ -5,4 +5,4 @@ from django.shortcuts import redirect
 
 @login_required
 def landing(requests):
-    return redirect('polargraph:index')
+    return redirect('cursivedata:index')

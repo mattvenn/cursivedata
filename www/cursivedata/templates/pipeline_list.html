@@ -11,7 +11,7 @@
     {% for pipeline in pipeline_list %}
 
   <div class="row">
-    <h2><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></h2>
+    <h2><a href="{% url cursivedata:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></h2>
             {% if pipeline.is_live %}
                 <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
             {% else %}
@@ -42,6 +42,6 @@
     </div>
 {% endif %}
     {% if user.is_authenticated %}
-        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_pipeline %}">Create a new pipeline</a></div> </h4> </div>
+        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url cursivedata:create_pipeline %}">Create a new pipeline</a></div> </h4> </div>
     {% endif %}
 {%endblock%}

@@ -6,15 +6,15 @@ import ipdb
 import datetime
 from django.test import TestCase
 from django.contrib.auth.models import User
-from polargraph.models import *
+from cursivedata.models import *
 from django.utils import timezone
-from polargraph.drawing import Drawing
+from cursivedata.drawing import Drawing
 
 from pysvg.structure import svg
 from pysvg.builders import ShapeBuilder
 from pysvg.text import text
 
-from polargraph.svg import append_svg_to_file
+from cursivedata.svg import append_svg_to_file
 from pysvg.parser import parse
 
 from django.utils import timezone

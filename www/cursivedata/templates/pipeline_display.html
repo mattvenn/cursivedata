@@ -11,15 +11,15 @@
                 <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
             {% endif %}
             <h4 class="subheader">
-            <div class="objectInfo">Sources<ul>{%for source in pipeline.sources.all%}<li><a href="{% url polargraph:show_source source.id%}">{{source.name}}</a> last updated {{source.last_updated}}</li>{%endfor%}</ul></div>
+            <div class="objectInfo">Sources<ul>{%for source in pipeline.sources.all%}<li><a href="{% url cursivedata:show_source source.id%}">{{source.name}}</a> last updated {{source.last_updated}}</li>{%endfor%}</ul></div>
             <div class="objectInfo">Datastore id: {{pipeline.data_store_id}}</div>
-            <div class="objectInfo">Generator: <a href="{% url polargraph:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>, last updated: {{ pipeline.generator.last_used}}</div>
-            <div>Endpoint: <a href="{% url polargraph:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
+            <div class="objectInfo">Generator: <a href="{% url cursivedata:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>, last updated: {{ pipeline.generator.last_used}}</div>
+            <div>Endpoint: <a href="{% url cursivedata:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
 
                 , drawing area is: {{pipeline.endpoint.img_width}}mm by {{pipeline.endpoint.img_height}}mm
             </div>
             {% if user.is_authenticated %}
-                <form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
+                <form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input class="button" type="submit" value="Modify" name="action" />
@@ -36,7 +36,7 @@
             <li>
             <h4 class="subheader">controls</h4>
 
-                <form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
+                <form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
 				{% csrf_token %}
 					<div class="formBlock">
 						<input class="button" type="submit" value="Reset" name="action" />
@@ -55,7 +55,7 @@
             <li>
             <h4 class="subheader">page size and offset</h4>
             <!-- page size -->
-				<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
+				<form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
 					{% csrf_token %}
                     <div>
                         <input class="button" type="submit" value="Auto Size" name="action" />
@@ -80,7 +80,7 @@
             <!-- generator params -->
             <li>
             <h4 class="subheader">generator parameters</h4>
-				<form action="{% url polargraph:show_pipeline pipeline.id %}" method="POST">
+				<form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
 					{% csrf_token %}
 						{% for param in pipeline.get_param_dict %}
 						<p>
@@ -106,7 +106,7 @@
                     <input id="slider" width="600px" type="range" min="0" max="0" step="1" onchange="toggleVis()">
                     <input id="rangeVal" type="text" size="8" /><br>
                     <a href="/{{pipeline.full_svg_file}}">image link</a><br/>
-                    <a href="{% url polargraph:embed_pipeline pipeline.id%}">embeddable svg</a></div>
+                    <a href="{% url cursivedata:embed_pipeline pipeline.id%}">embeddable svg</a></div>
                     
                 </div>
         <!--

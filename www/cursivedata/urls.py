@@ -1,12 +1,11 @@
 from django.conf.urls import patterns, url
 from django.views.generic.simple import direct_to_template
 
-from polargraph import views
+from cursivedata import views
 
 urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
 
-	 # ex: /polargraph/pipeline/5/update/
     
     #Show pipelines
     url(r'^pipeline/?$', views.list_pipelines, name='list_pipelines'),

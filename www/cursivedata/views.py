@@ -8,8 +8,8 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail, BadHeaderError
-from polargraph.models import *
-from polargraph.models.generator import GeneratorRunner
+from cursivedata.models import *
+from cursivedata.models.generator import GeneratorRunner
 from django.shortcuts import render
 import os
 import shutil
@@ -81,7 +81,7 @@ def create_source(request):
         form = COSMSourceCreation(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             source = form.save();
-            return HttpResponseRedirect(reverse('polargraph:show_source',args=[source.id])) # Redirect after POST
+            return HttpResponseRedirect(reverse('cursivedata:show_source',args=[source.id])) # Redirect after POST
     else:
         form = COSMSourceCreation() # An unbound form
 
@@ -166,7 +166,7 @@ def show_source(request,sourceID):
             if cs.is_running():
                 cs.stop_trigger()
             cs.delete()
-            return HttpResponseRedirect(reverse('polargraph:list_sources')) # Redirect after delete
+            return HttpResponseRedirect(reverse('cursivedata:list_sources')) # Redirect after delete
 
         context = {"source":cs}
         return render(request,"source_display.html",context)
@@ -230,7 +230,7 @@ def create_generator(request):
             g = Generator( name=name, description=description, module_name=module_name )
             shutil.copy(source.get_filename(), g.get_filename())
             g.save()
-            return HttpResponseRedirect(reverse('polargraph:show_generator',args=[g.id])) # Redirect after POST
+            return HttpResponseRedirect(reverse('cursivedata:show_generator',args=[g.id])) # Redirect after POST
     context = {"create":create_form}
     r = render(request,"generator_create.html",context)
     return r;
@@ -401,7 +401,7 @@ def create_endpoint( request ):
         if form.is_valid(): # All validation rules pass
             endpoint = form.save(commit=False);
             endpoint.save()
-            return HttpResponseRedirect(reverse('polargraph:show_endpoint', args=[endpoint.id])) # Redirect after POST
+            return HttpResponseRedirect(reverse('cursivedata:show_endpoint', args=[endpoint.id])) # Redirect after POST
     else:
         form = EndpointCreation() # An unbound form
 
@@ -416,7 +416,7 @@ def create_pipeline( request ):
         if form.is_valid(): # All validation rules pass
             pipeline = form.save(commit=False);
             pipeline.init_data();
-            return HttpResponseRedirect(reverse('polargraph:show_pipeline',args=[pipeline.id])) # Redirect after POST
+            return HttpResponseRedirect(reverse('cursivedata:show_pipeline',args=[pipeline.id])) # Redirect after POST
     else:
         form = PipelineCreation() # An unbound form
 

@@ -7,8 +7,8 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
 admin.autodiscover()
 
-from polargraph import views
-from polargraph.api import DataStoreResource, COSMSourceResource, EndpointResource
+from cursivedata import views
+from cursivedata.api import DataStoreResource, COSMSourceResource, EndpointResource
 
 from tastypie.api import Api
 
@@ -28,13 +28,13 @@ urlpatterns = patterns('',
     (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': join(settings.PROJECT_ROOT, 'media')}),
 
     url(r'^login', 'django.contrib.auth.views.login', name="login"),
-    url(r'^logout', 'django.contrib.auth.views.logout', {'next_page': reverse_lazy('polargraph:index')}, name='logout'),
+    url(r'^logout', 'django.contrib.auth.views.logout', {'next_page': reverse_lazy('cursivedata:index')}, name='logout'),
 
     url(r'^about', direct_to_template, {'template': 'about.html'}, name="about"),
     url(r'^people', direct_to_template, {'template': 'people.html'}, name="people"),
     url(r'^license', direct_to_template, {'template': 'license.html'}, name="license"),
     url(r'^getarobot', direct_to_template, {'template': 'getarobot.html'}, name="getarobot"),
 
-    #the polargraph app's urls
-    url(r'^', include('polargraph.urls',namespace='polargraph',app_name='polargraph')),
+    #the cursivedata app's urls
+    url(r'^', include('cursivedata.urls',namespace='cursivedata',app_name='cursivedata')),
 )

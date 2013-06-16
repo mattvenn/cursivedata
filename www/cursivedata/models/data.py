@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from imp import find_module, load_module
 import json
 import csv
-import polargraph.svg as svg
+import cursivedata.svg as svg
 import requests
 import dateutil.parser
 import jsonfield
@@ -166,7 +166,7 @@ class DataStore( models.Model ) :
         return "%s (%s)" % (self.name, self.id)
 
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
 
 class FakeDataStore(DataStore):
     def load_data(self,data):
@@ -182,4 +182,4 @@ class DataPoint( models.Model ):
     current = models.BooleanField(default=True)
 
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'

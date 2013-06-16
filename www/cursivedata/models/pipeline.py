@@ -11,12 +11,12 @@ from django.contrib.auth.models import User
 from imp import find_module, load_module
 import json
 import csv
-import polargraph.svg as svg
+import cursivedata.svg as svg
 import requests
-import polargraph.models.cosm
-from polargraph.models.generator import Generator,GeneratorState
-from polargraph.models.data import DataStore
-from polargraph.models.drawing_state import DrawingState,StoredOutput
+import cursivedata.models.cosm
+from cursivedata.models.generator import Generator,GeneratorState
+from cursivedata.models.data import DataStore
+from cursivedata.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
@@ -24,8 +24,8 @@ import shutil
 import time
 import os
 
-from polargraph.drawing import Drawing
-from polargraph.models.cosm import COSMSource
+from cursivedata.drawing import Drawing
+from cursivedata.models.cosm import COSMSource
 
 
 
@@ -183,6 +183,6 @@ class Pipeline( DrawingState ) :
             self.save()
         
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
         
 

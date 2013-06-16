@@ -14,7 +14,7 @@ from django.core.urlresolvers import reverse_lazy
 PROJECT_ROOT = path.dirname(path.dirname(__file__))
 LOGIN_REDIRECT_URL = '/'
 
-DEBUG = False #True
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -27,14 +27,14 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'polargraph',
-        'USER': 'polargraph',
+        'NAME': 'cursivedata',
+        'USER': 'cursivedata',
         'HOST': 'localhost',
-        'PASSWORD': 'polargraph',
+        'PASSWORD': 'cursivedata',
                 },
     'sqllite': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': path.join(PROJECT_ROOT, 'db', 'testsite.sqlite'),
+        'NAME': path.join(PROJECT_ROOT, 'db', 'www.sqlite'),
     }
 }
 
@@ -129,17 +129,17 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'testsite.urls'
+ROOT_URLCONF = 'www.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'testsite.wsgi.application'
+WSGI_APPLICATION = 'www.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    path.join(PROJECT_ROOT, 'testsite', 'templates'),
-    "polargraph/templates"
+    path.join(PROJECT_ROOT, 'www', 'templates'),
+    "cursivedata/templates"
 )
 
 INSTALLED_APPS = (
@@ -158,7 +158,7 @@ INSTALLED_APPS = (
 
     # Our apps
     'landing',
-    'polargraph',
+    'cursivedata',
     )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

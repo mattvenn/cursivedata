@@ -6,8 +6,8 @@ Created on 12 Jan 2013
 
 from django.db import models
 from django.utils import timezone
-import polargraph.svg as svg
-from polargraph.models.drawing_state import DrawingState,StoredOutput
+import cursivedata.svg as svg
+from cursivedata.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
 from pysvg.parser import parse
@@ -309,7 +309,7 @@ class Endpoint( DrawingState ):
         return self.name
 
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'
 
 class Transform( models.Model ):
     def build_from_pipeline(self,pipeline):
@@ -354,4 +354,4 @@ class GCodeOutput( models.Model ):
         super(GCodeOutput, self).delete()
     
     class Meta:
-        app_label = 'polargraph'
+        app_label = 'cursivedata'

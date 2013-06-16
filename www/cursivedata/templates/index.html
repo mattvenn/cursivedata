@@ -12,7 +12,7 @@
                 <a href="#"><img src="{{MEDIA_URL}}nivo/images/polarbot-mfuk.jpg" alt="" title="#htmlcaption-3" /></a>
             </div>
             <div id="htmlcaption-1" class="nivo-html-caption">
-                <h3>Cursive Data draws patterns from <a href="{% url polargraph:list_sources %}">realtime data</a>. Slowly growing <a href="{% url polargraph:list_pipelines %}">visualisations</a> that can be sent to websites or <a href="{% url polargraph:list_endpoints %}">drawing robots</a>.</h3> 
+                <h3>Cursive Data draws patterns from <a href="{% url cursivedata:list_sources %}">realtime data</a>. Slowly growing <a href="{% url cursivedata:list_pipelines %}">visualisations</a> that can be sent to websites or <a href="{% url cursivedata:list_endpoints %}">drawing robots</a>.</h3> 
             </div>
         </div>
 
@@ -51,8 +51,8 @@
     <ul class="block-grid three-up">
     {% for pipeline in latest_pipelines %}
       <li>
-        <a href="{% url polargraph:show_pipeline pipeline.id %}"><img src="/{{pipeline.full_svg_file}}" /></a>
-        <p><a href="{% url polargraph:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></p>
+        <a href="{% url cursivedata:show_pipeline pipeline.id %}"><img src="/{{pipeline.full_svg_file}}" /></a>
+        <p><a href="{% url cursivedata:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></p>
       </li>
     {% endfor %}
     </ul>

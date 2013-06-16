@@ -9,7 +9,7 @@
 
     {% for generator in generator_list %}
     <div class="row">
-        <h2><a href="{% url polargraph:show_generator generator.id %}">{{ generator.name }}</a></h2>
+        <h2><a href="{% url cursivedata:show_generator generator.id %}">{{ generator.name }}</a></h2>
 				<div class="description"> {{generator.description}} </div>
     </div>
 
@@ -32,5 +32,5 @@
     <h2>No generators are available.</h2>
     </div>
 {% endif %}
-        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url polargraph:create_generator %}">Create a new generator</a></div> </h4> </div>
+        <div class="row"> <h4 class="subheader"> <div class="description"><a href="{% url cursivedata:create_generator %}">Create a new generator</a></div> </h4> </div>
 {% endblock %}

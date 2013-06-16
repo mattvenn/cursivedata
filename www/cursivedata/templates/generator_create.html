@@ -7,7 +7,7 @@
   </div>
   <div class="row">
 		<div class="formBlock">
-			<form action="{% url polargraph:create_generator %}" method="POST">
+			<form action="{% url cursivedata:create_generator %}" method="POST">
 				{% csrf_token %}
 				<p>{{create.source_id.label}}<br/>{{ create.source_id }} </p>
 				<p>{{create.name.label}}<br/>{{ create.name }} </p>

@@ -22,7 +22,7 @@
                 <div>used by pipelines:</div>
                 <ul>
                     {% for pipeline in source.pipelines.all %}
-                    <li><a href="{% url polargraph:show_pipeline pipeline.id %}">pipeline {{pipeline.id}}</a></li>
+                    <li><a href="{% url cursivedata:show_pipeline pipeline.id %}">pipeline {{pipeline.id}}</a></li>
                     {% endfor %}
                 </ul>
 			</div>
@@ -36,7 +36,7 @@
 
         <div class="row">
           <div class="large-12 columns">
-				<form action="{% url polargraph:show_source source.id %}" method="POST">
+				<form action="{% url cursivedata:show_source source.id %}" method="POST">
 					{% csrf_token %}
 						<div class="cosmAction">
 							{% if source.is_running %}
