@@ -85,6 +85,8 @@ def can_run(data,params,internal_state):
         #if enough time passes, reset aggregate
         cell_index = get_minute(point.date)
         if cell_index != internal_state.get("last_cell",0):
+            print "resetting aggregate as cell index has changed to", cell_index
+            internal_state["last_cell"] = cell_index
             aggregate = 0
         aggregate += float(point.data['value'])
         if aggregate > params.get("Value"):
