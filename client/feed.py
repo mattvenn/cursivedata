@@ -90,6 +90,9 @@ def update_robot_config():
 
 #fetches robot id
 def fetch_robot_id():
+    if args.norobot:
+        return "1"
+
     (pack,names,values) = get_robot_config()
     index = names.index("id")
     return str(values[index])
@@ -128,7 +131,10 @@ def update_robot_dimensions():
 
 def update_robot_status():
     status_commands=["q"]
-    response = send_robot_commands(status_commands)
+    if not args.norobot:
+        response = send_robot_commands(status_commands)
+    else:
+        response = "pretend robot response"
 
     payload = {
         'status': response,
@@ -345,6 +351,9 @@ if __name__ == '__main__':
             update_robot_dimensions()
         if args.sendstatus:
             update_robot_status()
+    else:
+        update_robot_status()
+        exit(0)
 
     #send a file   
     if args.file:

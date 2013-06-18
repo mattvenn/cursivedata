@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Pipeline{% endblock %}
+{% block content %}
+
+{% if pipeline %}
+      <div class="row">
+        <h2>{{pipeline.name}}</h2>
+            {% if pipeline.is_live %}
+                <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
+            {% else %}
+                <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
+            {% endif %}
+            <h4 class="subheader">
+            <div class="objectInfo">Sources<ul>{%for source in pipeline.sources.all%}<li><a href="{% url cursivedata:show_source source.id%}">{{source.name}}</a> last updated {{source.last_updated}}</li>{%endfor%}</ul></div>
+            <div class="objectInfo">Datastore id: {{pipeline.data_store_id}}</div>
+            <div class="objectInfo">Generator: <a href="{% url cursivedata:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>, last updated: {{ pipeline.generator.last_used}}</div>
+            <div>Endpoint: <a href="{% url cursivedata:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
+
+                , drawing area is: {{pipeline.endpoint.img_width}}mm by {{pipeline.endpoint.img_height}}mm
+            </div>
+            {% if user.is_authenticated %}
+                <form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="button" type="submit" value="Modify" name="action" />
+                </form>
+            {% endif %}
+        </h4>
+
+      </div>
+        {% if user.is_authenticated %}
+
+      <div class="row">
+        <ul class="block-grid three-up">
+            <!-- controls -->
+            <li>
+            <h4 class="subheader">controls</h4>
+
+                <form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
+				{% csrf_token %}
+					<div class="formBlock">
+						<input class="button" type="submit" value="Reset" name="action" />
+						<input class="button" type="submit" value="Begin" name="action" />
+						<input class="button" type="submit" value="End" name="action" />
+	                    {% if pipeline.paused %}
+						<input class="button" type="submit" value="Resume" name="action"/>
+	                    {% else %}
+						<input class="button" type="submit" value="Pause" name="action"/>
+	                    {% endif %}
+					</div>
+                </form>
+
+
+            </li>
+            <li>
+            <h4 class="subheader">page size and offset</h4>
+            <!-- page size -->
+				<form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
+					{% csrf_token %}
+                    <div>
+                        <input class="button" type="submit" value="Auto Size" name="action" />
+                        <div class="formParamDescription">Auto size will set the width to the robot's drawing width</div>
+                    </div>
+                        <label for="pipeWidth">Width:</label>
+                        <input type="text" name="pipeWidth" id="pipeWidth" value="{{pipeline.img_width}}" /><br /> 
+                        <label for="pipeHeight">Height:</label>
+                        <input type="text" name="pipeHeight" id="pipeHeight" value="{{pipeline.img_height}}" /><br />
+                        <input class="button" type="submit" value="Update Size" name="action" />
+                        <div class="formParamDescription">Changing image size will reset the drawing</div>
+
+								<label for="xOffset">X Offset</label>
+								<input type="text" name="xOffset" id="xOffset" value="{{pipeline.print_top_left_x}}" /><br /> 
+								<label for="yOffset">Y Offset</label>
+								<input type="text" name="yOffset" id="yOffset" value="{{pipeline.print_top_left_y}}" /><br /> 
+								<label for="printWidth">Width</label>
+								<input type="text" name="printWidth" id="printWidth" value="{{pipeline.print_width}}" />
+							<input class="button" type="submit" value="Update Print Location" name="action" /><br />
+					</form>
+            </li>
+            <!-- generator params -->
+            <li>
+            <h4 class="subheader">generator parameters</h4>
+				<form action="{% url cursivedata:show_pipeline pipeline.id %}" method="POST">
+					{% csrf_token %}
+						{% for param in pipeline.get_param_dict %}
+						<p>
+							<label for="param{{param.name}}">{{param.name}} - {{param.description}}</label> 
+							<input type="text" name="param{{param.name}}" id="param{{param.name}}" value="{{param.value}}" />
+						</p>
+						{% endfor %} 
+						<input class="button" type="submit" value="Update Parameters" name="action" />
+				</form>
+
+            </li>
+            </ul>
+		</div>
+    {% endif %}
+    
+    <div class="row">
+            <h2>Current drawing</h2>
+                <!--<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />-->
+                <!-- someone please fix this terrible shit -->
+                <div style="background:#fff">
+                    <a href="/{{pipeline.full_svg_file}}"><embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /></a><br/>
+                    </div>
+                    <input id="slider" width="600px" type="range" min="0" max="0" step="1" onchange="toggleVis()">
+                    <input id="rangeVal" type="text" size="8" /><br>
+                    <a href="/{{pipeline.full_svg_file}}">image link</a><br/>
+                    <a href="{% url cursivedata:embed_pipeline pipeline.id%}">embeddable svg</a></div>
+                    
+                </div>
+        <!--
+		<div class="mainOutput">
+			<h3> Last Update <h3>
+			<img class="bigPic latestImage" src="/{{pipeline.last_svg_file}}" />
+		</div>
+        -->
+	</div>
+    <div class="row">
+	<h2>Latest drawings</h2>
+        <ul class="block-grid three-up">
+            {% for output in pipeline.get_recent_output %}
+                <li>
+                <div class="outputContainer">
+                <img src="/{{output.filename}}" >
+                {{output.modified}}
+                </li>
+
+		{% endfor %}
+        </ul>
+	</div>
+{% else %}
+    <div class="row">
+	<h2>Pipeline not found</h2>
+    </div>
+{% endif %}
+{% endblock %}

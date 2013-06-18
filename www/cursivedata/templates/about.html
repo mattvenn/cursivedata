@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+
+  <div class="row">
+    <h2>What is Cursive Data?</h2>
+<p>The project started as a way of making energy usage data more accessible to people not interested in graphs or numbers.
+</p>
+<p>
+As <a href="{% url cursivedata:list_sources %}">real time data</a> is received one of a number of <a href="{% url cursivedata:list_generators %}">pattern generators</a> is used to create a new frame that becomes part of a slowly growing <a href="{% url cursivedata:list_pipelines %}">visualisation</a>.
+</p>
+<p>
+The visualisations can simply be embedded onto a website, or more interestingly brought to life by a drawing robot.
+</p>
+        <iframe width="640" height="360" src="http://www.youtube.com/embed/DS6PdULJhOE?feature=player_embedded" frameborder="0" allowfullscreen></iframe>
+<p>
+The robots are wall hanging v-plotters or polargraphs. They are designed to exhibit your data in a beautiful way.
+A <a href="http://mattvenn.net/files/Polargraph_MattVenn.pdf">document further explaining the idea is available here.</a>
+</p>
+<p>
+<a href="http://bristolgreencapital.org/">Bristol Green Capital</a> funded the project to develop this website and install a public robot that will draw energy data.
+</p>
+
+  </div>
+
+{% endblock %}

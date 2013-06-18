@@ -1,0 +1,7 @@
+*.swp[pon]
+
+.feedcache
+tmp/*
+testsite/tmp/*
+data/output/*
+data/working/*
