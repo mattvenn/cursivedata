@@ -186,7 +186,10 @@ def show_endpoint(request, endpointID):
             width = request.POST.get("width","0")
             if width == "":
                 width = 0
-            endpoint.load_external_svg(request.FILES['svgfile'],int(width))
+            if request.FILES.has_key('svgfile'):
+                endpoint.load_external_svg(request.FILES['svgfile'],int(width))
+            else:
+                messages.add_message(request, messages.ERROR, 'no svg file found')
         elif act == "Move Area":
             print endpoint.movearea()
         elif act == "Reset":
