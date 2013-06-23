@@ -110,11 +110,12 @@ class Endpoint( DrawingState ):
             try:
                 so = GCodeOutput(endpoint=self)
                 so.save()
-                print "creating gcode in ", so.get_filename()
+                print "creating gcode in %s from %s" % (so.get_filename(), self.robot_svg_file)
                 self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
             except EndpointConversionError, e:
                 print "problem converting svg:", e
                 so.delete()
+                raise EndpointConversionError(e)
 
     #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
     #returns an svg document (not a file)
@@ -321,7 +322,7 @@ class Transform( models.Model ):
         (svgwidth,svgheight) = svg.get_dimensions(svg_file)
         if width > endpoint.img_width:
             print "not scaling larger than endpoint"
-            width = endpoint.img_width
+            raise EndpointConversionError("width %d is too large for endpoint, max width is %d" % (width, endpoint.img_width))
         if width == 0:
             print "not using a 0 width"
             width = endpoint.img_width
