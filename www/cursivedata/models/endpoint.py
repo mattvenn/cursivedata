@@ -261,11 +261,11 @@ class Endpoint( DrawingState ):
         so = GCodeOutput(endpoint=self)
         so.save()
         f = open(so.get_filename(),'w')
-        f.write("g%f,%f\n" % ( self.side_margin, self.top_margin ))
-        f.write("g%f,%f\n" % ( self.width - self.side_margin , self.top_margin ))
-        f.write("g%f,%f\n" % ( self.width - self.side_margin , self.height ))
-        f.write("g%f,%f\n" % ( self.side_margin , self.height ))
-        f.write("g%f,%f\n" % ( self.side_margin, self.top_margin ))
+        f.write("g%.1f,%.1f\n" % ( self.side_margin, self.top_margin ))
+        f.write("g%.1f,%.1f\n" % ( self.width - self.side_margin , self.top_margin ))
+        f.write("g%.1f,%.1f\n" % ( self.width - self.side_margin , self.height ))
+        f.write("g%.1f,%.1f\n" % ( self.side_margin , self.height ))
+        f.write("g%.1f,%.1f\n" % ( self.side_margin, self.top_margin ))
         f.close()
 
     def calibrate(self):
