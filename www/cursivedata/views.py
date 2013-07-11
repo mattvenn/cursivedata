@@ -1,5 +1,6 @@
 # Create your views here.
 
+from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -185,7 +186,10 @@ def show_endpoint(request, endpointID):
             width = request.POST.get("width","0")
             if width == "":
                 width = 0
-            endpoint.load_external_svg(request.FILES['svgfile'],int(width))
+            if request.FILES.has_key('svgfile'):
+                endpoint.load_external_svg(request.FILES['svgfile'],int(width))
+            else:
+                messages.add_message(request, messages.ERROR, 'no svg file found')
         elif act == "Move Area":
             print endpoint.movearea()
         elif act == "Reset":
@@ -206,12 +210,14 @@ def show_endpoint(request, endpointID):
             print "Update Params"
         elif act != "none":
             print "Unknown action:",act
-        previous = endpoint.get_recent_output()
-        files_left = endpoint.get_num_files_to_serve()
-        context = {"endpoint":endpoint, "previous":previous,"files_left":files_left}
-        return render(request,"endpoint_display.html",context)
     except Endpoint.DoesNotExist:
         raise Http404
+    except Exception, e:
+        messages.add_message(request, messages.ERROR, e)
+    previous = endpoint.get_recent_output()
+    files_left = endpoint.get_num_files_to_serve()
+    context = {"endpoint":endpoint, "previous":previous,"files_left":files_left}
+    return render(request,"endpoint_display.html",context)
 
 @login_required
 def create_generator(request):

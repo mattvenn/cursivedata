@@ -30,6 +30,8 @@ footer h3 {
   padding-left: 15%;
   padding-right: 15%;
 }
+.error-bar { background: red; min-height: 45px; line-height: 45px; margin: 0 0 0 0; padding-top:5px; padding-bottom: 5px; padding-left: 20px; width: 100%; position: relative; /* Contain width to .row width */ /* First <ul> for branding, title, name, etc */ /* topbar global <ul> styles */ }
+.messages { font-weight: bold; padding-left: 20px}
 .key-action {
   text-align: center;
   margin-bottom: 50px;

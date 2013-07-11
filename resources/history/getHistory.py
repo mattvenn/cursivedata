@@ -61,7 +61,7 @@ def fetchRange(start_date,end_date,key,feed_number):
                     break;
 
             except KeyError:
-                print "no data points for that period"
+                print "no data points for that period:", data
                 break
 
 
