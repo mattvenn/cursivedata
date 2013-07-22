@@ -45,6 +45,20 @@ def get_dimensions(svg_file):
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
 def append_svg_to_file( fragment_file, main_file ):
+
+    #locking
+    import fcntl
+    lockfile = "/tmp/%s.lock" % main_file
+    fd = open(lockfile,'w')
+
+    try:
+        print "checking lock:", lockfile
+        fcntl.lockf(fd,fcntl.LOCK_EX | fcntl.LOCK_NB)
+        print "ok"
+    except IOError:
+        print "another process is running with lock"
+        raise
+
     try:
         print "parsing main file", main_file
         svg_main = parse(main_file)
