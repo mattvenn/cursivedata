@@ -80,7 +80,7 @@ class DataStore( models.Model ) :
 #        print "Data Hash",hash(self)
         self.clean()
         if hasattr(self, 'pipeline'):
-            print "Trying to run pipline: ",self.pipeline
+            print "Trying to run pipeline:",self.pipeline
             self.pipeline.update(self)
         else:
             print "datastore has no pipeline to run"
