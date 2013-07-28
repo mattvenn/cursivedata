@@ -69,8 +69,8 @@ class Drawing:
     def bl_text(self,content,margin=5,size=10,family="Helvetica",fill="none",stroke="#000"):
         self.text(content,margin,self.height-margin,size=size,family=family,fill=fill,stroke=stroke)
     
-    def get_grid(self,nx=None,ny=None ):
-        return Grid(self,nx,ny)
+    def get_grid(self,nx=None,ny=None,force_square=True ):
+        return Grid(self,nx,ny,force_square)
     
     #Takes a number, and turns it into document coordinates. At the moment, just makes a string, but could e.g. add "mm" if necessary
     def dc(self,coord):
@@ -91,17 +91,21 @@ class Drawing:
         return svg_parsed
 
 class Grid:
-    def __init__(self, drawing, nx=None, ny=None ):
+    def __init__(self, drawing, nx=None, ny=None,force_square=True ):
         self.drawing = drawing
         w = drawing.width
         h = drawing.height
         if nx and ny:
             #Figure out scales for both, use smaller, set offset
             #Use nx to set size, and do ny to fit
-            self.size_x = min( w/nx, h/ny )
-            self.size_y = min( w/nx, h/ny )
-            self.nx = math.floor(w/self.size_x)
-            self.ny = math.floor(h/self.size_y)
+            if force_square:
+                self.size_x = min( w/nx, h/ny )
+                self.size_y = min( w/nx, h/ny )
+            else:
+                self.size_x = w/nx
+                self.size_y = h/ny
+            self.nx = nx
+            self.ny = ny
         elif nx:
             #Use nx to set size, and do ny to fit
             self.size_x = w/nx
