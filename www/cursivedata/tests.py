@@ -1,5 +1,11 @@
 """
 run "manage.py test".
+
+can run on command line like this:
+export DJANGO_SETTINGS_MODULE=www.settings
+nosetests cursivedata/tests.py
+and with -s will allow drop to pdb
+
 """
 
 import ipdb
@@ -70,7 +76,6 @@ class TestPipeline(TestCase):
             for col in range(ydiv):
                 nt.assert_equal( grid.index_to_xy(row+col*xdiv), (row,col))
 
-        #pdb.set_trace()
         #top left dimensions
         for row in range(xdiv):
             for col in range(ydiv):
@@ -118,7 +123,6 @@ class TestPipeline(TestCase):
         #this runs the pipeline
         timestamp = str(timezone.now())
         data = [{ 'data' : '{"value":4000}', "date" : timestamp }]
-        import pdb; pdb.set_trace()
         self.data_store.add_data(data)
 
         #robot margins
