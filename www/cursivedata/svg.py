@@ -48,15 +48,16 @@ def append_svg_to_file( fragment_file, main_file ):
 
     #locking
     import fcntl
-    lockfile = "/tmp/%s.lock" % main_file
-    fd = open(lockfile,'w')
 
     try:
+        lockfile = "/tmp/%s.lock" % main_file.replace('/','.')
+        fd = open(lockfile,'w')
+
         print "checking lock:", lockfile
         fcntl.lockf(fd,fcntl.LOCK_EX | fcntl.LOCK_NB)
         print "ok"
-    except IOError:
-        print "another process is running with lock"
+    except IOError, e:
+        print "lock in use:", lockfile
         raise
 
     try:
