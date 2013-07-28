@@ -33,7 +33,7 @@ class TestPipeline(TestCase):
         self.data_store = DataStore()
         self.data_store.save()
 
-        self.end_point = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=1000, height=1000, top_margin=100, side_margin=100)
+        self.end_point = Endpoint(name="My Robot",device="Polargraph",location="Under the stairs" , width=1000, height=1000, top_margin=100, side_margin=100,generate_gcode=True)
         self.end_point.save()
 
         self.pipeline = Pipeline(name="Test Pipeline" ,data_store=self.data_store, generator=self.generator, endpoint=self.end_point,state=self.gen_state, last_updated=timezone.now() )
@@ -118,6 +118,7 @@ class TestPipeline(TestCase):
         #this runs the pipeline
         timestamp = str(timezone.now())
         data = [{ 'data' : '{"value":4000}', "date" : timestamp }]
+        import pdb; pdb.set_trace()
         self.data_store.add_data(data)
 
         #robot margins
