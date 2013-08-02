@@ -1,0 +1,70 @@
+  0
+SECTION
+  2
+BLOCKS
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+LINE
+  8
+0
+ 10
+-30
+ 11
+-30
+ 20
+-1.165
+ 21
+1.165
+  0
+LINE
+  8
+0
+ 10
+-30
+ 11
+30
+ 20
+1.165
+ 21
+1.165
+  0
+LINE
+  8
+0
+ 10
+30
+ 11
+30
+ 20
+1.165
+ 21
+-1.165
+  0
+LINE
+  8
+0
+ 10
+30
+ 11
+-30
+ 20
+-1.165
+ 21
+-1.165
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  0
+ENDSEC
+  0
+EOF
