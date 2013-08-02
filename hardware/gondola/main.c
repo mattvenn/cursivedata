@@ -16,7 +16,10 @@ more example code:http://metku.net/index.html?path=articles/microcontroller-part
 //used for the 2 wire comms
 volatile uint8_t counter = 0; 
 volatile bool counting = false;
-volatile bool moveServo = false;
+volatile bool move_pen = false;
+volatile bool pen_up = false;
+static int servo_speed = 20; //ms to wait between each step
+void move_pen_servo();
 //pins
 #define INT_PIN PB3
 #define SERVO_PIN PB0 //OC0A
@@ -91,9 +94,46 @@ int main()
         clearbit(PORTB,LED_PIN); //turn off led
       }
 
+      //do the pen moving
+      if(move_pen)
+        move_pen_servo();
+
+      /*
+      pen_up = true;
+      move_pen_servo();
+      _delay_ms(1000);
+      pen_up = false;
+      move_pen_servo();
+      _delay_ms(1000);
+      */
     }
 }
 
+void move_pen_servo()
+{
+        move_pen = false;
+        if(pen_up==true)
+        {
+            for(int i = PENDOWN; i >= PENUP; i -- )
+            {
+                OCR0A = i;
+                _delay_ms(servo_speed);
+            }
+        }
+        else
+        {
+            for(int i = PENUP; i <= PENDOWN; i ++ )
+            {
+                OCR0A = i;
+                _delay_ms(servo_speed);
+            }
+            //flash the led
+            setbit(PORTB,LED_PIN);
+            _delay_ms(50);
+            clearbit(PORTB,LED_PIN); //turn off led
+            _delay_ms(50);
+        }
+}
 //pcint 
 ISR(PCINT0_vect)
 {
@@ -113,16 +153,15 @@ ISR(PCINT0_vect)
       clearbit(PORTB,LED_PIN); //turn off led
       if( counter > 2 && counter <= 4 )
       {
-        OCR0A = PENUP;
+//        OCR0A = PENUP;
+        pen_up = true;
+        move_pen = true;
       }
       else if( counter > 4 && counter <=8)
       {
-        OCR0A = PENDOWN;
-        //flash the led
-        clearbit(PORTB,LED_PIN); //turn off led
-        _delay_ms(100);
-        setbit(PORTB,LED_PIN);
-        _delay_ms(100);
+//        OCR0A = PENDOWN;
+        pen_up = false;
+        move_pen = true;
       }
       clearbit(PORTB,LED_PIN); //turn off led
       counter = 0;
