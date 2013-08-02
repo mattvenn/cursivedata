@@ -59,14 +59,19 @@ module made_gondola()
     acrylic() servo_mount();
     acrylic() translate([0,0,thickness])leaf_riser();
 }
-made_gondola();
-//leaf_riser();
+//made_gondola();
 //translate([0,0,thickness])
 *projection() leaf_riser();
-//projection() gondola();
+projection() gondola();
 *projection() rotate([90,0,0]) servo_mount();
 *hanger();
 *projection()hanger_washer();
+
+module slot_test()
+{
+    h = servo_w+3*thickness;
+    projection() cube([60,thickness-laser_width,thickness-laser_width],center=true);
+}
 module acrylic()
 {
     color("grey",0.8)
@@ -83,7 +88,7 @@ module servo_mount_diff()
             {
                 minkowski()
                 {
-                    cube([servo_mount_w,h-drill_r*2,thickness],center=true);
+                    cube([servo_mount_w,h-drill_r*2,thickness-laser_width],center=true);
                     cylinder(r=drill_r,h=0.1);
                 }
                 //string notches
