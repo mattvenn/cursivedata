@@ -13,6 +13,7 @@
 include <servos.scad>
 include <../case/globals.scad>
 include </home/mattvenn/cad/MCAD/shapes.scad>
+include </home/matthew/work/cad/MCAD/shapes.scad>
 $fa = 2.5; //min angle: make large circles smoother
 $fs=1.0; //min fragment size, make small circles smoother
 //measured
@@ -33,6 +34,7 @@ leaf_length = 60;
 leaf_thickness = 5; //width of the leaf spring
 leaf_clearance = 2; //clearance between spring and walls
 leaf_width = 60;
+string_attach_height = 30;
 
 servo_x = 5.5;
 slot_shift = -5;
@@ -55,16 +57,17 @@ module made_gondola()
     acrylic() pen_holder();
     cam_angle = $t * -90;
     acrylic() translate([servo_x,cam_y,thickness+thickness/2+servo_w/2]) rotate([90,cam_angle,0]) cam();
-    color("blue") translate([0,0,thickness]) servo();
+    color("blue") translate([0,thickness,thickness]) servo();
+    translate([0,thickness,0])
     acrylic() servo_mount();
     acrylic() translate([0,0,thickness])leaf_riser();
 }
-//made_gondola();
+made_gondola();
 //translate([0,0,thickness])
 *projection() leaf_riser();
 *projection() gondola();
-projection() rotate([90,0,0]) servo_mount();
-//servo_mount();
+*gondola();
+*projection() rotate([90,0,0]) servo_mount();
 *hanger();
 *projection()hanger_washer();
 
@@ -82,7 +85,7 @@ module servo_mount_diff()
 {
     servo_mount_w = 60;
     notch_h = 5;
-    h = servo_w+3*thickness;
+    h = string_attach_height+notch_h;
     translate([0,cam_y+thickness+servo_cam_to_holder,h/2-thickness/2])
         rotate([90,0,0])
             difference()
@@ -193,8 +196,8 @@ module gondola()
     difference()
     {
     roundedBox(leaf_width,leaf_length,thickness*2,2);
-    translate([0,-leaf_thickness-2*leaf_clearance,0])
-      roundedBox(leaf_width-2*leaf_thickness-4*leaf_clearance,leaf_length,thickness*2,14);
+    translate([0,-leaf_thickness-2*leaf_clearance-5,0])
+      roundedBox(leaf_width-2*leaf_thickness-4*leaf_clearance,leaf_length+10,thickness*2,14);
     }
     //pen hole
     cylinder(r=pen_hole_r,h=2*thickness,center=true);
@@ -202,20 +205,33 @@ module gondola()
     //pcb holes
     translate([0,-outer_r*0.6,0])
       pcb_holes();
-    translate([0,0,-1])
+    translate([0,thickness,-1])
         servo_mount_diff();
 
   }
-    echo(leaf_thickness);
-    translate([leaf_width/2-leaf_thickness/2-leaf_clearance,0,0])
-        cylinder(r=leaf_thickness/2,h=thickness,center=true);
-    translate([leaf_width/2-leaf_thickness/2-leaf_clearance,-leaf_length/4,0])
-        cube([leaf_thickness,leaf_length/2,thickness],center=true);
-    translate([-leaf_width/2+leaf_thickness/2+leaf_clearance,0,0])
-        cylinder(r=leaf_thickness/2,h=thickness,center=true);
-    translate([-leaf_width/2+leaf_thickness/2+leaf_clearance,-leaf_length/4,0])
-        cube([leaf_thickness,leaf_length/2,thickness],center=true);
+    //leaf springs
+    springs();
         
+}
+
+module springs()
+{
+    translate([leaf_width/2-leaf_thickness/2-leaf_clearance,0,0])
+        spring();
+    translate([-leaf_width/2+leaf_thickness/2+leaf_clearance,0,0])
+        spring();
+}
+module spring()
+{
+    cylinder(r=leaf_thickness/2,h=thickness,center=true);
+    translate([0,-leaf_length/4,0])
+    difference()
+    {
+        cube([leaf_thickness,leaf_length/2,thickness],center=true);
+        translate([0,-leaf_length/2.5,0])
+            cube([leaf_thickness/3,leaf_length,thickness*2],center=true);
+    }
+
 }
 /*
 module rounded()
