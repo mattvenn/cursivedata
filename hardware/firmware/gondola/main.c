@@ -14,10 +14,14 @@ more example code:http://metku.net/index.html?path=articles/microcontroller-part
 //uint8_t  EEMEM startServoLoc; 
 //uint8_t startServoPos;
 //used for the 2 wire comms
+#define STATE_UP true
+#define STATE_DOWN false
 volatile uint8_t counter = 0; 
 volatile bool counting = false;
 volatile bool move_pen = false;
 volatile bool pen_up = false;
+bool pen_state;
+
 static int servo_speed = 20; //ms to wait between each step
 void move_pen_servo();
 //pins
@@ -25,8 +29,8 @@ void move_pen_servo();
 #define SERVO_PIN PB0 //OC0A
 #define LED_PIN PB4
 
-#define PENUP 16
-#define PENDOWN 34
+#define PENUP 14
+#define PENDOWN 38
 
 int main()
 {
@@ -77,6 +81,7 @@ int main()
 
     //turn on servo pwm generation 
     OCR0A = PENUP;
+    pen_state = STATE_UP;
     TCCR0A |= (1<<COM0A1);
 
     //enable interrupts
@@ -112,21 +117,23 @@ int main()
 void move_pen_servo()
 {
         move_pen = false;
-        if(pen_up==true)
+        if(pen_up==true && pen_state == STATE_DOWN)
         {
             for(int i = PENDOWN; i >= PENUP; i -- )
             {
                 OCR0A = i;
                 _delay_ms(servo_speed);
             }
+            pen_state = STATE_UP;
         }
-        else
+        else if(pen_up==false && pen_state == STATE_UP)
         {
             for(int i = PENUP; i <= PENDOWN; i ++ )
             {
                 OCR0A = i;
                 _delay_ms(servo_speed);
             }
+            pen_state = STATE_DOWN;
             //flash the led
             setbit(PORTB,LED_PIN);
             _delay_ms(50);
