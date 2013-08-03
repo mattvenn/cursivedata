@@ -97,8 +97,8 @@ void home()
 
   //default pwm
   setPWM(config.default_pwm);
-  //release any tesnsion
-  int tension_release_steps = 100;
+  //release any tension
+  int tension_release_steps = 1000;
   stepLeft(tension_release_steps);
   int steps=findRightLimit();
 

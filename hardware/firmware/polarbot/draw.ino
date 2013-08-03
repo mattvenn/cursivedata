@@ -1,10 +1,9 @@
-//update this to take into account the gondola width
 //arguments are measured in steps
 static void FK(int l1, int l2) {
 
-  float a = l1; // / config.stepsPerMM;
+  float a = l1; 
   float b = config.width*config.stepsPerMM - config.gondola_width*config.stepsPerMM;
-  float c = l2; // /config.stepsPerMM;
+  float c = l2;
 
   // slow, uses trig
   //float theta = acos((a*a+b*b-c*c)/(2.0*a*b));
@@ -14,7 +13,7 @@ static void FK(int l1, int l2) {
   // and we know that sin(acos(i)) = sqrt(1-i*i)
   float i=(a*a+b*b-c*c)/(2.0*a*b);
   x1 = i * l1 + config.gondola_width * config.stepsPerMM / 2;
-  y1 = sqrt(1.0 - i*i)*l1;
+  y1 = sqrt(1.0 - i*i)*l1+config.gondola_height*config.stepsPerMM;
   
 }
 
@@ -46,8 +45,8 @@ void moveTo(float x2, float y2)
   int b2 = sqrt(pow((w-x2),2)+pow(y2,2));*/
  //take into account the gondola width
 
-  int a2 = sqrt(pow(x2-config.gondola_width*config.stepsPerMM/2,2)+pow(y2,2));
-  int b2 = sqrt(pow((config.width*config.stepsPerMM-x2-config.gondola_width*config.stepsPerMM/2),2)+pow(y2,2));
+  int a2 = sqrt(pow(x2-config.gondola_width*config.stepsPerMM/2,2)+pow(y2-config.gondola_height*config.stepsPerMM,2));
+  int b2 = sqrt(pow((config.width*config.stepsPerMM-x2-config.gondola_width*config.stepsPerMM/2),2)+pow(y2-config.gondola_height*config.stepsPerMM,2));
 
   int stepA;
   int stepB;

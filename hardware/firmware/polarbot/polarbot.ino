@@ -246,9 +246,9 @@ void loop() {
 
 void runCommand( Payload * p)
 {
-  //if we're not calibrated - don't do anything. unless the command is calibrate, force string length, or dump config
+  //if we're not calibrated - don't do anything. unless the command is calibrate, force string length, or dump/load config
   //possibly this should change if uncalibrated, only reject move commands
-  if(!calibrated && !(p->command == 'c'||p->command == 'f'||p->command =='j'))
+  if(!calibrated && !(p->command == 'c'||p->command == 'f'||p->command =='k'||p->command == 'j'))
   {
     Serial.println("not calibrated");
     Serial.println("ok");
