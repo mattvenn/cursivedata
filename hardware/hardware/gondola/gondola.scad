@@ -22,8 +22,7 @@ bolt_r = 2.5/2; //for tapping
 pen_holder_r = 30/2;
 clearance=0.2;
 drill_r = 1+clearance;
-
-servo_dim = [12.5, 25,19.5];
+servo_dim = [12.5-laser_width, 23.2-laser_width,19.5];
 servo_w = servo_dim[0];
 servo_h = servo_dim[1];
 servo_r = 4.8/2; //axle of the motor
@@ -47,7 +46,8 @@ outer_r = 60;
 hanger_r = pen_holder_r + 5;
 servo_y = servo_h+cam_y; 
 pen_hole_r = 25/2; //acrylic pipe is 30mm D, which I'll turn down to get a nice fit
-
+echo(str("thickness:",thickness," laser_width:",laser_width));
+echo(str("slot width:",thickness-laser_width));
 //the bits
 module made_gondola()
 {
@@ -97,11 +97,11 @@ module servo_mount_diff()
                 }
                 //string notches
                 translate([servo_mount_w/2-notch_h,h/2-notch_h/2,0])
-                    cube([1,notch_h,thickness*2],center=true);
+                    cube([1.5,notch_h,thickness*2],center=true);
                 translate([servo_mount_w/2-notch_h,h/2-notch_h,0])
                     cylinder(r=notch_h/2,h=thickness*2,center=true);
                 translate([-servo_mount_w/2+notch_h,h/2-notch_h/2,0])
-                    cube([1,notch_h,thickness*2],center=true);
+                    cube([1.5,notch_h,thickness*2],center=true);
                 translate([-servo_mount_w/2+notch_h,h/2-notch_h,0])
                     cylinder(r=notch_h/2,h=thickness*2,center=true);
 
@@ -121,7 +121,7 @@ module servo_mount()
 
 module servo()
 {
-    alignds420(position=[servo_x,servo_y,thickness/2+6],rotation=[0,-90,90]);
+    alignds420(position=[servo_x,servo_y,thickness/2+6],rotation=[0,-90,90],servo_dim=servo_dim);
     translate([servo_w-drill_r,servo_y-servo_dim[0]/2,thickness/2+6])rotate([0,-90,90])cylinder(r=drill_r*2,h=20,center=true);
 }
 module pen_holder()

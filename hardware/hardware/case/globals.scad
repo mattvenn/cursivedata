@@ -12,7 +12,7 @@ round_radius = 2;
 
 //acrylic
 thickness = 2.7; //3.1; //2.73;
-laser_width = 0.17; //accounts for both sides of a laser cut
+laser_width = 0.25; //accounts for both sides of a laser cut
 
 //stepper
 stepper_width=40;
