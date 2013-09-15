@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 """
+docs:
+    https://xively.com/dev/docs/api/quick_reference/historical_data/
+
 limitations:
-    can only fetches data in chunks of 6 hours
+    can only fetches data in chunks of 6 hours, should increase this for longer intervals/time periods
+    would need messing with duration and interval, with a lookup table from the above docs
 
 """
 import urllib
@@ -14,62 +18,57 @@ import argparse
 
 def fetchRange(start_date,end_date,key,feed_number):
     alldatapoints = {}
-    per_page = 500 #seems limited to 500, tho docs say 1000
     url = 'http://api.cosm.com/v2/feeds/%d.json' % feed_number
 
     while start_date < end_date:
-        page = 1
-        while True:
-            values = {
-                      'start' : start_date.isoformat(),
-                      'duration' : "6hours",
-                      'interval' : args.interval, #once a minute. 0 is everything but can only get 6 hours at a time
-                      'key' : key,
-                      'per_page' : per_page,
-                      'page' : page,
-                      }
+        values = {
+                  'start' : start_date.isoformat(),
+                  'duration' : "6hours",
+                  'limit' : 1000,
+                  'interval' : args.interval, #once a minute. 0 is everything but can only get 6 hours at a time
+                  'key' : key,
+                  }
 
-            data = urllib.urlencode(values)
-            fullurl = url + '?' + data
-            print values["page"], values["start"] 
-            req = urllib2.Request(fullurl)
-            if args.verbose:
-                print values
+        data = urllib.urlencode(values)
+        fullurl = url + '?' + data
+        req = urllib2.Request(fullurl)
+        print "start date:", values['start']
 
-            response = None
-            while response == None:
-                try:
-                    response = urllib2.urlopen(req)
-                except urllib2.URLError, e:
-                    print e.code
-                    print e.read()
-                    print "trying again..."
+        if args.verbose:
+            print values
 
-            the_page = response.read()
-
-            data = json.loads(the_page)
-            datapoints = 0
+        response = None
+        while response == None:
             try:
-                for datastream in data["datastreams"]:
-                    feed_id = datastream["id"]
-                    #create key array if necessary
-                    if not alldatapoints.has_key(feed_id):
-                        alldatapoints[feed_id] = []
-                    alldatapoints[feed_id] = alldatapoints[feed_id] + datastream["datapoints"]
-                    datapoints += len(datastream["datapoints"])
+                response = urllib2.urlopen(req)
+            except urllib2.URLError, e:
+                print e.code
+                print e.read()
+                print "trying again..."
 
-                if args.verbose:
-                    print "got %d datapoints in %d streams" % (datapoints, len(data["datastreams"]) )
-                page += 1
+        the_page = response.read()
 
-                if datapoints != per_page:
-                    break;
+        data = json.loads(the_page)
+        datapoints = 0
+        try:
+            for datastream in data["datastreams"]:
+                feed_id = datastream["id"]
+                #create key array if necessary
+                if not alldatapoints.has_key(feed_id):
+                    alldatapoints[feed_id] = []
+                alldatapoints[feed_id] = alldatapoints[feed_id] + datastream["datapoints"]
+                datapoints += len(datastream["datapoints"])
 
-            except KeyError:
-                print "no data points for that period:", data
-                break
+            if args.verbose:
+                print "got %d datapoints in %d streams" % (datapoints, len(data["datastreams"]) )
 
-        start_date = start_date + datetime.timedelta(hours=6)
+        except KeyError:
+            print "no data points for that period:", data
+            break
+
+        first_key = alldatapoints.keys()[0]
+        last_datetime = alldatapoints[first_key][-1]["at"]
+        start_date = dateutil.parser.parse(last_datetime)
 
     return alldatapoints
 
@@ -126,10 +125,13 @@ if __name__ == '__main__':
     #parse dates
     start_date = dateutil.parser.parse(args.start,dayfirst=True)
     end_date = dateutil.parser.parse(args.end,dayfirst=True)
+    from pytz import timezone
+    GMT = timezone('GMT')
+    start_date = GMT.localize(start_date)
+    end_date = GMT.localize(end_date)
 
     #fetch data
     data = fetchRange(start_date,end_date,key,args.feed)
-    #import ipdb; ipdb.set_trace()
 
     #make a summary
     for key in data.keys():
