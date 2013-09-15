@@ -92,6 +92,7 @@ class Generator( models.Model ) :
         return s
     
     def add_or_update_param(self,param_spec):
+
         pr = self.get_param(param_spec['name'])
         if not pr:
             pr = Parameter(generator=self)
@@ -109,11 +110,16 @@ class Generator( models.Model ) :
     
     #Gets the current values for all parameters as a dict
     def get_param_dict(self,param_values):
+        mod = Generator.get_file( self.module_name )
         params = []
+        #TODO this just filters out the old parameters - doesn't remove them
         for param in self.parameter_set.all():
-            params.append({"name":param.name,
-                           "description":param.description,
-                           "value":param_values.get(param.name,param.default)})
+            if not [p for p in mod.get_params() if p['name'] == param.name]:
+                print "old param", param.name
+            else:
+                params.append({"name":param.name,
+                               "description":param.description,
+                               "value":param_values.get(param.name,param.default)})
         return params
     
     def get_recent_output(self,start=0,end=3):
