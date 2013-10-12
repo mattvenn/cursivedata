@@ -103,8 +103,9 @@ class DataStore( models.Model ) :
         data = []
         print "Adding data to store",str(self)
         for row in reader:
-            #print "Row:",row
-            #Find the time field, get a date, and delete it from the data dict (use now() as a default)
+            #check we have a value
+            if not row.has_key('value'):
+                raise ValueError
             #Create a dict with {date=date, data=data} and append
             datapoint = {}
             if time_field :
@@ -113,6 +114,8 @@ class DataStore( models.Model ) :
             else:
                 datapoint['date'] = timezone.now()
             datapoint['data'] = row
+            
+
             data.append(datapoint)
         print "loaded %d lines" % len(data)
         self.update_current_data(data)
