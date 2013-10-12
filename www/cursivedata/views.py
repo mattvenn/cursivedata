@@ -306,6 +306,8 @@ def show_generator(request, generatorID):
                     ds_form.load_csv(request.FILES['csv_file'], "Time")
                 except ValidationError, e:
                     messages.add_message(request, messages.ERROR, 'Invalid time, needs to be in this format YYYY-MM-DD HH:MM:SS+00:00')
+                except ValueError, e:
+                    messages.add_message(request, messages.ERROR, "csv header needs to be 'Time,value'")
             else:
                 messages.add_message(request, messages.ERROR, 'Select a datastore first')
         elif act == "Update Query":
@@ -348,7 +350,7 @@ class SelectOrMakeDataStore(forms.Form):
 class DataStoreSettings(forms.Form):
     max_time = forms.DateTimeField(widget=SelectDateWidget,label="Data Before",required=False)
     min_time = forms.DateTimeField(widget=SelectDateWidget,label="Data After",required=False)
-    max_records = forms.IntegerField(label="Limit records to last",required=False)
+    max_records = forms.IntegerField(label="Limit records to first",required=False)
     
     def get_params(self):
         return { "max_date": self.max_date, 
