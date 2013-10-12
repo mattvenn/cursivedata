@@ -4,23 +4,21 @@ bugs:
 from django.utils.datetime_safe import datetime
 import math
 
-def get_division(date,params):
+def get_division(date,params,internal_state):
     minute = int( date.strftime("%M") ) # minute 0 -59
     hour = int( date.strftime("%H") ) # minute 0 -59
-    #mins in a day
-    mins =  (minute + hour * 60)
-    division = mins / int( params.get('circle_t') / params.get('divide') )
-    division = division % params.get('divide')
-    return int(division)
+    dom = int( date.strftime("%d") ) #day of month 0 - 31
 
-def get_seconds(date):
-    seconds = int( date.strftime("%s") ) # minute 0 -59
-    return seconds
-   
-def get_xy(drawing,params,radius,minute):
+    #mins in the month
+    mins =  minute + hour * 60 + dom * 24 * 60
+    div = mins % params.get('circle_t')
+        
+    return div
+
+def get_xy(drawing,params,radius,div):
     #centre point
     centre = (drawing.width/2,drawing.height/2)
-    angle = minute * (2 * math.pi / params.get('divide'))
+    angle = div * (2 * math.pi / params.get('circle_t'))
     x = radius * math.sin(angle)
     y = radius * math.cos(angle)
     x = centre[0] + x
@@ -33,7 +31,7 @@ def process(drawing,data,params,internal_state) :
 
     for point in data.get_current():
 
-        div = get_division(point.date,params)
+        div = get_division(point.date,params,internal_state)
         value = float(point.data['value'])
         length = (value / params.get('value'))*circle_r
         if length > circle_r:
@@ -63,8 +61,8 @@ def end(drawing,params,internal_state) :
 def get_params() :
     return  [ 
         #changing this needs to update the internal state, as we store an array of this number
-        {"name":"circle_t", "default": 1440, "description":"the whole circle is worth this many minutes" },
-        {"name":"value", "default":50, "description":"an input value of this will draw a 1mm bar" },
+        {"name":"circle_t", "default": 1440, "description":"the whole circle is worth this many minutes (max is one months worth)" },
+        {"name":"value", "default":1000, "description":"an input value of this will draw a 1mm bar" },
         {"name":"circle_r", "default":100, "description":"radius of central circle" },
 # params can only be floats        {"name":"text", "default":'text', "description":"text for centre" },
             ]
