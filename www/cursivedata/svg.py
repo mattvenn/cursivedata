@@ -5,6 +5,7 @@ Created on 6 Jan 2013
 '''
 import time,copy
 from pysvg.parser import parse
+import time
 import sys
 import cairosvg
 from xml.parsers.expat import ExpatError
@@ -48,6 +49,7 @@ def append_svg_to_file( fragment_file, main_file ):
 
     #locking
     import fcntl
+    start_time = time.time()
 
     try:
         lockfile = "/tmp/%s.lock" % main_file.replace('/','.')
@@ -78,6 +80,7 @@ def append_svg_to_file( fragment_file, main_file ):
         print "problem appending %s to %s: %s" % (fragment_file,main_file,e)
         raise
     clear_blank_lines(main_file)
+    print "finished in %d secs" % (time.time() - start_time)
 
 def is_blank_line(line):
     if line == "\n":

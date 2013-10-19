@@ -116,6 +116,7 @@ class Endpoint( DrawingState ):
                 print "problem converting svg:", e
                 so.delete()
                 raise EndpointConversionError(e)
+            print "gcode done"
 
     #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
     #returns an svg document (not a file)
@@ -170,6 +171,7 @@ class Endpoint( DrawingState ):
         print pycam_args
         p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
         stdout,stderr = p.communicate()
+        print "pycam done"
 
         self.parse_gcode_to_polar(tmp_gcode,polarfile)
         os.close(fd)
