@@ -11,6 +11,7 @@ from cursivedata.models.endpoint import GCodeOutput
 
 ep_id = 2
 ep = Endpoint.objects.get(id=ep_id)
+print ep.name, "id", ep_id
 
 
 #import ipdb; ipdb.set_trace()
