@@ -1,4 +1,5 @@
 
+import argparse
 import sys
 import os
 import datetime
@@ -12,9 +13,6 @@ from cursivedata.models.endpoint import GCodeOutput
 ep_id = 2
 ep = Endpoint.objects.get(id=ep_id)
 print ep.name, "id", ep_id
-
-
-#import ipdb; ipdb.set_trace()
 
 total_gcodes = GCodeOutput.objects.filter(endpoint=ep).count()
 fresh_gcodes = GCodeOutput.objects.filter(endpoint=ep,served=False)
@@ -35,3 +33,18 @@ for gcode in fresh_gcodes:
 print "of %d unserved files, %d don't have data and %d don't have files" % (len(fresh_gcodes),no_data,no_file)
 
 
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description="manage gcode files")
+    parser.add_argument('--id',
+        action='store', type=int, dest='ep_id', 
+        help="endpoint id")
+    parser.add_argument('--fix-all',
+        action='store_const', const=True, default=False, dest='fix_all', help="mark all the broken gcode files as read")
+
+    args = parser.parse_args()
+
+    triggers = get_triggers()
+    if args.delete:
+        for trigger in triggers:
+            if trigger["id"] == args.delete:
