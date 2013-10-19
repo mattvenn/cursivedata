@@ -78,6 +78,7 @@ class EndpointResource(ModelResource):
         endpoint = bundle.obj
         endpoint.status_updated = timezone.now()
         endpoint.save() 
-        print "Width: ",endpoint.width," Height:",endpoint.height," top margin:",endpoint.top_margin," side margin:", endpoint.side_margin
-        print "Status: ",endpoint.status," status updated:",endpoint.status_updated
+        #print "Width: ",endpoint.width," Height:",endpoint.height," top margin:",endpoint.top_margin," side margin:", endpoint.side_margin
+        #print "Status: ",endpoint.status," status updated:",endpoint.status_updated
+        print "endpoint " + endpoint.id + " updated:",endpoint.status_updated
         return res
