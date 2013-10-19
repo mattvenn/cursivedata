@@ -11,11 +11,8 @@ from cursivedata.models import *
 from cursivedata.models.endpoint import GCodeOutput
 
 parser = argparse.ArgumentParser(description="manage gcode files")
-parser.add_argument('--id',
-    action='store', type=int, dest='ep_id', 
-    help="endpoint id")
-parser.add_argument('--fix-all',
-    action='store_const', const=True, default=False, dest='fix_all', help="mark all the broken gcode files as served")
+parser.add_argument('--id', action='store', type=int, dest='ep_id', help="endpoint id", required=True)
+parser.add_argument('--fix-all', action='store_const', const=True, default=False, dest='fix_all', help="mark all the broken gcode files as served")
 
 args = parser.parse_args()
 
