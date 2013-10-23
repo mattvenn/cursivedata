@@ -68,6 +68,7 @@ def append_svg_to_file( fragment_file, main_file ):
         print "parsing frag file", fragment_file
         svg_frag = parse(fragment_file)
         svg_id = int(time.time())
+        print "adding frags to main", main_file
         for e in svg_frag.getAllElements():
             try:
                 e.set_id(svg_id)

@@ -24,6 +24,7 @@
 	</Directory>
 
   # Logfiles
+  ErrorLogFormat "[%t] [%p] %M"
   ErrorLog  /home/polarsite/cursivedata/www/log/error.log
   CustomLog /home/polarsite/cursivedata/www/log/access.log combined
 </VirtualHost>
