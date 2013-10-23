@@ -9,6 +9,8 @@ import time
 import sys
 import cairosvg
 from xml.parsers.expat import ExpatError
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import ParseError
 
 
 def get_dimensions(svg_file):
@@ -64,23 +66,24 @@ def append_svg_to_file( fragment_file, main_file ):
 
     try:
         print "parsing main file", main_file
-        svg_main = parse(main_file)
+        svg_main = ET.parse(main_file)
         print "parsing frag file", fragment_file
-        svg_frag = parse(fragment_file)
-        svg_id = int(time.time())
+        svg_frag = ET.parse(fragment_file)
+        svg_id = str(int(time.time()))
+        mainroot= svg_main.getroot()
+        fragroot =svg_frag.getroot()
         print "adding frags to main", main_file
-        for e in svg_frag.getAllElements():
-            try:
-                e.set_id(svg_id)
-                e.set_class("frame")
-            except AttributeError:
-                pass
-            svg_main.addElement( e )
-        svg_main.save(main_file)
-    except (ExpatError, IOError) as e:
+        for child in fragroot:
+            child.set('id',svg_id)
+            child.set('class','frame')
+            mainroot.append(child)
+            
+        svg_main.write(main_file)
+    except ParseError as e:
         print "problem appending %s to %s: %s" % (fragment_file,main_file,e)
         raise
-    clear_blank_lines(main_file)
+    #no need to do this with new parser
+    #clear_blank_lines(main_file)
     print "finished in %d secs" % (time.time() - start_time)
 
 def is_blank_line(line):
