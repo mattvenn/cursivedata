@@ -14,10 +14,13 @@ include <servos.scad>
 include <../case/globals.scad>
 include </home/mattvenn/cad/MCAD/shapes.scad>
 include </home/matthew/work/cad/MCAD/shapes.scad>
+include </home/matt/cad/MCAD/shapes.scad>
 $fa = 2.5; //min angle: make large circles smoother
 $fs=1.0; //min fragment size, make small circles smoother
 //measured
 pcb_dist=42;
+pcb_w = 52;
+pcb_h = 20;
 bolt_r = 2.5/2; //for tapping
 pen_holder_r = 30/2;
 clearance=0.2;
@@ -34,7 +37,7 @@ leaf_length = 60;
 leaf_thickness = 5; //width of the leaf spring
 leaf_clearance = 2; //clearance between spring and walls
 leaf_width = 60;
-string_attach_height = 30;
+string_attach_height = 35;
 
 servo_x = 5.5;
 slot_shift = -5;
@@ -62,14 +65,40 @@ module made_gondola()
     acrylic() servo_mount();
     acrylic() translate([0,0,thickness])leaf_riser();
 }
-made_gondola();
+//made_gondola();
 //translate([0,0,thickness])
 *projection() leaf_riser();
 *projection() gondola();
-*gondola();
-*projection() rotate([90,0,0]) servo_mount();
+//gondola();
+//projection() rotate([90,0,0]) servo_mount();
 *hanger();
 *projection()hanger_washer();
+projection()
+weight();
+module weight()
+{
+    side_w = 9;
+    difference()
+    {
+        cube([pcb_w,pcb_h,1],center=true);
+        translate([-pcb_w/2,pcb_h/2,0])
+            rotate([0,0,45])
+                cube(side_w,center=true);
+        translate([-pcb_w/2,-pcb_h/2,0])
+            rotate([0,0,45])
+                cube(side_w,center=true);
+        translate([pcb_w/2,pcb_h/2,0])
+            rotate([0,0,45])
+                cube(side_w,center=true);
+        translate([pcb_w/2,-pcb_h/2,0])
+            rotate([0,0,45])
+                cube(side_w,center=true);
+
+        //bigger holes for bolts to slide through
+        echo(bolt_r+0.3);
+        pcb_holes(bolt_r+0.3);
+    }
+}
 
 module slot_test()
 {
@@ -135,7 +164,7 @@ module pen_holder()
     
 }
 
-module pcb_holes()
+module pcb_holes(bolt_r=bolt_r)
 {
   translate([-pcb_dist/2,0,0])
     cylinder(r=bolt_r,h=thickness*2,center=true);
