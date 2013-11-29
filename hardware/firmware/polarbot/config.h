@@ -10,6 +10,7 @@ struct config_t
   int right_limit; //152mm
   byte id;
   float gondola_width; 
+  float gondola_height; 
   int default_pwm;
   int lowpower_pwm;
   int home_pwm_high;

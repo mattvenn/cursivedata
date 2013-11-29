@@ -8,6 +8,7 @@ from django.forms.extras.widgets import SelectDateWidget
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail, BadHeaderError
 from cursivedata.models import *
 from cursivedata.models.generator import GeneratorRunner
@@ -300,7 +301,15 @@ def show_generator(request, generatorID):
         elif act == "Create Datastore":
             ds_form.create_data_store(request.POST.get("ds_name","Unnamed Datastore"))
         elif act == "Import CSV":
-            ds_form.load_csv(request.FILES['csv_file'], "Time")
+            if ds_form.data_store:
+                try:
+                    ds_form.load_csv(request.FILES['csv_file'], "Time")
+                except ValidationError, e:
+                    messages.add_message(request, messages.ERROR, 'Invalid time, needs to be in this format YYYY-MM-DD HH:MM:SS+00:00')
+                except ValueError, e:
+                    messages.add_message(request, messages.ERROR, "csv header needs to be 'Time,value'")
+            else:
+                messages.add_message(request, messages.ERROR, 'Select a datastore first')
         elif act == "Update Query":
             pass
         elif act == "Save Code":
@@ -330,7 +339,7 @@ class SelectOrMakeDataStore(forms.Form):
         if self.is_valid() :
             self.data_store = self.cleaned_data['data_store_id']
     def create_data_store(self,name):
-        self.data_store = DataStore(name=request.POST.get("ds_name","Unnamed Datastore"))
+        self.data_store = DataStore(name=name)
         self.data_store.save()
     def load_csv(self,file,time_field):
         if self.data_store :
@@ -341,7 +350,7 @@ class SelectOrMakeDataStore(forms.Form):
 class DataStoreSettings(forms.Form):
     max_time = forms.DateTimeField(widget=SelectDateWidget,label="Data Before",required=False)
     min_time = forms.DateTimeField(widget=SelectDateWidget,label="Data After",required=False)
-    max_records = forms.IntegerField(label="Limit records to last",required=False)
+    max_records = forms.IntegerField(label="Limit records to first",required=False)
     
     def get_params(self):
         return { "max_date": self.max_date, 
