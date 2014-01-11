@@ -65,16 +65,16 @@ module made_gondola()
     acrylic() servo_mount();
     acrylic() translate([0,0,thickness])leaf_riser();
 }
-//made_gondola();
+*made_gondola();
 //translate([0,0,thickness])
 *projection() leaf_riser();
-*projection() gondola();
+projection() gondola();
 //gondola();
 //projection() rotate([90,0,0]) servo_mount();
 *hanger();
 *projection()hanger_washer();
-projection()
-weight();
+*projection()
+    weight();
 module weight()
 {
     side_w = 9;
