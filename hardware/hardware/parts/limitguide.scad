@@ -1,6 +1,7 @@
 include <../case/stepper.scad>
 include <../case/globals.scad>
 include </home/mattvenn/cad/MCAD/shapes.scad>
+include </home/matthew/work/cad/MCAD/shapes.scad>
 
 wire_clearance = 10;
 edge_clearance = 3;
@@ -18,57 +19,82 @@ switch_length = 29;
 //calculated
 screw_edge_width = 10; //amount we need for screwing down
 width = switch_offset_x + edge_clearance * 2 + 2 * screw_edge_width;
-height = switch_length;
+
+//space for the perpendicalar wire guide
+slot_space = thickness * 2;
+height = switch_length + slot_space;
 screw_r = 2;
-//guessed
-bend_width = 2;
-wire_height = 6 - bend_width;
-guide_height = wire_height * 2;
-projection()
-    union()
+clearance = 0.2;
+//wire z
+wire_z = 5;
+wire_r = 0.8 / 2;
+guide_height = thickness + wire_z + 3; //wire_z * 2;
+
+*projection() wireguide();
+made_wireguide();
+made_mount_plate();
+*projection() made_mount_plate();
+module made_mount_plate()
+{
+    difference()
     {
         mount_plate();
-        translate([0,+height/2+bend_width/2,0])
-        bend();
-        translate([0,+height/2+guide_height/2+bend_width,0])
-            wireguide();
+        made_wireguide(true);
     }
-
-module bend()
-{
-    translate([-width/2+width/4,0,0])
-    cube([width/3,bend_width*2,thickness],center=true);
 }
-module wireguide()
+module made_wireguide(boolean)
 {
-difference()
+    translate([0,height/2-thickness/2-thickness,guide_height/2-thickness/2])
+    rotate([90,0,0])
+    wireguide(boolean);
+}
+module wireguide(boolean)
 {
-    roundedBox(width,guide_height,thickness,round_radius);
-    hull()
+    assign(thickness = thickness - clearance)
     {
-    translate([5+wire_clearance/2,0,0])
-        cylinder(r=0.5,h=thickness*2,center=true);
-    translate([width+wire_clearance/2,0,0])
-        cylinder(r=0.5,h=thickness*2,center=true);
+        difference()
+        {
+            union()
+            {
+            roundedBox(width,guide_height,thickness,round_radius);
+            //only rounded on the top
+            translate([0,-guide_height/2+thickness/2,0])
+                cube([width,thickness+0.01,thickness+0.01],center=true);
+            }
+            hull()
+            {
+            translate([5+wire_clearance/2,-guide_height/2+thickness+wire_z,0])
+                cylinder(r=wire_r,h=thickness*2,center=true);
+            translate([width+wire_clearance/2,-guide_height/2+thickness+wire_z,0])
+                cylinder(r=wire_r,h=thickness*2,center=true);
+            }
+            //the dibbit
+            translate([0,-guide_height/2+thickness/2,0])
+                if( boolean )
+                    cube([width/3+clearance,thickness,thickness*2],center=true);
+                else
+                    cube([width/3,thickness,thickness*2],center=true);
+        }
     }
 }
-}
+
 module mount_plate()
 {
     difference()
     {
     roundedBox(width,height,thickness,round_radius);
 
-    //hole for mounting the roller
-    translate([width/2-screw_edge_width-edge_clearance,height/2-edge_clearance-m3_bolt_r,0])
+    translate([ width/2-screw_edge_width-edge_clearance,
+                height/2-edge_clearance-m3_bolt_r-slot_space,
+                0])
     {
+        //hole for mounting the roller
         cylinder(r=m3_bolt_r,h=thickness*2,center=true);
         //switch mount holes
         translate([-switch_offset_x,switch_offset_y,0])
             switch_holes();
     }
-    translate([5,-height/2-edge_clearance*2-m3_bolt_r*2,-thickness])
-        cube([wire_clearance,height,thickness*2]);
+    //mounting holes
     translate([-width/2+screw_edge_width/2,0,0])
         cylinder(r=screw_r,h=thickness*2,center=true);
     translate([+width/2-screw_edge_width/2,0,0])
