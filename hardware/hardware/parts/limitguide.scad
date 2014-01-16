@@ -21,19 +21,18 @@ screw_edge_width = 10; //amount we need for screwing down
 width = switch_offset_x + edge_clearance * 2 + 2 * screw_edge_width;
 
 //space for the perpendicalar wire guide
-slot_space = thickness * 2;
+slot_space = thickness * 3;
 height = switch_length + slot_space;
 screw_r = 2;
-clearance = 0.2;
 //wire z
 wire_z = 5;
 wire_r = 0.8 / 2;
 guide_height = thickness + wire_z + 3; //wire_z * 2;
 
 *projection() wireguide();
-made_wireguide();
-made_mount_plate();
-*projection() made_mount_plate();
+projection() made_mount_plate();
+*made_wireguide();
+*made_mount_plate();
 module made_mount_plate()
 {
     difference()
@@ -44,13 +43,13 @@ module made_mount_plate()
 }
 module made_wireguide(boolean)
 {
-    translate([0,height/2-thickness/2-thickness,guide_height/2-thickness/2])
+    translate([0,height/2+thickness/2-slot_space,guide_height/2-thickness/2])
     rotate([90,0,0])
     wireguide(boolean);
 }
 module wireguide(boolean)
 {
-    assign(thickness = thickness - clearance)
+    assign(thickness = thickness - laser_width)
     {
         difference()
         {
@@ -71,9 +70,9 @@ module wireguide(boolean)
             //the dibbit
             translate([0,-guide_height/2+thickness/2,0])
                 if( boolean )
-                    cube([width/3+clearance,thickness,thickness*2],center=true);
+                    cube([width/2+laser_width,thickness,thickness*2],center=true);
                 else
-                    cube([width/3,thickness,thickness*2],center=true);
+                    cube([width/2,thickness,thickness*2],center=true);
         }
     }
 }
