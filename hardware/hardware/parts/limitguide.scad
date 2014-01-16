@@ -27,12 +27,18 @@ screw_r = 2;
 //wire z
 wire_z = 5;
 wire_r = 0.8 / 2;
-guide_height = thickness + wire_z + 3; //wire_z * 2;
+guide_height = thickness + wire_z + 5; //wire_z * 2;
 
+
+//for laser cutting
 *projection() wireguide();
-projection() made_mount_plate();
-*made_wireguide();
+*projection() made_mount_plate();
+
+//to see what's going on 
+made_wireguide();
 *made_mount_plate();
+
+//the mount plate in correct orientation
 module made_mount_plate()
 {
     difference()
@@ -41,6 +47,7 @@ module made_mount_plate()
         made_wireguide(true);
     }
 }
+//the wireguide plate in correct orientation
 module made_wireguide(boolean)
 {
     translate([0,height/2+thickness/2-slot_space,guide_height/2-thickness/2])
