@@ -29,19 +29,19 @@ servo_dim = [12.5-laser_width, 23.2-laser_width,19.5];
 servo_w = servo_dim[0];
 servo_h = servo_dim[1];
 servo_r = 4.8/2; //axle of the motor
-servo_cam_to_holder = 11.2; //distance between one face of the cam and the back shoulder of the servo
-
+servo_cam_to_holder = 12 + thickness; //distance between centers of cam and servo holder
 
 //made up
 leaf_length = 60;
 leaf_thickness = 5; //width of the leaf spring
 leaf_clearance = 2; //clearance between spring and walls
 leaf_width = 60;
-string_attach_height = 35;
+
+//25 works well for 600mm bot
+string_attach_height = 25;
 
 servo_x = 5.5;
-slot_shift = -5;
-cam_y = leaf_length/2 + slot_shift - leaf_thickness/4;
+cam_y = leaf_length/2  - thickness / 2 - thickness;
 pen_holder_height = 100;
 outer_r = 60;
 
@@ -52,29 +52,30 @@ pen_hole_r = 25/2; //acrylic pipe is 30mm D, which I'll turn down to get a nice 
 echo(str("thickness:",thickness," laser_width:",laser_width));
 echo(str("slot width:",thickness-laser_width));
 //the bits
+
+made_gondola();
+//translate([0,0,thickness])
+*projection() leaf_riser();
+*projection() gondola();
+*rotate([90,0,0]) servo_mount();
+*gondola();
+*servo_support();
+*servo_mount_diff();
+*hanger();
+*projection()
+    weight();
+
 module made_gondola()
 {
     acrylic() gondola();
-    *acrylic() translate([0,0,20 +thickness*2]) rotate([0,0,45])hanger();
-    *acrylic() translate([0,0,20 +thickness*3]) rotate([0,0,-180-45])hanger();
     acrylic() pen_holder();
     cam_angle = $t * -90;
     acrylic() translate([servo_x,cam_y,thickness+thickness/2+servo_w/2]) rotate([90,cam_angle,0]) cam();
     color("blue") translate([0,thickness,thickness]) servo();
-    translate([0,thickness,0])
     acrylic() servo_mount();
+    acrylic() servo_support();
     acrylic() translate([0,0,thickness])leaf_riser();
 }
-*made_gondola();
-//translate([0,0,thickness])
-*projection() leaf_riser();
-projection() gondola();
-//gondola();
-//projection() rotate([90,0,0]) servo_mount();
-*hanger();
-*projection()hanger_washer();
-*projection()
-    weight();
 module weight()
 {
     side_w = 9;
@@ -110,30 +111,49 @@ module acrylic()
     color("grey",0.8)
         child();
 }
+
+module servo_support()
+{
+    translate([0,cam_y+servo_cam_to_holder+10,thickness/2])
+    difference()
+    {
+        cube([servo_h,thickness,thickness*2],center=true);
+        //bottom tabs
+        translate([servo_h/8+servo_h/4,0,-thickness])
+        cube([servo_h / 4,thickness*2,thickness*2],center=true);
+        translate([-servo_h/8-servo_h/4,0,-thickness])
+        cube([servo_h / 4,thickness*2,thickness*2],center=true);
+    }
+}
 module servo_mount_diff()
 {
     servo_mount_w = 60;
     notch_h = 5;
     h = string_attach_height+notch_h;
-    translate([0,cam_y+thickness+servo_cam_to_holder,h/2-thickness/2])
+    translate([0,cam_y+servo_cam_to_holder,h/2-thickness/2])
         rotate([90,0,0])
             difference()
             {
                 minkowski()
                 {
-                    cube([servo_mount_w,h-drill_r*2,thickness-laser_width],center=true);
+                    cube([servo_mount_w-drill_r*2,h-drill_r*2,thickness-laser_width],center=true);
                     cylinder(r=drill_r,h=0.1);
                 }
                 //string notches
-                translate([servo_mount_w/2-notch_h,h/2-notch_h/2,0])
+                translate([servo_mount_w/2-notch_h-drill_r,h/2-notch_h/2,0])
                     cube([1.5,notch_h,thickness*2],center=true);
-                translate([servo_mount_w/2-notch_h,h/2-notch_h,0])
+                translate([servo_mount_w/2-notch_h-drill_r,h/2-notch_h,0])
                     cylinder(r=notch_h/2,h=thickness*2,center=true);
-                translate([-servo_mount_w/2+notch_h,h/2-notch_h/2,0])
+                translate([-servo_mount_w/2+notch_h+drill_r,h/2-notch_h/2,0])
                     cube([1.5,notch_h,thickness*2],center=true);
-                translate([-servo_mount_w/2+notch_h,h/2-notch_h,0])
+                translate([-servo_mount_w/2+notch_h+drill_r,h/2-notch_h,0])
                     cylinder(r=notch_h/2,h=thickness*2,center=true);
-
+                
+                //bottom tabs
+                translate([servo_mount_w/8+servo_mount_w/4,-h/2,0])
+                cube([servo_mount_w / 4,thickness*2,thickness*2],center=true);
+                translate([-servo_mount_w/8-servo_mount_w/4,-h/2,0])
+                cube([servo_mount_w / 4,thickness*2,thickness*2],center=true);
             }
 
 }
@@ -234,8 +254,10 @@ module gondola()
     //pcb holes
     translate([0,-outer_r*0.6,0])
       pcb_holes();
-    translate([0,thickness,-1])
-        servo_mount_diff();
+    //servo mount
+    servo_mount_diff();
+    //servo support
+    servo_support();
 
   }
     //leaf springs
@@ -262,47 +284,7 @@ module spring()
     }
 
 }
-/*
-module rounded()
-{
-    translate([-leaf_length/2+leaf_width/2-3*drill_r-clearance,leaf_length/2-leaf_width/2+3*drill_r+clearance,0])
-      rotate([0,0,-90])
-    difference()
-    {
-    cube([drill_r*4,drill_r*4,thickness*2],center=true);
-    translate([drill_r*2,drill_r*2,0])
-      cylinder(r=drill_r*2,h=thickness*4,center=true);
-    }
-}
-*/
-module hanger()
-{
-  color("blue")
-  difference()
-    {
-      hull()
-      {
-        translate([outer_r/2,0,0])
-          cylinder(r=hanger_r/3,h=thickness,center=true);
-        cylinder(r=hanger_r,h=thickness,center=true);
-      }
-      cylinder(r=pen_holder_r+clearance,h=thickness*2,center=true);
-      //string hole
-      echo(str("string distance=",outer_r/2));
-      translate([outer_r/2,0,0])
-        cylinder(r=bolt_r+clearance,h=thickness*2,center=true);
-    }
-}
 
-module hanger_washer()
-{
-difference()
-{
-
-        cylinder(r=hanger_r,h=thickness,center=true);
-      cylinder(r=pen_holder_r+clearance,h=thickness*2,center=true);
-      }
-}
 module cam()
 {
   radius = servo_w/2+thickness;
