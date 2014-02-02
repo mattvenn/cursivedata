@@ -38,7 +38,7 @@ leaf_clearance = 2; //clearance between spring and walls
 leaf_width = 60;
 
 //25 works well for 600mm bot
-string_attach_height = 25;
+string_attach_height = 25; //distance from the paper
 
 servo_x = 5.5;
 cam_y = leaf_length/2  - thickness / 2 - thickness;
@@ -53,15 +53,19 @@ echo(str("thickness:",thickness," laser_width:",laser_width));
 echo(str("slot width:",thickness-laser_width));
 //the bits
 
-made_gondola();
-//translate([0,0,thickness])
-*projection() leaf_riser();
-*projection() gondola();
-*rotate([90,0,0]) servo_mount();
+*made_gondola();
+
+if(export_leaf_riser)
+    projection() leaf_riser();
+if(export_gondola)
+    projection() gondola();
+if(export_servo_mount)
+    projection()rotate([90,0,0]) servo_mount();
+if(export_servo_support)
+    projection()rotate([90,0,0]) servo_support();
+
 *gondola();
-*servo_support();
-*servo_mount_diff();
-*hanger();
+//servo_mount();
 *projection()
     weight();
 
@@ -255,7 +259,8 @@ module gondola()
     translate([0,-outer_r*0.6,0])
       pcb_holes();
     //servo mount
-    servo_mount_diff();
+    translate([0,0,-0.01]) //for clean boolean
+        servo_mount_diff();
     //servo support
     servo_support();
 
