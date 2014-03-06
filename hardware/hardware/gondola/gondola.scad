@@ -63,12 +63,14 @@ if(export_servo_mount)
     projection()rotate([90,0,0]) servo_mount();
 if(export_servo_support)
     projection()rotate([90,0,0]) servo_support();
+if(export_cam)
+    projection()cam();
 
 *gondola();
 //servo_mount();
 *projection()
     weight();
-
+*cam();
 module made_gondola()
 {
     acrylic() gondola();
@@ -281,12 +283,15 @@ module spring()
 {
     cylinder(r=leaf_thickness/2,h=thickness,center=true);
     translate([0,-leaf_length/4,0])
+    cube([leaf_thickness,leaf_length/2,thickness],center=true);
+    /* stuart reckons too weak
     difference()
     {
         cube([leaf_thickness,leaf_length/2,thickness],center=true);
         translate([0,-leaf_length/2.5,0])
             cube([leaf_thickness/3,leaf_length,thickness*2],center=true);
     }
+    */
 
 }
 
