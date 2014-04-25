@@ -131,8 +131,8 @@ def show_pipeline(request, pipelineID):
             pipeline.update_size(pipeline.endpoint.img_width,pipeline.endpoint.img_height)
             pipeline.save()
         elif act == "Update Size":
-            pipeline.update_size( int(request.POST.get('pipeWidth',pipeline.img_width)),
-                    int(request.POST.get('pipeHeight',pipeline.img_height)))
+            pipeline.update_size( float(request.POST.get('pipeWidth',pipeline.img_width)),
+                    float(request.POST.get('pipeHeight',pipeline.img_height)))
         elif act == "Update Print Location":
             pipeline.print_top_left_x = request.POST.get("xOffset")
             pipeline.print_top_left_y = request.POST.get("yOffset")

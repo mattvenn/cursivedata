@@ -85,8 +85,8 @@ boolean calibrated = false;
 
 
 long commandsExecuted = 0;
-int x1; //measured in steps
-int y1; //measured in steps
+long int x1; //measured in steps
+long int y1; //measured in steps
 long int a1; //measured in steps
 long int b1; //measured in steps
 
@@ -328,9 +328,14 @@ void runCommand( Payload * p)
     break;
   case 'q':
     //rectangular coords
+    Serial.println(x1);
+    Serial.println(y1);
+    Serial.println(a1);
+    Serial.println(b1);
+
+
     Serial.print( "x: ");
     Serial.println(x1 / config.stepsPerMM);
-
     Serial.print( "y: ");
     Serial.println(y1 / config.stepsPerMM);
 

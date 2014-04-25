@@ -148,6 +148,7 @@ def update_robot_status():
         print "updated ok"
     else:
         print "failed to update"
+    return response
     
 def fetch_data():
     url = args.url + '/endpoint_data/' + fetch_robot_id() + "/?consume=true"
@@ -345,15 +346,17 @@ if __name__ == '__main__':
         exit(1)
 
     #get serial init first, as lots depends on getting data from the robot
-    if not args.norobot:
+    if args.norobot:
+        update_robot_status()
+        exit(0)
+    else:
         serial_port = setup_serial()
         if args.updatedimensions:
             update_robot_dimensions()
+	#we should check robot's status anyway, regardless of sending it to server
         if args.sendstatus:
-            update_robot_status()
-    else:
-        update_robot_status()
-        exit(0)
+            response = update_robot_status()
+
 
     #send a file   
     if args.file:
