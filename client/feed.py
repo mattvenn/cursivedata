@@ -302,7 +302,7 @@ if __name__ == '__main__':
         action='store', dest='store_file', 
         help="file to write robot responses in")
     parser.add_argument('--verbose',
-        action='store_const', const=True, dest='verbose', default=False,
+        action='store_const', const=True, dest='verbose', default=True,
         help="verbose")
     parser.add_argument('--send-status',
         action='store_const', const=True, dest='sendstatus', default=False,
