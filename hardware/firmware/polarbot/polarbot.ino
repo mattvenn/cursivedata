@@ -14,14 +14,10 @@
  
  todo:
  sw:
- - check: after calibration, with strings equal length, x and y aren't quite right I think. problem with FK?
+ - remove hanger_l, seems to be an old and unused feature
  - deal with microsteps and stepsperMm. 
  - is servo delay too small? might be missing small details
 
- hw:
- - replace stepper driver with stepsticks?
- - if gpio doesn't include i2c then probably it should
- - gondola servo lift ;(
  
  */
 #define testSteppers
