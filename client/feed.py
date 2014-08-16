@@ -375,6 +375,7 @@ if __name__ == '__main__':
         for i in range(len(names)):
           print names[i], '=', values[i]
           config[names[i]] = values[i]
+        print("config dumped to file: config")
         open("config",'w').write(json.dumps(config))
     if args.updateconfig:
         update_robot_config()
