@@ -61,6 +61,7 @@ signed off
 
 ## status
 
+signed off
 
 ## test date
 
@@ -70,7 +71,7 @@ signed off
 
 * homing
 * pen up/down
- svg tests
+* svg tests
 
 ## problems
 
