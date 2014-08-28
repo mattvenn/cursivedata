@@ -7,6 +7,7 @@ Drawing robots and internet based back end for generation of patterns.
 ## Links
 
 * website: http://cursivedata.co.uk
+* [getting started](docs/getting_started.md)
 * [overview of the robot design](docs/robot.md)
 * controlling the [robots](client/README.md)
 * [robot configs](client/configs/)
