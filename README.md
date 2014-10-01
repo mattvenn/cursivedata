@@ -2,7 +2,9 @@
 
 ## About
 
-Drawing robots and internet based back end for generation of patterns.
+[CursiveData.co.uk](http://cursivedata.co.uk) converts real time data into slowly growing online visualisations that are simultaneously brought to life by drawing robots. 
+
+[Press Release](https://docs.google.com/document/d/1AlJKTlvSeWEwPWLswe2qC5pCD9Ajeh3cXOZcOdX4iYk/pub)
 
 ## Resources
 
