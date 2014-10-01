@@ -1,0 +1,6 @@
+-r requirements.txt
+django-nose==1.2
+nose==1.3.4
+pip-tools==0.3.5
+pudb==2014.1
+urwid==1.2.1
