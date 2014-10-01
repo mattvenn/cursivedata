@@ -13,7 +13,7 @@ Drawing robots and internet based back end for generation of patterns.
 * [robot configs](client/configs/)
 * [testing document](hardware/tests/testing.800.md)
 * [test results for 800 size](hardware/tests/test.results.md)
-* For information on how the website works and creating new patterns, see the [wiki](/wiki).
+* For information on how the website works and creating new patterns, see the [wiki](https://github.com/mattvenn/cursivedata/wiki).
 
 ## License
 
