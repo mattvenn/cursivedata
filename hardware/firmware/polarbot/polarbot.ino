@@ -14,10 +14,14 @@
  
  todo:
  sw:
- - remove hanger_l, seems to be an old and unused feature
+ - check: after calibration, with strings equal length, x and y aren't quite right I think. problem with FK?
  - deal with microsteps and stepsperMm. 
  - is servo delay too small? might be missing small details
 
+ hw:
+ - replace stepper driver with stepsticks?
+ - if gpio doesn't include i2c then probably it should
+ - gondola servo lift ;(
  
  */
 #define testSteppers
@@ -81,10 +85,10 @@ boolean calibrated = false;
 
 
 long commandsExecuted = 0;
-long int x1; //measured in steps
-long int y1; //measured in steps
-long int a1; //measured in steps
-long int b1; //measured in steps
+long unsigned int x1; //measured in steps
+long unsigned int y1; //measured in steps
+long unsigned int a1; //measured in steps
+long unsigned int b1; //measured in steps
 
 
 //pwm power stuff
@@ -125,8 +129,8 @@ void setup() {
 
   //pinMode( GPIO1, OUTPUT);
   //pinMode(GPIO2, OUTPUT );
-  pinMode( GPIO1, INPUT );
-  digitalWrite(GPIO1,HIGH);
+//  pinMode( GPIO1, INPUT );
+//  digitalWrite(GPIO1,HIGH);
   //  pinMode( GPIO2, INPUT );
 
   //spi setup
@@ -157,13 +161,13 @@ void setup() {
   initSD();
 #endif
   //calibrate();
+
+  setup_sender();
 }
 
 // the loop routine runs over and over again forever:
 void loop() {
 
-  if(digitalRead(GPIO1)==LOW)
-    home();
   if( statusTimer.poll(500) )
   {
 
@@ -235,8 +239,8 @@ void loop() {
     doRadio();
 #endif
 
-  if(millis() - lastCommandTime > low_power_time && lowpower == false)
-    powerSave(true);
+//  if(millis() - lastCommandTime > low_power_time && lowpower == false)
+//    powerSave(true);
 
 }
 
@@ -310,6 +314,8 @@ void runCommand( Payload * p)
     loadSerialConfig();
     Serial.println("ok");
     break;
+  case 'l':
+    xbee_send((char)p->arg1); 
   case 'm':
     stepLeft(p->arg1);
     stepRight(p->arg2);
@@ -324,14 +330,9 @@ void runCommand( Payload * p)
     break;
   case 'q':
     //rectangular coords
-    Serial.println(x1);
-    Serial.println(y1);
-    Serial.println(a1);
-    Serial.println(b1);
-
-
     Serial.print( "x: ");
     Serial.println(x1 / config.stepsPerMM);
+
     Serial.print( "y: ");
     Serial.println(y1 / config.stepsPerMM);
 

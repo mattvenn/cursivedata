@@ -1,6 +1,8 @@
 struct config_t
 {
   float stepsPerMM;
+  int motor_l_dir;
+  int motor_r_dir;
   int hanger_l; 
   int top_margin; 
   int side_margin; 

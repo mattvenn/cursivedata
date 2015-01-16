@@ -101,7 +101,7 @@ void home()
   //release any tension
   int tension_release_steps = 5000;
   stepLeft(tension_release_steps);
-  int steps=findRightLimit();
+  long unsigned int steps=findRightLimit();
 
   a1 = (config.left_limit + config.hanger_l)*config.stepsPerMM + steps + tension_release_steps;
   b1 = (config.right_limit + config.hanger_l)*config.stepsPerMM;
@@ -115,7 +115,7 @@ void home()
   setPWM(config.default_pwm);
 
   //move to center point
-  drawLine(config.width*config.stepsPerMM/2,config.width*config.stepsPerMM/2);
+  //drawLine(config.width*config.stepsPerMM/2,config.width*config.stepsPerMM/2);
 
   setSpeed(config.draw_speed);
   calibrated=true;
@@ -141,8 +141,6 @@ int findRightLimit()
 int findLeftLimit()
 {
   int steps = 0;
-
-
 
   //while limit l is high, wind l motor
   while( digitalRead( LIMITL ) == LOW )
@@ -203,7 +201,7 @@ void stepLeft(int steps)
     powerSave(false);
   for( int i = 0; i < abs( steps) ; i ++ )
   {
-    if(steps > 0 )
+    if(steps * config.motor_l_dir > 0 )
       fsL();
     else
       bsL();
@@ -217,7 +215,7 @@ void stepRight(int steps)
     powerSave(false);
   for( int i = 0; i < abs( steps) ; i ++ )
   {
-    if(steps > 0 )
+    if(steps * config.motor_r_dir > 0 )
       fsR();
     else
       bsR();

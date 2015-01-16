@@ -4,6 +4,7 @@ void initServo()
   delay(1000);
   penUp();
 }
+/*
 void penUp()
 {
   pulsePower(2);
@@ -19,6 +20,7 @@ void penDown()
   pulsePower(2);
     delay(500); //these could be made shorter
 }
+*/
 
 void pulsePower(  int delayTime )
 {
