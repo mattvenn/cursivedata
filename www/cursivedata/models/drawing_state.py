@@ -5,7 +5,7 @@ Created on 2 Feb 2013
 '''
 from django.db import models
 from django.utils import timezone
-import cursivedata.svg as svg
+import cursivelib.svg as svg
 import pysvg.structure
 import pysvg.builders
 from django.utils.datetime_safe import datetime
@@ -74,15 +74,7 @@ class DrawingState( models.Model ):
             width = self.img_width
         if height == -1:
             height = self.img_height
-        #Should specify mm for document size
-        widthmm = "%fmm" % width
-        heightmm = "%fmm" % height
-        doc = pysvg.structure.svg(width=widthmm,height=heightmm)
-        doc.set_viewBox("0 0 %s %s" % (width, height))
-        if createRect:
-            build = pysvg.builders.ShapeBuilder()
-            doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
-        return doc
+        return svg.create_svg_doc(width,height,createRect)
         
     #Updates the full image, by creating a PNG from the full SVG, and storing the SVG and PNG in the history
     def update_full_image(self):
