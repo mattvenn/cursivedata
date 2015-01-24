@@ -18,6 +18,7 @@ import os
 from cursivelib.robot_spec import RobotSpec
 from cursivelib.svg_to_gcode import SVGPreparation,DrawingSpec,DrawingPosition
 from cursivelib.pycam_gcode import PyCAMGcode
+from cursivelib.native_gcode import NativeGCodeConversion
 
 
 
@@ -123,7 +124,8 @@ class Endpoint( DrawingState ):
                     output_filename = localfile
 
                 print "creating gcode in %s from %s" % (output_filename, self.robot_svg_file)
-                gcode_converter = PyCAMGcode()
+#                gcode_converter = PyCAMGcode()
+                gcode_converter = NativeGCodeConversion()
                 gcode_converter.convert_svg(robot_svg,output_filename,self.robot_spec)
             except EndpointConversionError, e:
                 print "problem converting svg:", e
