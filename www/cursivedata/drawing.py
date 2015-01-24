@@ -53,7 +53,7 @@ class Drawing:
         self.doc.addElement(line)
 
     def path(self,points):
-        (x,y) = points.pop()
+        (x,y) = points.pop(0)
         p = path("M%d,%d" % (x,y))
         for point in points:
             p.appendLineToPath(point[0],point[1],False)
