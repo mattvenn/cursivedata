@@ -48,8 +48,6 @@ class Transform() :
         self.parent = p
 
 class NativeGCodeConversion() :
-    pycam="/usr/bin/pycam"
-    #pycam="/Users/dmrust/.virtualenvs/polarsite/lib/python2.7/site-packages/pycam-0.5.1/pycam"
     outfile = None
     
     def convert_svg(self,svg_data,gcode_filename,robot_spec) :
@@ -104,6 +102,6 @@ class NativeGCodeConversion() :
         self.output("d1")
 
     def output(self, data) :
-        #print "OP: ", data
+        print "OP: ", data
         self.outfile.write(data+"\n")
 
