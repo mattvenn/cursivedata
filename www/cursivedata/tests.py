@@ -16,12 +16,16 @@ from cursivedata.models import *
 from django.utils import timezone
 from cursivedata.drawing import Drawing
 
-from pysvg.structure import svg
-from pysvg.builders import ShapeBuilder
-from pysvg.text import text
+#from pysvg.structure import svg
+#from pysvg.builders import ShapeBuilder
+#from pysvg.text import text
 
-from cursivedata.svg import append_svg_to_file
-from pysvg.parser import parse
+#from cursivedata.svg import append_svg_to_file
+#from pysvg.parser import parse
+
+import cursivelib.svg as svg
+import pysvg.structure
+import pysvg.builders
 
 from django.utils import timezone
 import nose.tools as nt
@@ -132,14 +136,17 @@ class TestPipeline(TestCase):
         gcode = open(self.end_point.get_next_filename()).readlines()
         gcode = [ s.strip() for s in gcode ]
 
+        ipdb.set_trace()
+
         #better way to do this?
-        nt.assert_equal(gcode[0],'g%d.0,%d.0' % (side_m,top_m+sq_height))
-        nt.assert_equal(gcode[1],'d1')
-        nt.assert_equal(gcode[2],'g%d.0,%d.0' % (side_m+sq_width,top_m+sq_height))
-        nt.assert_equal(gcode[3],'g%d.0,%d.0' % (side_m+sq_width,top_m))
-        nt.assert_equal(gcode[4],'g%d.0,%d.0' % (side_m,top_m))
-        nt.assert_equal(gcode[5],'g%d.0,%d.0' % (side_m,top_m+sq_height))
-        nt.assert_equal(gcode[6],'d0')
+        nt.assert_equal(gcode[0],'d0')
+        nt.assert_equal(gcode[1],'g%d.0,%d.0' % (side_m,top_m+sq_height))
+        nt.assert_equal(gcode[2],'d1')
+        nt.assert_equal(gcode[3],'g%d.0,%d.0' % (side_m+sq_width,top_m+sq_height))
+        nt.assert_equal(gcode[4],'g%d.0,%d.0' % (side_m+sq_width,top_m))
+        nt.assert_equal(gcode[5],'g%d.0,%d.0' % (side_m,top_m))
+        nt.assert_equal(gcode[6],'g%d.0,%d.0' % (side_m,top_m+sq_height))
+        nt.assert_equal(gcode[7],'d0')
 
     """
     self.pipeline.update_size(300,300)

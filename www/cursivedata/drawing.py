@@ -52,6 +52,13 @@ class Drawing:
         line = self.shapes.createLine(x1,y1,x2,y2,strokewidth,stroke)
         self.doc.addElement(line)
 
+    def path(self,points):
+        (x,y) = points.pop()
+        p = path("M%d,%d" % (x,y))
+        for point in points:
+            p.appendLineToPath(point[0],point[1],False)
+        self.doc.addElement(p)
+
     def text(self,content,x,y,size=10,family="Helvetica",fill="none",stroke="#000",transform=None,id=None):
         text = txt.text(content=content,x=x,y=y,fill=fill,stroke=stroke)
         text.set_font_size(size);

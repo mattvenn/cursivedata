@@ -16,7 +16,12 @@ def square(x,y,width,height,dwg):
 
 def process(drawing,data,params,internal_state) :
     print "Drawing an example rectangle",map(str,params)
-    drawing.rect(params.get('x'),params.get('y'),params.get('Width'),params.get('Height')) 
+    x = params.get('x')
+    y = params.get('y')
+    w = params.get('Width')
+    h = params.get('Height')
+    #drawing.rect(params.get('x'),params.get('y'),params.get('Width'),params.get('Height')) 
+    drawing.path([(x,y),(x+w,y),(x+w,y+h),(x,y+h),(x,y)])
     return None
 
 def get_params() :
