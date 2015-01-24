@@ -136,16 +136,15 @@ class TestPipeline(TestCase):
         gcode = open(self.end_point.get_next_filename()).readlines()
         gcode = [ s.strip() for s in gcode ]
 
-        ipdb.set_trace()
 
-        #better way to do this?
+        #re-ordered for non flipped drawing using native gcode gen
         nt.assert_equal(gcode[0],'d0')
-        nt.assert_equal(gcode[1],'g%d.0,%d.0' % (side_m,top_m+sq_height))
+        nt.assert_equal(gcode[1],'g%d.0,%d.0' % (side_m,top_m))
         nt.assert_equal(gcode[2],'d1')
-        nt.assert_equal(gcode[3],'g%d.0,%d.0' % (side_m+sq_width,top_m+sq_height))
-        nt.assert_equal(gcode[4],'g%d.0,%d.0' % (side_m+sq_width,top_m))
-        nt.assert_equal(gcode[5],'g%d.0,%d.0' % (side_m,top_m))
-        nt.assert_equal(gcode[6],'g%d.0,%d.0' % (side_m,top_m+sq_height))
+        nt.assert_equal(gcode[3],'g%d.0,%d.0' % (side_m+sq_width,top_m))
+        nt.assert_equal(gcode[4],'g%d.0,%d.0' % (side_m+sq_width,top_m+sq_height))
+        nt.assert_equal(gcode[5],'g%d.0,%d.0' % (side_m,top_m+sq_height))
+        nt.assert_equal(gcode[6],'g%d.0,%d.0' % (side_m,top_m))
         nt.assert_equal(gcode[7],'d0')
 
     """
