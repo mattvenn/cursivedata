@@ -21,14 +21,15 @@ class SVGPreparation() :
 
     # Returns an SVG transform which will convert screen SVG to
     # robot coordinate SVG
-    # SVG coords are 0,0 in bottom left, while robot it is
-    # 0,0 in top left. So we flip the y axis and offset by
+    # SVG coords are 0,0 in top left, and robot it is
+    # 0,0 in top left. So we keep the y axis and only offset by
     # drawing height
+    # was required before because Pycam uses flipped y axis
     def get_robot_transform(self,robot_spec) :
         #setup our transform
         tr = pysvg.builders.TransformBuilder()
-        tr.setScaling(x=1,y=-1)
-        trans = str(robot_spec.side_margin) + " " + str(robot_spec.img_height) 
+        #tr.setScaling(x=1,y=-1)
+        trans = str(robot_spec.side_margin) + " " + str(robot_spec.top_margin) 
         tr.setTranslation( trans )
         return tr
 
