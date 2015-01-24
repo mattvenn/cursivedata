@@ -2,18 +2,6 @@ import pysvg.text
 import colorsys
 from pysvg.builders import *
 
-#Not used now. Left for posterity and how to do paths
-def square(x,y,width,height,dwg):
-    style_dict = { "fill":"none", "stroke":"#000", "stroke-width":"1" }
-    p = path("M%d,%d" % (x,y))
-    p.appendLineToPath(x+width,y,False)
-    p.appendLineToPath(x+width,y+height,False)
-    p.appendLineToPath(x,y+width,False)
-    p.appendLineToPath(x,y,False)
-    p.set_style(StyleBuilder(style_dict).getStyle())
-    p.set_id(id)
-    dwg.addElement(p)
-
 def process(drawing,data,params,internal_state) :
     print "Drawing an example rectangle",map(str,params)
     x = params.get('x')
