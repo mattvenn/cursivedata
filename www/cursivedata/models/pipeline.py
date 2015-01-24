@@ -11,7 +11,8 @@ from django.contrib.auth.models import User
 from imp import find_module, load_module
 import json
 import csv
-import cursivedata.svg as svg
+#import cursivedata.svg as svg
+import cursivelib.svg as svg
 import requests
 import cursivedata.models.cosm
 from cursivedata.models.generator import Generator,GeneratorState
