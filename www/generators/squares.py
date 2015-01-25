@@ -23,7 +23,7 @@ def process(drawing,data,params,internal_state) :
         #if we move to a new cell, start small again
         if cell_index != internal_state.get("last_cell",0):
             internal_state["last_cell"] = cell_index
-            print "cell index changed"
+            #print "cell index changed"
             aggregate = 0
             square_num = 0
 
@@ -34,20 +34,20 @@ def process(drawing,data,params,internal_state) :
         cx, cy = cell.cent()
         
         
-        print "number:%d\naggregate:%.2f" % (cell_index, aggregate)
-        print "x:%d y:%d" % ( cx, cy )
+        #print "number:%d\naggregate:%.2f" % (cell_index, aggregate)
+        #print "x:%d y:%d" % ( cx, cy )
 
         #if we have aggregated enough values to draw a square
         while aggregate > params.get("Value"):
             width = params.get("SquareInc") + square_num * params.get("SquareInc")
-            print "square #%d width %d" % ( square_num, width )
+            #print "square #%d width %d" % ( square_num, width )
             transform = None
             if params.get("Rotate"):
                 rotate = int(square_num*params.get("Rotate")) % 360 
                 transform = "rotate(%d,%d,%d)" % (rotate,cx,cy)
             hWidth = width/2
             if not circle:
-                drawing.rect(cx-hWidth,cy-hWidth,width,width,id=id,transform = transform)
+                drawing.rect(cx-hWidth,cy-hWidth,width,width,transform = transform)
             else:
                 drawing.circle(cx,cy,width/2)
                 
@@ -89,14 +89,14 @@ def can_run(data,params,internal_state):
         #if enough time passes, reset aggregate
         cell_index = get_minute(point.date)
         if cell_index != last_cell_index:
-            print "resetting aggregate as cell index has changed to", cell_index
+            #print "resetting aggregate as cell index has changed to", cell_index
             last_cell_index = cell_index
             aggregate = 0
         aggregate += float(point.data['value'])
         if aggregate > params.get("Value"):
-            print "squares can run"
+            #print "squares can run"
             return True
-    print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
+    #print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
   #  internal_state["aggregate"]=aggregate
   #  internal_state["cell_index"]=last_cell_index
     return False
