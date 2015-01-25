@@ -94,8 +94,9 @@ def create_source(request):
 def show_pipeline(request, pipelineID):
     try:
         user_timezone = request.session.get('current_timezone') or settings.TIME_ZONE
-        if timezone:
-             timezone.activate(user_timezone)
+        #this has now broken for some reason: greenwich is invalid timezone
+        #if timezone:
+        #     timezone.activate(user_timezone)
         act = request.POST.get('action',"none")
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
