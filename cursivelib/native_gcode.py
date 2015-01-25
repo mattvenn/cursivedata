@@ -2,7 +2,10 @@ import tempfile
 import subprocess
 import os
 import re
+import ipdb
 
+MIN_LENGTH = 1.0
+#requires version 2.0b1
 from svgpath import Path, Line, Arc, CubicBezier, QuadraticBezier, parse_path
 
 # a fantastic error class!
@@ -57,6 +60,7 @@ class NativeGCodeConversion() :
         
 
     def convert_elements(self,svg_data,transform=Transform()):
+        
         for element in svg_data.getAllElements():
             n = element.__class__.__name__
             if n is 'g':
@@ -74,8 +78,6 @@ class NativeGCodeConversion() :
     def convert_path(self,path,transform) :
         segments = parse_path(path.get_d())
         last = complex(float("inf"),float("inf"))
-
-        # Currently assuming that all the segments are Lines due to laziness
         # Also assumes that starts and ends are contiguous
         for seg in segments:
             start = seg.start
@@ -85,6 +87,17 @@ class NativeGCodeConversion() :
                 self.pen_up()
                 self.output_move(start.real,start.imag,transform)
                 self.pen_down()
+
+            #point method interpolates x,y from start to end as 0 >= i <= 1
+            #this loop may cause a problem with not properly closed shapes
+            if not type(seg) is Line:
+                length = seg.length(error=0.01)
+                inc = MIN_LENGTH/length
+                i = 0
+                while i <= 1:
+                    i += inc
+                    p = seg.point(i)
+                    self.output_move(p.real,p.imag,transform)
 
             last = seg.end
             self.output_move(last.real,last.imag,transform)
