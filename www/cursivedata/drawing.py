@@ -7,6 +7,7 @@ import pysvg
 import colorsys
 import pysvg.text as txt
 from pysvg.parser import parse
+from pysvg.builders import *
 from pysvg.shape import *
 import math
 
@@ -30,35 +31,61 @@ class Drawing:
         rgb = colorsys.hsv_to_rgb(hue, sat, lev)
         return self.rgb_to_color(rgb)
     
+    #get rid of this passed in transform stuff and do it afterwards?
     #Draws a rectangle with the given x,y as top left, and the given height and width
-    def rect(self,x,y,width,height,fill="none",stroke="#000", strokewidth=1,transform=None,id=None):
-        rect = self.shapes.createRect( self.dc(x), self.dc(y), width=self.dc(width), height=self.dc(height),
-                                        fill=fill, stroke=stroke, strokewidth=strokewidth) 
+    #fix for path
+    def rect(self,x,y,width,height,fill="none",stroke="#000", strokewidth=1,transform=None):
+        #rect = self.shapes.createRect( self.dc(x), self.dc(y), width=self.dc(width), height=self.dc(height),
+        #                                fill=fill, stroke=stroke, strokewidth=strokewidth) 
+        w = width
+        h = height
+        rect = self.path([(x,y),(x+w,y),(x+w,y+h),(x,y+h),(x,y)],stroke,strokewidth)
+
         if transform :
             rect.set_transform( transform )
-        if id :
-            rect.set_id(id)
         self.doc.addElement( rect )
     
-    def circle(self,x,y,radius,fill="none",stroke="#000",transform=None,id=None):
-        circ = self.shapes.createCircle(self.dc(x), self.dc(y), r=self.dc(radius), fill=fill, stroke=stroke)
-        if transform :
-            circ.set_transform( transform )
-        if id :
-            circ.set_id(id)
-        self.doc.addElement( circ )
-   
-    def line(self,x1,y1,x2,y2,stroke="#000",strokewidth="1"):
-        line = self.shapes.createLine(x1,y1,x2,y2,strokewidth,stroke)
-        self.doc.addElement(line)
+    #fix for path
+    def circle(self,x,y,radius,fill="none",stroke="#000",transform=None):
 
-    def path(self,points):
+        r=radius
+        p=path("M%d %d" % (x,y-r))
+        p.appendArcToPath(r,r,0,2*r,large_arc_flag=1)
+        p.appendArcToPath(r,r,0,-2*r,large_arc_flag=1)
+        p.appendCloseCurve()
+        p.set_style(get_line_style())
+
+        if transform :
+            p.set_transform( transform )
+        self.doc.addElement( p )
+   
+    #ignores fill
+    def get_line_style(self,colour="black",width="1"):
+        style=StyleBuilder()
+        style.setFilling("none")
+        style.setStroke(colour)
+        style.setStrokeWidth(width)
+        return style.getStyle()
+
+    #fixed for path
+    def line(self,x1,y1,x2,y2,stroke="#000",strokewidth="1"):
+        pts = ((x1,y1),(x2,y2))
+        p = self.path(pts)
+        p.set_style(self.get_line_style(width=strokeWidth,colour=stroke))
+        self.doc.addElement(p)
+        #line = self.shapes.createLine(x1,y1,x2,y2,strokewidth,stroke)
+        #self.doc.addElement(line)
+
+    def path(self,points,stroke="#000",strokewidth="1"):
         (x,y) = points.pop(0)
         p = path("M%d,%d" % (x,y))
         for point in points:
             p.appendLineToPath(point[0],point[1],False)
+        p.set_style(self.get_line_style(width=strokewidth,colour=stroke))
         self.doc.addElement(p)
+        return p
 
+    #fix for path - not now
     def text(self,content,x,y,size=10,family="Helvetica",fill="none",stroke="#000",transform=None,id=None):
         text = txt.text(content=content,x=x,y=y,fill=fill,stroke=stroke)
         text.set_font_size(size);
