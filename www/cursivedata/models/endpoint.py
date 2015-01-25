@@ -71,6 +71,8 @@ class Endpoint( DrawingState ):
         #Set the actual size of the drawing area based on the size of the robot and the margins
         #Used to make the SVG images
         self.robot_spec = RobotSpec(width=self.width,height=self.height,top_margin = self.top_margin, side_margin = self.side_margin)
+#                gcode_converter = PyCAMGcode()
+        self.gcode_converter = NativeGCodeConversion()
  
     #returns true if updated within last hour
     @property
@@ -124,9 +126,7 @@ class Endpoint( DrawingState ):
                     output_filename = localfile
 
                 print "creating gcode in %s from %s" % (output_filename, self.robot_svg_file)
-#                gcode_converter = PyCAMGcode()
-                gcode_converter = NativeGCodeConversion()
-                gcode_converter.convert_svg(robot_svg,output_filename,self.robot_spec)
+                self.gcode_converter.convert_svg(robot_svg,output_filename,self.robot_spec)
             except EndpointConversionError, e:
                 print "problem converting svg:", e
                 so.delete()
