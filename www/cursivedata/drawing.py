@@ -53,7 +53,7 @@ class Drawing:
         p.appendArcToPath(r,r,0,2*r,large_arc_flag=1)
         p.appendArcToPath(r,r,0,-2*r,large_arc_flag=1)
         p.appendCloseCurve()
-        p.set_style(get_line_style())
+        p.set_style(self.get_line_style())
 
         if transform :
             p.set_transform( transform )
