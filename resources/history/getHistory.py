@@ -34,8 +34,8 @@ def fetchRange(start_date,end_date,key,feed_number):
         req = urllib2.Request(fullurl)
         print "start date:", values['start']
 
-        if args.verbose:
-            print values
+        #if args.verbose:
+        #    print values
 
         response = None
         while response == None:
@@ -62,9 +62,9 @@ def fetchRange(start_date,end_date,key,feed_number):
             if args.verbose:
                 print "got %d datapoints in %d streams" % (datapoints, len(data["datastreams"]) )
 
-        except KeyError:
-            print "no data points for that period:", data
-            break
+        except KeyError as e:
+            print "no data points for %s this period" % feed_id
+            #break
 
         first_key = alldatapoints.keys()[0]
         last_datetime = alldatapoints[first_key][-1]["at"]
@@ -79,10 +79,10 @@ if __name__ == '__main__':
         action='store', dest='keyfile', default="api.key",
         help="where the api key is stored")
     argparser.add_argument('--feed',
-        action='store', dest='feed', type=int, default = 46756, #default is for bristol hackspace
+        action='store', dest='feed', type=int, default = 130883, #default is for matt's home energy
         help="feed number")
     argparser.add_argument('--interval', 
-        action='store', dest='interval', default=0, type=int,
+        action='store', dest='interval', default=60, type=int,
         help="interval between datapoints in seconds, 0 for everything")
     argparser.add_argument('--start',
         action='store', dest='start',
