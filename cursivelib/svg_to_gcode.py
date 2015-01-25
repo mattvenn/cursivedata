@@ -25,6 +25,8 @@ class SVGPreparation() :
     # 0,0 in top left. So we keep the y axis and only offset by
     # drawing height
     # was required before because Pycam uses flipped y axis
+
+    # will need to be changed so can handle both until we lose pycam completely
     def get_robot_transform(self,robot_spec) :
         #setup our transform
         tr = pysvg.builders.TransformBuilder()
