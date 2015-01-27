@@ -155,8 +155,8 @@ class Endpoint( DrawingState ):
             pipeline.print_width / pipeline.img_width)
 
     # Centers the given file in the print area
-    def pos_from_file(self,svg_filename,width):
-        return self.preparation.drawing_position_from_file(svg_filename,
+    def pos_from_file(self,svg_file,width):
+        return self.preparation.drawing_position_from_file(svg_file,
             DrawingSpec(width=width),self.robot_spec)
 
 
