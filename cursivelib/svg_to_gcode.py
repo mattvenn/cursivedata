@@ -61,8 +61,8 @@ class SVGPreparation() :
     # the page. RobotSpec is just used for checking dimensions
     # Currently, just puts the drawing top center; DrawingSpec
     # could be expanded to do something more clever
-    def drawing_position_from_file(self, svg_filename, drawing_spec, robot_spec=None ) :
-        (svgwidth,svgheight) = svg.get_dimensions(file(svg_filename))
+    def drawing_position_from_file(self, svg_file, drawing_spec, robot_spec=None ) :
+        (svgwidth,svgheight) = svg.get_dimensions(svg_file)
         width = drawing_spec.width
         if robot_spec is not None :
             if width > robot_spec.img_width:
