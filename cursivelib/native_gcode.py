@@ -105,7 +105,7 @@ class NativeGCodeConversion() :
 
     def output_move(self,x,y,transform):
         xt,yt = transform.transform(x,y)
-        print "Translated",x,y,"to",xt,yt
+#        print "Translated",x,y,"to",xt,yt
         self.output("g"+format(xt,".1f")+","+format(yt,".1f"))
 
     def pen_up(self):
@@ -115,6 +115,6 @@ class NativeGCodeConversion() :
         self.output("d1")
 
     def output(self, data) :
-        print "OP: ", data
+#        print "OP: ", data
         self.outfile.write(data+"\n")
 
