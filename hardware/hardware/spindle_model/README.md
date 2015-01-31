@@ -17,6 +17,8 @@ Then a [dirty python](model.py) script was used to make a model of how spindle d
 
 # Plot
 
-All 4 csv files are plotted using [plot.py](plot.py) which depends on matplotlib . From the CLI:
+All 4 csv files are plotted using [plot.py](plot.py) which depends on matplotlib . 
+Use [show.sh](show.sh) to create the modelled data and then plot all files on the same graph.
 
     ./show.sh
+   
