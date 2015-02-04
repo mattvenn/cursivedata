@@ -1,0 +1,41 @@
+---
+
+- hosts: all
+  vars:
+    virtualenv: ~/.virtualenvs/cursivedata
+  tasks:
+    - apt: update_cache=yes
+      sudo: yes
+
+    - apt: name={{ item }} state=present
+      with_items:
+        - mysql-server
+        - aptitude
+        - python-dev
+        - libffi-dev
+        - libcairo-dev
+        - libmysqlclient-dev
+        - git-core
+        - inkscape
+        - pstoedit
+        - virtualenvwrapper
+        - python-mysqldb
+      sudo: yes
+
+    - name: Create the virtualenv
+      shell: >
+        source /etc/bash_completion.d/virtualenvwrapper
+        && mkvirtualenv cursivedata
+        && setvirtualenvproject
+      args:
+        chdir: '/vagrant'
+        creates: '{{ virtualenv }}/.project'
+        executable: /bin/bash
+
+    - pip: >
+        chdir='/vagrant'
+        requirements='dev-requirements.txt'
+        virtualenv='{{ virtualenv }}'
+
+    - mysql_user: name=cursivedata password=cursivedata priv=*.*:ALL state=present
+    - mysql_db: name=cursivedata state=present

@@ -1,4 +1,5 @@
 //arguments are measured in steps
+//l1 and l2 are distance from the top corners to the gondola attachment points
 static void FK(long int l1, long int l2) {
 
   float a = l1; 
