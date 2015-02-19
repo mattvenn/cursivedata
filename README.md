@@ -12,6 +12,7 @@
 
 * website: http://cursivedata.co.uk
 * information on [how the website works and creating new patterns](https://github.com/mattvenn/cursivedata/wiki).
+* (pipelines)[docs/pipeline.md]
 
 ### Robots
 
