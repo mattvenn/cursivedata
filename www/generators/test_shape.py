@@ -23,10 +23,10 @@ def get_name() : return "Shape Test"
 def get_description() : return "Draw a square at the set position"
 
 def begin(drawing,params,internal_state) :
-    pass
+    process(drawing,None,params,internal_state)
 
 def end(drawing,params,internal_state) :
-    pass
+    process(drawing,None,params,internal_state)
 
 def can_run(data,params,internal_state):
     return True
