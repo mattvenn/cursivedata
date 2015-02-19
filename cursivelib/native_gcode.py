@@ -23,10 +23,12 @@ class Transform() :
         self.parent = parent
 
     def transform(self,x,y) :
-        if self.parent is not None:
-            x,y = self.parent.transform(x,y)
+        #do our transform first
         xt = x*self.xscale + self.xoffset
         yt = y*self.yscale + self.yoffset
+        #then parents
+        if self.parent is not None:
+            xt,yt = self.parent.transform(xt,yt)
         return (xt,yt)
 
     # e.g. translate(110 0) scale(1.07513227513 1.07513227513)
@@ -47,9 +49,6 @@ class Transform() :
             self.yscale = float(scm.group(2))
 
 
-    def set_parent(self,p) :
-        self.parent = p
-
 class NativeGCodeConversion() :
     outfile = None
     
@@ -63,6 +62,7 @@ class NativeGCodeConversion() :
         
         for element in svg_data.getAllElements():
             n = element.__class__.__name__
+#            ipdb.set_trace()
             if n is 'g':
                 # It's a group, so process all the stuff in it
                 tr = element.get_transform()
