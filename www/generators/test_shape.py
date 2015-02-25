@@ -15,8 +15,22 @@ def square(x,y,width,height,dwg):
     dwg.addElement(p)
 
 def process(drawing,data,params,internal_state) :
+    colour = internal_state.get("colour",0)
+    rotate = internal_state.get("rotate",0)
+    x = params.get('x')
+    y = params.get('y')
+    for point in data.get_current():
+        if point.getStreamName() == params.get('colourid'):
+            print("colour = %f" %  point.getValue())
+            internal_state["colour"]= point.getValue()
+        elif point.getStreamName() == params.get('rotateid'):
+            print("rotate = %f" % point.getValue())
+            internal_state["rotate"]= point.getValue()
+    transform = "rotate(%d,%d,%d)" % (rotate,x,y)
+    colour = 'rgb({0},{0},{0})'.format(colour)
+
     print "Drawing an example rectangle",map(str,params)
-    drawing.rect(params.get('x'),params.get('y'),params.get('Width'),params.get('Height')) 
+    drawing.rect(x,y,params.get('Width'),params.get('Height'),transform=transform,fill=colour) 
     return None
 
 def get_params() :
@@ -24,7 +38,9 @@ def get_params() :
              {"name":"Width", "default": 100, "description":"width in mm" },
              {"name":"Height", "default": 100, "description":"height in mm" }, 
              {"name":"x", "default": 0, "description":"x offset" },
-             {"name":"y", "default": 0, "description":"y offset" }, ]
+             {"name":"y", "default": 0, "description":"y offset" }, 
+             {"name":"colourid", "default": 0, "decription":"which source ID for colour", 'data_type':"text" }, 
+             {"name":"rotateid", "default": 1, "description":"which source ID for rotation", 'data_type':"text" }, ]
 
 def get_name() : return "Shape Test"
 def get_description() : return "Draw a square at the set position"
