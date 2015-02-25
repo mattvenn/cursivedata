@@ -94,8 +94,8 @@ def create_source(request):
 def show_pipeline(request, pipelineID):
     try:
         user_timezone = request.session.get('current_timezone') or settings.TIME_ZONE
-        if timezone:
-             timezone.activate(user_timezone)
+#        if timezone:
+#             timezone.activate(user_timezone)
         act = request.POST.get('action',"none")
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
@@ -141,7 +141,13 @@ def show_pipeline(request, pipelineID):
         elif act == "Update Parameters":
             for (key, value) in request.POST.iteritems():
                 if key.startswith("param"):
-                    pipeline.state.params[key.replace("param","")]= float(value)
+                    key = key.replace("param","")
+                    data_type = pipeline.state.generator.get_param(key).data_type
+
+                    if data_type == 'float':
+                        value = float(value)
+
+                    pipeline.state.params[key]= value
             pipeline.state.save()
         elif act != "none":
             print "Unknown pipeline action:",act
