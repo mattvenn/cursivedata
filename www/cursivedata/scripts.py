@@ -7,6 +7,11 @@ from cursivedata.models import *
 from django.utils import timezone
 from django.contrib.auth.models import User
 
+def create_generator():
+    gsq = Generator(name="Tree @Bristol", description="DEE Solartree @Bristol", image="No Image", module_name="Tree2")
+    gsq.save()
+
+
 def reset_superuser_pw() :
     su = User.objects.all()[0]
     pw = 'admin'

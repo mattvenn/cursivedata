@@ -10,7 +10,7 @@ import sys
 
 def push_data( input_data ):
     headers= {'content-type': 'application/json'}
-    print "value: ", args.value
+    print args.key, args.value
     data = {
         "input_data": input_data,
         "name": "UPDATED!"
@@ -40,13 +40,16 @@ def calculate_datetime_from_minute(minute):
 
 if __name__ == '__main__':
 
-    default_url = 'http://localhost:8080/api/v1/datastore/'
+    default_url = 'http://localhost:8000/api/v1/datastore/'
 #    'http://mattvenn.net:8080/api/v1/cosm'
 
-    parser = argparse.ArgumentParser(description="feed polar files to polargraph robot")
+    parser = argparse.ArgumentParser(description="post data to a datastore")
     parser.add_argument('--datastore',
         action='store', dest='datastore', type=int, default='1',
         help="the id of the datastore (not the pipeline)")
+    parser.add_argument('--key',
+        action='store', dest='key', default='value',
+        help="the key of the data - default is 'value'")
     parser.add_argument('--value',
         action='store', dest='value', type=float, default='1',
         help="value")
@@ -100,4 +103,4 @@ if __name__ == '__main__':
         push_data(data)
     else:
         timestamp = calculate_datetime_from_minute(args.minute)
-        push_data([{"data": '{"value":%d}' % args.value,"date":timestamp}],)
+        push_data([{"data": '{"%s":%d}' % (args.key,args.value),"date":timestamp}],)
