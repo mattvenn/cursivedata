@@ -26,6 +26,11 @@ def process(drawing,data,params,internal_state) :
         elif point.getStreamName() == params.get('rotateid'):
             print("rotate = %f" % point.getValue())
             internal_state["rotate"]= point.getValue()
+        else:
+            #no valid data for us
+            print("couldn't find data with right name")
+            return None
+
     transform = "rotate(%d,%d,%d)" % (rotate,x,y)
     colour = 'rgb({0},{0},{0})'.format(colour)
 
@@ -39,8 +44,8 @@ def get_params() :
              {"name":"Height", "default": 100, "description":"height in mm" }, 
              {"name":"x", "default": 0, "description":"x offset" },
              {"name":"y", "default": 0, "description":"y offset" }, 
-             {"name":"colourid", "default": 0, "description":"which source ID for colour", 'data_type':"text" }, 
-             {"name":"rotateid", "default": 1, "description":"which source ID for rotation", 'data_type':"text" }, ]
+             {"name":"colourid", "default": 0, "description":"which source name for colour", 'data_type':"text" }, 
+             {"name":"rotateid", "default": 1, "description":"which source name for rotation", 'data_type':"text" }, ]
 
 def get_name() : return "Shape Test"
 def get_description() : return "Draw a square at the set position"
