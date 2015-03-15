@@ -7,10 +7,14 @@ import pysvg.structure
 import math
 import random
     
-svg_width = 800
-ball_width = 15
 grid = 21
-tree_width = 445
+#measured these
+ball_space = 24.5
+ball_xoffset = 180 - ball_space
+ball_yoffset = 173 - ball_space
+svg_width = 800.0
+ball_width = 15.0
+sun_width = 128.0
 
 def get_minute(date):
     minute = int( date.strftime("%M") ) # minute 0 -59
@@ -25,6 +29,10 @@ def process(drawing,data,params,internal_state) :
 
     for point in data.get_current():
         current_minute = get_minute(point.date) 
+        if point.getStreamName() == params.get('sun_name'):
+            print("got %f for sun" % point.getValue())
+            draw_sun(drawing,point.getValue(),current_minute)
+            next
         aggregate += float(point.getValue())
         print "aggregate:", aggregate
         print "current minute", current_minute
@@ -43,26 +51,43 @@ def process(drawing,data,params,internal_state) :
 
     return None
 
-def draw_ball(drawing,x,y,ball_num):
-    w = 310.0 # don't know why I can't calculate this but it's not working
-    xscale = w / (grid - 1) # = 15.5
-    yscale = xscale
-    xoffset = ( drawing.width - w ) / 2 
-    yoffset = xoffset
 
-    #draw_ball(drawing,x*xscale+xoffset,y*yscale+yoffset,ball_num)
-    x = x*xscale+xoffset
-    y = y*yscale+yoffset
+def draw_sun(drawing,sun_level,minute):
+    if sun_level > 5:
+        sun_level = 5
+    if sun_level < 1:
+        sun_level = 1
+
+    print(sun_level) #level 1 doesn't draw for some reason
+    sunsvg = drawing.load_svg("media/tree2/weather/sun_%d.svg" % sun_level)
+    sun = sunsvg.getElementAt(1)
+    th=TransformBuilder()
+    scale = drawing.width / svg_width
+
+    xpix = svg_width / 1440 * minute - sun_width / 2
+    ypix = svg_width / 8 - sun_width / 2
+
+    #doesn't matter what order we put these in, trans happens first so we need to take into account the scaling that happens after
+    th.setTranslation("%d,%d" % (xpix*scale, ypix*scale))
+    th.setScaling(scale) 
+    sun.set_transform(th.getTransform())
+    drawing.doc.addElement(sun)
+
+
+def draw_ball(drawing,x,y,ball_num):
+    scale = drawing.width / svg_width
+
+    #x & y are numbers from 0 to 20 (grid is 21 wide)
+    xpix = x*ball_space+ball_xoffset-ball_width/2
+    ypix = y*ball_space+ball_yoffset-ball_width/2
 
     ballsvg = drawing.load_svg("media/tree2/balls/ball_%d.svg" % ball_num)
     ball = ballsvg.getElementAt(1)
     th=TransformBuilder()
-    width = drawing.width / svg_width
-    offset = ball_width * width / 2
 
     #doesn't matter what order we put these in, trans happens first so we need to take into account the scaling that happens after
-    th.setTranslation("%d,%d" % (x - offset, y-offset))
-    th.setScaling(width) 
+    th.setTranslation("%d,%d" % (xpix*scale, ypix*scale))
+    th.setScaling(scale) 
     ball.set_transform(th.getTransform())
     drawing.doc.addElement(ball)
 
@@ -90,6 +115,11 @@ def get_prob_grid():
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,],
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]]
 
+def draw_all_suns(drawing):
+    sun_level = 0
+    for minute in range(300,1080,120):
+        sun_level += 1
+        draw_sun(drawing,sun_level,minute)
 #test routine to check balls in correct place
 def draw_all_balls(drawing):
     prob_grid = get_prob_grid()
@@ -166,7 +196,9 @@ def begin(drawing,params,internal_state) :
     """
 #    for i in range(50):
 #        draw_ball_in_pos(drawing,internal_state,2)
-#    draw_all_balls(drawing)
+    draw_all_balls(drawing)
+    draw_all_suns(drawing)
+    #draw_sun(drawing,1,1440/2)
     
 def end(drawing,params,internal_state) :
     pass
@@ -192,6 +224,7 @@ def get_params() :
         #changing this needs to update the internal state, as we store an array of this number
         {"name":"value", "default":1, "description":"an input value of this will draw a leaf the same size as the scale leaf" },
         {"name":"interval", "default":10, "description":"how long (minutes) to wait before drawing a new leaf" },
+        {"name":"sun_name", "default": 'sun', "description":"which source name for sun", 'data_type':"text" }, 
             ]
 
 def get_name() : return "Tree"
@@ -201,9 +234,12 @@ def can_run(data,params,internal_state):
     minute = int(internal_state.get("minute",0))
     interval = int(params.get("interval",10))
     for point in data.get_current():
+        if point.getStreamName() == params.get('sun_name'):
+            print("found sun point - running")
+            return True
         current_minute = get_minute(point.date) 
         if current_minute > minute + interval:
-            print "leaf can run, %d > %d + %d" % (current_minute, minute, interval)
+            print("leaf can run, %d > %d + %d" % (current_minute, minute, interval))
             return True
     print "leaf not running"
     return False
