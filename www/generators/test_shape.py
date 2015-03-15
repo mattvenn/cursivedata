@@ -39,7 +39,7 @@ def get_params() :
              {"name":"Height", "default": 100, "description":"height in mm" }, 
              {"name":"x", "default": 0, "description":"x offset" },
              {"name":"y", "default": 0, "description":"y offset" }, 
-             {"name":"colourid", "default": 0, "decription":"which source ID for colour", 'data_type':"text" }, 
+             {"name":"colourid", "default": 0, "description":"which source ID for colour", 'data_type':"text" }, 
              {"name":"rotateid", "default": 1, "description":"which source ID for rotation", 'data_type':"text" }, ]
 
 def get_name() : return "Shape Test"
