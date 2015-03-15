@@ -9,8 +9,11 @@ import argparse
 import sys
 
 def push_data( input_data ):
+
     headers= {'content-type': 'application/json'}
-    print args.key, args.value
+    print(input_data)
+    if args.test:
+        return
     data = {
         "input_data": input_data,
         "name": "UPDATED!"
@@ -60,8 +63,9 @@ if __name__ == '__main__':
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
     parser.add_argument('--random',
-        action='store', dest='random', type=int, default=None,
-        help="create random data")
+        action='store', type=int, help="create a number of random data points")
+    parser.add_argument('--test',
+        action='store_const', const=True, help="just print data, don't post it")
     parser.add_argument('--file',
         action='store', dest='file', help="historical data")
     parser.add_argument('--stream-id',
@@ -75,9 +79,9 @@ if __name__ == '__main__':
         if data.has_key(args.stream_id):
             #could we do this all in one go?
             for line in data[args.stream_id]:
-                print line
-                print line["value"]
-                print line["at"]
+                #print line
+                #print line["value"]
+                #print line["at"]
                 push_data([{"data": '{"value":%s}' % line["value"],"date":line["at"]}],)
         else:
             print "no such stream_id, choose from ", data.keys()
@@ -92,7 +96,7 @@ if __name__ == '__main__':
             timestamp = calculate_datetime_from_minute(0)
             value = last_value + random.randint(3,10)
             data = [{"data": '{"value":%d}' % value,"date":timestamp}]
-            print data
+            #print data
             push_data(data)
             last_value = value
             last_min = minute
