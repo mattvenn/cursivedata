@@ -186,6 +186,8 @@ class DataPoint( models.Model ):
 
     def getStreamName(self):
         #return first key
+        #if len(self.data.keys() > 1):
+        #    raise Exception("we got a datapoint with more than 1 data value in it")
         return self.data.keys()[0]
 
     def getValue(self):

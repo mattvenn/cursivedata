@@ -104,9 +104,8 @@ def clear_blank_lines(main_file):
 
 def convert_svg_to_png( svgfile, pngfilename ):
     with open( pngfilename, 'w+') as png_file:
-        print("Writing PNG file:",pngfilename," from ",svgfile," got",str(png_file))
+        print "NOT Writing PNG file:",pngfilename," from ",svgfile," got",str(png_file)
         #cairosvg.svg2png(url=svgfile,write_to=png_file)
-
         print("done")
 
 def get_temp_filename(extension):
