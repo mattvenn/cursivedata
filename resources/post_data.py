@@ -100,11 +100,6 @@ if __name__ == '__main__':
             push_data(data)
             last_value = value
             last_min = minute
-    elif args.minute:
-        timestamp = calculate_datetime_from_minute(args.minute)
-        data = [{"data": '{"value":%d}' % args.value,"date":timestamp}]
-        print data
-        push_data(data)
     else:
         timestamp = calculate_datetime_from_minute(args.minute)
         push_data([{"data": '{"%s":%d}' % (args.key,args.value),"date":timestamp}],)
