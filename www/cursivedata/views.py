@@ -142,7 +142,7 @@ def show_pipeline(request, pipelineID):
             for (key, value) in request.POST.iteritems():
                 if key.startswith("param"):
                     key = key.replace("param","")
-                    data_type = pipeline.state.generator.get_param(key).data_type
+                    data_type = pipeline.generator.get_param(key).data_type
 
                     if data_type == 'float':
                         value = float(value)
