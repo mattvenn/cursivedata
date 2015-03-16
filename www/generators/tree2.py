@@ -31,7 +31,7 @@ def process(drawing,data,params,internal_state) :
         current_minute = get_minute(point.date) 
         if point.getStreamName() == params.get('sun_name'):
             print("got %f for sun" % point.getValue())
-            draw_sun(drawing,point.getValue(),current_minute)
+            draw_sun(drawing,point.getValue())
             next
         aggregate += float(point.getValue())
         print "aggregate:", aggregate
@@ -52,19 +52,19 @@ def process(drawing,data,params,internal_state) :
     return None
 
 
-def draw_sun(drawing,sun_level,minute):
+def draw_sun(drawing,sun_level):
     if sun_level > 5:
         sun_level = 5
     if sun_level < 1:
         sun_level = 1
 
     print(sun_level) #level 1 doesn't draw for some reason
-    sunsvg = drawing.load_svg("media/tree2/weather/sun_%d.svg" % sun_level)
-    sun = sunsvg.getElementAt(1)
+    sun = drawing.get_first_group_from_file("media/tree2/weather/sun_%d.svg" % sun_level)
     th=TransformBuilder()
     scale = drawing.width / svg_width
 
-    xpix = svg_width / 1440 * minute - sun_width / 2
+    #xpix = svg_width / 1440 * minute - sun_width / 2
+    xpix = svg_width / 2 - sun_width / 2
     ypix = svg_width / 8 - sun_width / 2
 
     #doesn't matter what order we put these in, trans happens first so we need to take into account the scaling that happens after
@@ -81,8 +81,7 @@ def draw_ball(drawing,x,y,ball_num):
     xpix = x*ball_space+ball_xoffset-ball_width/2
     ypix = y*ball_space+ball_yoffset-ball_width/2
 
-    ballsvg = drawing.load_svg("media/tree2/balls/ball_%d.svg" % ball_num)
-    ball = ballsvg.getElementAt(1)
+    ball = drawing.get_first_group_from_file("media/tree2/balls/ball_%d.svg" % ball_num)
     th=TransformBuilder()
 
     #doesn't matter what order we put these in, trans happens first so we need to take into account the scaling that happens after
@@ -115,11 +114,6 @@ def get_prob_grid():
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,],
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]]
 
-def draw_all_suns(drawing):
-    sun_level = 0
-    for minute in range(300,1080,120):
-        sun_level += 1
-        draw_sun(drawing,sun_level,minute)
 #test routine to check balls in correct place
 def draw_all_balls(drawing):
     prob_grid = get_prob_grid()
@@ -168,27 +162,16 @@ def draw_ball_in_pos(drawing,internal_state,size):
     
 def begin(drawing,params,internal_state) :
     print "Starting tree: ",map(str,params)
-    """
-    internal_state["last_length"]= [0 for i in range(divs)]
-    internal_state["last_div"]= 0
-    internal_state["last_val"] = 0
-    internal_state["start"] = 1
-    """
     store_starting_probs(internal_state)
-    tree = drawing.load_svg("media/tree2/tree/tree.svg")
+    #tree = drawing.load_svg("media/tree2/tree/tree.svg")
+    tree = drawing.get_first_group_from_file("media/tree2/tree/tree.svg")
     #after importing, the svg has lost units. Original was 500 px wide, so now 500 units (in this case mm)
     tr=TransformBuilder()
     width =  drawing.width / svg_width
     tr.setScaling( width ) 
-    #have to add as a group, or pysvg adds a whole new svg into the drawing
-    group = pysvg.structure.g()
-    group.set_transform(tr.getTransform())
+    tree.set_transform(tr.getTransform())
 
-    for e in tree.getAllElements():
-        group.addElement(e)
-    drawing.doc.addElement(group)
-#    write_scale(drawing,params)
-#    draw_balls(drawing)
+    drawing.doc.addElement(tree)
     """
     draw_ball(drawing,0,0,1);
     draw_ball(drawing,250,250,1);
@@ -197,8 +180,8 @@ def begin(drawing,params,internal_state) :
 #    for i in range(50):
 #        draw_ball_in_pos(drawing,internal_state,2)
     draw_all_balls(drawing)
-    draw_all_suns(drawing)
-    #draw_sun(drawing,1,1440/2)
+    #draw_all_suns(drawing)
+    draw_sun(drawing,1)
     
 def end(drawing,params,internal_state) :
     pass
