@@ -67,9 +67,13 @@ if __name__ == '__main__':
     parser.add_argument('--test',
         action='store_const', const=True, help="just print data, don't post it")
     parser.add_argument('--file',
-        action='store', dest='file', help="historical data")
+        action='store', dest='file', help="historical data as json, needs stream-id and optionally length")
+    parser.add_argument('--length',
+        action='store', dest='length', type=int, default='0',
+        help="number of records in a file to send")
     parser.add_argument('--stream-id',
         action='store', dest='stream_id', help="which stream in historical data")
+
 
     args = parser.parse_args()
     print args.url
@@ -78,11 +82,18 @@ if __name__ == '__main__':
         data = json.load(open(args.file))
         if data.has_key(args.stream_id):
             #could we do this all in one go?
+            records = 0
+            if args.length == 0:
+                args.length = len(data[args.stream_id])
             for line in data[args.stream_id]:
+                records += 1
                 #print line
                 #print line["value"]
                 #print line["at"]
-                push_data([{"data": '{"value":%s}' % line["value"],"date":line["at"]}],)
+                push_data([{"data": '{"%s":%d}' % (args.stream_id,args.value),"date":line["at"]}],)
+                #push_data([{"data": '{"value":%s}' % line["value"],"date":line["at"]}],)
+                if records >= args.length:
+                    break
         else:
             print "no such stream_id, choose from ", data.keys()
     elif args.random:
