@@ -40,7 +40,7 @@ def calculate_datetime_from_minute(minute):
 
 if __name__ == '__main__':
 
-    default_url = 'http://localhost:8080/api/v1/datastore/'
+    default_url = 'http://localhost:8000/api/v1/datastore/'
 #    'http://mattvenn.net:8080/api/v1/cosm'
 
     parser = argparse.ArgumentParser(description="feed polar files to polargraph robot")
