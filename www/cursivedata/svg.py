@@ -69,7 +69,7 @@ def append_svg_to_file(fragment_file, main_file):
         svg_main = ET.parse(main_file)
         print("parsing frag file", fragment_file)
         svg_frag = ET.parse(fragment_file)
-        svg_id = str(time.time())
+        svg_id = str(int(time.time()))
         print("using svg_id as %s" % svg_id)
         mainroot= svg_main.getroot()
         fragroot =svg_frag.getroot()
