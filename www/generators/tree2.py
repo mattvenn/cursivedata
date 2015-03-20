@@ -24,32 +24,41 @@ def get_minute(date):
 
 def process(drawing,data,params,internal_state) :
     aggregate = 0
-    minute = int(internal_state.get("minute",0))
+    power_minute = int(internal_state.get("power_minute",0))
+    sun_minute = int(internal_state.get("sun_minute",0))
     interval = int(params.get("interval",10))
+    last_drawn = None
 
+#    import ipdb; ipdb.set_trace()
     for point in data.get_current():
         current_minute = get_minute(point.date) 
         if point.getStreamName() == params.get('sun_name'):
-            print("got %f for sun" % point.getValue())
-            draw_sun(drawing,point.getValue())
-            next
-        aggregate += float(point.getValue())
-        print "aggregate:", aggregate
-        print "current minute", current_minute
-        print "minute + interval", minute + interval
-        #if we've got enough time & aggregate to draw a leaf
-        if (current_minute > (minute + interval)) and aggregate > 0:
+            if current_minute > sun_minute + interval:
+                print("got %f for sun" % point.getValue())
+                draw_sun(drawing,point.getValue())
+                sun_minute = current_minute
+                last_drawn = point.date
+                
+        else:
+            aggregate += float(point.getValue())
+            print "aggregate:", aggregate
+            print "current minute", current_minute
+            print "minute + interval", power_minute + interval
+            #if we've got enough time & aggregate to draw a leaf
+            if (current_minute > (power_minute + interval)) and aggregate > 0:
 
-            scale = float(params.get("value",1))
-            draw_ball_in_pos(drawing,internal_state,aggregate/scale)
+                scale = float(params.get("value",1))
+                draw_ball_in_pos(drawing,internal_state,aggregate/scale)
+                last_drawn = point.date
 
-            #reset
-            aggregate = 0
-            minute = current_minute
+                #reset
+                aggregate = 0
+                power_minute = current_minute
         
-    internal_state["minute"] = minute
+    internal_state["power_minute"] = power_minute
+    internal_state["sun_minute"] = sun_minute
 
-    return None
+    return last_drawn
 
 
 def draw_sun(drawing,sun_level):
@@ -179,9 +188,9 @@ def begin(drawing,params,internal_state) :
     """
 #    for i in range(50):
 #        draw_ball_in_pos(drawing,internal_state,2)
-    draw_all_balls(drawing)
+    #draw_all_balls(drawing)
     #draw_all_suns(drawing)
-    draw_sun(drawing,1)
+    #draw_sun(drawing,1)
     
 def end(drawing,params,internal_state) :
     pass
@@ -214,16 +223,22 @@ def get_name() : return "Tree"
 def get_description() : return "draws a tree, then leaves on the tree "
 
 def can_run(data,params,internal_state):
-    minute = int(internal_state.get("minute",0))
+    power_minute = int(internal_state.get("power_minute",0))
+    sun_minute = int(internal_state.get("sun_minute",0))
     interval = int(params.get("interval",10))
     for point in data.get_current():
+        current_minute = get_minute(point.date) 
         if point.getStreamName() == params.get('sun_name'):
             print("found sun point - running")
-            return True
-        current_minute = get_minute(point.date) 
-        if current_minute > minute + interval:
-            print("leaf can run, %d > %d + %d" % (current_minute, minute, interval))
-            return True
+            print("can run? %d > %d + %d" % (current_minute, sun_minute, interval))
+            if current_minute > sun_minute + interval:
+                print("time out, running")
+                return True
+        else:
+            print("can run? %d > %d + %d" % (current_minute, power_minute, interval))
+            if current_minute > power_minute + interval:
+                print("time out, running")
+                return True 
     print "leaf not running"
     return False
 
