@@ -18,7 +18,7 @@ def push_data( input_data ):
         "input_data": input_data,
         "name": "UPDATED!"
         }
-    r = requests.patch(args.url + str(args.datastore) + "/",headers=headers,data=json.dumps(data))
+    r = requests.patch(url + str(args.datastore) + "/",headers=headers,data=json.dumps(data))
     print r.status_code
     if r.text:
         try:
@@ -43,10 +43,14 @@ def calculate_datetime_from_minute(minute):
 
 if __name__ == '__main__':
 
-    default_url = 'http://localhost:8000/api/v1/datastore/'
-#    'http://mattvenn.net:8080/api/v1/cosm'
 
     parser = argparse.ArgumentParser(description="post data to a datastore")
+    parser.add_argument('--host',
+        action='store', dest='host', default='localhost',
+        help="host url to connect")
+    parser.add_argument('--port',
+        action='store', dest='port', type=int, default='8000',
+        help="port of url")
     parser.add_argument('--datastore',
         action='store', dest='datastore', type=int, default='1',
         help="the id of the datastore (not the pipeline)")
@@ -56,9 +60,6 @@ if __name__ == '__main__':
     parser.add_argument('--value',
         action='store', dest='value', type=float, default='1',
         help="value")
-    parser.add_argument('--url',
-        action='store', dest='url', default=default_url,
-        help="url of the api")
     parser.add_argument('--minute',
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
@@ -72,30 +73,30 @@ if __name__ == '__main__':
         action='store', dest='length', type=int, default='0',
         help="number of records in a file to send")
     parser.add_argument('--stream-id',
-        action='store', dest='stream_id', help="which stream in historical data")
+        action='store', dest='stream_id', help="comma separated list of streams in historical data")
 
 
     args = parser.parse_args()
-    print args.url
+    url = 'http://%s:%d/api/v1/datastore/' % (args.host, args.port)
+    print url
 
     if args.file:
         data = json.load(open(args.file))
-        if data.has_key(args.stream_id):
-            #could we do this all in one go?
-            records = 0
-            if args.length == 0:
-                args.length = len(data[args.stream_id])
-            for line in data[args.stream_id]:
-                records += 1
-                #print line
-                #print line["value"]
-                #print line["at"]
-                push_data([{"data": '{"%s":%d}' % (args.stream_id,args.value),"date":line["at"]}],)
-                #push_data([{"data": '{"value":%s}' % line["value"],"date":line["at"]}],)
-                if records >= args.length:
-                    break
-        else:
-            print "no such stream_id, choose from ", data.keys()
+        keys = args.stream_id.split(',')
+        for key in keys:
+            if data.has_key(key):
+                #could we do this all in one go?
+                records = 0
+                if args.length == 0:
+                    args.length = len(data[key])
+                for line in data[key]:
+                    records += 1
+                    #changed this to a float because when string was '+1' it messed up json parsing from db
+                    push_data([{"data": '{"%s":%f}' % (key,float(line["value"])),"date":line["at"]}],)
+                    if records >= args.length:
+                        break
+            else:
+                print("no such field [%s], choose from %s" % (key,data.keys()))
     elif args.random:
         #generate random data
 
@@ -113,4 +114,4 @@ if __name__ == '__main__':
             last_min = minute
     else:
         timestamp = calculate_datetime_from_minute(args.minute)
-        push_data([{"data": '{"%s":%d}' % (args.key,args.value),"date":timestamp}],)
+        push_data([{"data": '{"%s":%f}' % (args.key,float(args.value)),"date":timestamp}],)
