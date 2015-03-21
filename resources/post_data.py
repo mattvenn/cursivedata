@@ -7,6 +7,7 @@ import datetime
 import pprint
 import argparse
 import sys
+import csv
 
 def push_data( input_data ):
 
@@ -81,22 +82,24 @@ if __name__ == '__main__':
     print url
 
     if args.file:
-        data = json.load(open(args.file))
         keys = args.stream_id.split(',')
-        for key in keys:
-            if data.has_key(key):
-                #could we do this all in one go?
-                records = 0
-                if args.length == 0:
-                    args.length = len(data[key])
-                for line in data[key]:
+        records = 0
+
+        with open(args.file) as fh:
+            csv_reader = csv.reader(fh)
+            fields = csv_reader.next()
+            try:
+                for row in csv_reader:
+                    for field in keys:
+                        index = fields.index(field)
+                        push_data([{"data": '{"%s":%f}' % (field,float(row[index])),"date":row[0]}],)
+
                     records += 1
-                    #changed this to a float because when string was '+1' it messed up json parsing from db
-                    push_data([{"data": '{"%s":%f}' % (key,float(line["value"])),"date":line["at"]}],)
-                    if records >= args.length:
+                    if args.length and records >= args.length:
                         break
-            else:
-                print("no such field [%s], choose from %s" % (key,data.keys()))
+            except ValueError:
+                print("no such field [%s], choose from %s" % (field,fields))
+                exit(1)
     elif args.random:
         #generate random data
 
