@@ -22,20 +22,23 @@ def process(drawing,data,params,internal_state) :
     for point in data.get_current():
         if point.getStreamName() == params.get('colourid'):
             print("colour = %f" %  point.getValue())
-            internal_state["colour"]= point.getValue()
+            colour = point.getValue()
         elif point.getStreamName() == params.get('rotateid'):
             print("rotate = %f" % point.getValue())
-            internal_state["rotate"]= point.getValue()
+            rotate = point.getValue()
         else:
-            #no valid data for us
-            print("couldn't find data with right name")
-            return None
+            colour = 0
+            rotate = 0
 
     transform = "rotate(%d,%d,%d)" % (rotate,x,y)
     colour = 'rgb({0},{0},{0})'.format(colour)
 
     print "Drawing an example rectangle",map(str,params)
     drawing.rect(x,y,params.get('Width'),params.get('Height'),transform=transform,fill=colour) 
+
+    internal_state["colour"] = colour
+    internal_state["rotate"] = rotate
+
     return None
 
 def get_params() :
