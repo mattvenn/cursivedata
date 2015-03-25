@@ -29,13 +29,15 @@ def process(drawing,data,params,internal_state) :
     interval = int(params.get("interval",10))
     last_drawn = None
 
-#    import ipdb; ipdb.set_trace()
     for point in data.get_current():
         current_minute = get_minute(point.date) 
         if point.getStreamName() == params.get('sun_name'):
             if current_minute > sun_minute + interval:
-                print("got %f for sun" % point.getValue())
-                draw_sun(drawing,point.getValue())
+                #clouds go from 0 to 100%
+                clouds = int(point.getValue())
+                clouds /= 20
+                print("got %f for sun" % clouds)
+                draw_sun(drawing,clouds)
                 sun_minute = current_minute
                 last_drawn = point.date
                 
