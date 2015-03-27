@@ -32,6 +32,7 @@ def process(drawing,data,params,internal_state) :
     for point in data.get_current():
         current_minute = get_minute(point.date) 
         if point.getStreamName() == params.get('sun_name'):
+#            import ipdb; ipdb.set_trace()
             if current_minute > sun_minute + interval:
                 #clouds go from 0 to 100%
                 clouds = int(point.getValue())

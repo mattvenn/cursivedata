@@ -32,7 +32,7 @@ def process(drawing,data,params,internal_state) :
     for point in data.get_current():
 
         div = get_division(point.date,params,internal_state)
-        value = float(point.data['value'])
+        value = float(point.getValue())
         length = (value / params.get('value'))*circle_r
         if length > circle_r:
             length = circle_r

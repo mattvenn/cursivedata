@@ -29,7 +29,7 @@ def process(drawing,data,params,internal_state) :
     
     #Run through all the data points
     for point in data.get_current():
-        initial = float(point.data['value'])
+        initial = float(point.getValue())
         val = ( initial-min)  / ( max - min )
         print "Data value",val
         

@@ -15,7 +15,7 @@ def process(drawing,data,params,internal_state) :
     
     #Run through all the data points
     for point in data.get_current():
-        val = ((float(point.data['value'])/34000.0))
+        val = ((float(point.getValue())/34000.0))
         cell = grid.cell(it)
         tlx, tly = cell.tl()
         cx, cy = cell.cent()

@@ -27,7 +27,7 @@ def process(drawing,data,params,internal_state) :
             aggregate = 0
             square_num = 0
 
-        aggregate += float(point.data['value'])
+        aggregate += float(point.getValue())
 
         #work out where to draw
         cell = grid.cell(cell_index)
@@ -92,7 +92,7 @@ def can_run(data,params,internal_state):
             print "resetting aggregate as cell index has changed to", cell_index
             last_cell_index = cell_index
             aggregate = 0
-        aggregate += float(point.data['value'])
+        aggregate += float(point.getValue())
         if aggregate > params.get("Value"):
             print "squares can run"
             return True

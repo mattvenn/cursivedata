@@ -46,11 +46,11 @@ def process(drawing,data,params,internal_state) :
     bar_width = circle_c / params.get("divide")
     for point in data.get_current():
         #something happened to the data and we need to reset last_val
-        if float(point.data['value']) < last_val:
-            last_val = float(point.data['value'])
+        if float(point.getValue()) < last_val:
+            last_val = float(point.getValue())
 
-        value = float(point.data['value']) - last_val
-        last_val = float(point.data['value'])
+        value = float(point.getValue()) - last_val
+        last_val = float(point.getValue())
 
         div = get_division(point.date,params)
         if div != last_div:
@@ -110,7 +110,7 @@ def get_description() : return "draws a circular bar graph"
 def can_run(data,params,internal_state):
     aggregate = internal_state.get("aggregate",0)
     for point in data.get_current():
-        aggregate += float(point.data['value'])
+        aggregate += float(point.getValue())
         if aggregate > params.get("value"):
             print "circles can run"
             return True

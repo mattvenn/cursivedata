@@ -27,7 +27,7 @@ def process(drawing,data,params,internal_state) :
     
     #Run through all the data points
     for point in data.get_current():
-        y = float(point.data['value'])
+        y = float(point.getValue())
         if y > params.get("MaxY"):
             y = params.get("MaxY")
         #flip y

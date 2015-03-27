@@ -60,7 +60,7 @@ def process(drawing,data,params,internal_state) :
     circle = int(params.get("Circle",0))
 
     for point in data.get_current():
-        aggregate += float(point.data['value'])
+        aggregate += float(point.getValue())
         #allow user to determine how fast the graph is drawn again
         last_periods = current_periods
         point_periods = Periods(point.date, params)

@@ -13,7 +13,7 @@ def process(drawing,data,params,internal_state) :
     #Run through all the data points
     for point in data.get_current():
         index = index + 1
-        initial = float(point.data['value'])
+        initial = float(point.getValue())
         val = ( initial-min)  / ( max - min )
         print "Data value",val
         draw_wave(drawing,params,val,index)
