@@ -90,6 +90,19 @@ class Drawing:
         svg_parsed = parse(svg_file)
         return svg_parsed
 
+    def get_first_group_from_file(self,name):
+        svg = self.load_svg(name)
+        return self.get_first_group(svg)
+
+    def get_first_group(self,svg):
+        groups = svg.getElementsByType(pysvg.structure.g)
+        #but defs is also a group and we don't want it
+        #there must be a better way to find element type but this is what I've got
+        for group in groups:
+            if group._elementName == 'g':
+                return group
+        return None
+
 class Grid:
     def __init__(self, drawing, nx=None, ny=None,force_square=True ):
         self.drawing = drawing

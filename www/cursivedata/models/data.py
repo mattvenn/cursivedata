@@ -184,5 +184,15 @@ class DataPoint( models.Model ):
     datastore = models.ForeignKey( DataStore )
     current = models.BooleanField(default=True)
 
+    def getStreamName(self):
+        #return first key
+        if len(self.data.keys()) > 1:
+            raise Exception("we got a datapoint with more than 1 data value in it")
+        return self.data.keys()[0]
+
+    def getValue(self):
+        return self.data[self.getStreamName()]
+
     class Meta:
         app_label = 'cursivedata'
+

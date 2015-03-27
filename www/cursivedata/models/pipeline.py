@@ -107,11 +107,7 @@ class Pipeline( DrawingState ) :
 #            if self.id == 4:
 #                import pdb; pdb.set_trace()
 #                print svg_document.getXML()
-            try:
-                self.add_svg( svg_document )
-            except Exception:
-                #import pdb; pdb.set_trace()
-                pass
+            self.add_svg( svg_document )
             self.generator.update_last_used()
             print "Generator run OK!"
         else:

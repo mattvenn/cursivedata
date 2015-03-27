@@ -77,6 +77,9 @@ class COSMSource( models.Model ):
         data = { "trigger_type":"change" }
         data["environment_id"]=self.feed_id
         data["stream_id"]=self.stream_id 
+#        import ipdb; ipdb.set_trace()
+        domain = 'mattvenn.net'
+        port = '8080'
         url = self.get_url(domain,port)
         if not re.match("^http://",url):
             url = "http://"+url

@@ -11,7 +11,7 @@ import cairosvg
 from xml.parsers.expat import ExpatError
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ParseError
-
+from django.utils import timezone
 
 def get_dimensions(svg_file):
     parsed = parse(svg_file)
@@ -47,7 +47,7 @@ def get_dimensions(svg_file):
 
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
-def append_svg_to_file( fragment_file, main_file ):
+def append_svg_to_file(fragment_file, main_file):
 
     #locking
     import fcntl
@@ -57,19 +57,20 @@ def append_svg_to_file( fragment_file, main_file ):
         lockfile = "/tmp/%s.lock" % main_file.replace('/','.')
         fd = open(lockfile,'w')
 
-        print "checking lock:", lockfile
+        print("checking lock:", lockfile)
         fcntl.lockf(fd,fcntl.LOCK_EX | fcntl.LOCK_NB)
-        print "ok"
+        print("ok")
     except IOError, e:
-        print "lock in use:", lockfile
+        print("lock in use:", lockfile)
         raise
 
     try:
-        print "parsing main file", main_file
+        print("parsing main file", main_file)
         svg_main = ET.parse(main_file)
-        print "parsing frag file", fragment_file
+        print("parsing frag file", fragment_file)
         svg_frag = ET.parse(fragment_file)
         svg_id = str(int(time.time()))
+        print("using svg_id as %s" % svg_id)
         mainroot= svg_main.getroot()
         fragroot =svg_frag.getroot()
         print "adding frags to main", main_file
@@ -104,8 +105,9 @@ def clear_blank_lines(main_file):
 
 def convert_svg_to_png( svgfile, pngfilename ):
     with open( pngfilename, 'w+') as png_file:
-        #print "Writing PNG file:",pngfilename," from ",svgfile," got",str(png_file)
-        cairosvg.svg2png(url=svgfile,write_to=png_file)
+        print "NOT Writing PNG file:",pngfilename," from ",svgfile," got",str(png_file)
+        #cairosvg.svg2png(url=svgfile,write_to=png_file)
+        print("done")
 
 def get_temp_filename(extension):
     millis = int(round(time.time() * 1000000))

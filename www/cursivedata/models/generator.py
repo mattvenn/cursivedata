@@ -98,6 +98,7 @@ class Generator( models.Model ) :
             pr = Parameter(generator=self)
         pr.name=param_spec['name']
         pr.default=param_spec.get('default',param_spec.get('default',0))
+        pr.data_type=param_spec.get('data_type',param_spec.get('data_type','float'))
         pr.description=param_spec.get('description',param_spec.get('description',"Unknown"))
         pr.save()
         
@@ -119,6 +120,7 @@ class Generator( models.Model ) :
             else:
                 params.append({"name":param.name,
                                "description":param.description,
+                               "data_type":param.data_type,
                                "value":param_values.get(param.name,param.default)})
         return params
     
@@ -139,7 +141,8 @@ class Generator( models.Model ) :
 #Generators have parameters. These can result in UI elements
 class Parameter( models.Model ) :
     name = models.CharField(max_length=200)
-    default = models.FloatField(default=0,blank=True)
+    data_type = models.CharField(default="float",max_length=20)
+    default = models.CharField(default="0",blank=True,max_length=200)
     description = models.CharField(default="Some parameter",blank=True,max_length=1000)
     generator = models.ForeignKey( Generator )
 
