@@ -35,7 +35,7 @@ def process(drawing,data,params,internal_state) :
 #            import ipdb; ipdb.set_trace()
             if current_minute > sun_minute + interval:
                 #clouds go from 0 to 100%
-                clouds = int(point.getValue())
+                clouds = int(float(point.getValue()))
                 clouds /= 20
                 print("got %f for sun" % clouds)
                 draw_sun(drawing,clouds)
