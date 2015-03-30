@@ -16,6 +16,10 @@ svg_width = 800.0
 ball_width = 15.0
 sun_width = 128.0
 
+def get_hour(date):
+    hour = int(date.strftime("%H") ) # hour 0 -23
+    return hour
+
 def get_minute(date):
     minute = int( date.strftime("%M") ) # minute 0 -59
     hour = int(date.strftime("%H") ) # hour 0 -23
@@ -38,7 +42,8 @@ def process(drawing,data,params,internal_state) :
                 clouds = int(float(point.getValue()))
                 clouds /= 20
                 print("got %f for sun" % clouds)
-                draw_sun(drawing,clouds)
+                hour = get_hour(point.date)
+                draw_sun(drawing,clouds,hour)
                 sun_minute = current_minute
                 last_drawn = point.date
                 
@@ -64,20 +69,41 @@ def process(drawing,data,params,internal_state) :
     return last_drawn
 
 
-def draw_sun(drawing,sun_level):
+# time is an interger hour
+def draw_sun(drawing,sun_level,time):
+    tmin = 5
+    tmax = 19
+    #don't draw too early or late
+    if time < tmin or time > tmax:
+        return
+    #don't draw even hours because it fills up the available space
+    if time % 2 == 0:
+        return
+
+    #limit sun level
     if sun_level > 5:
         sun_level = 5
     if sun_level < 1:
         sun_level = 1
 
-    print(sun_level) #level 1 doesn't draw for some reason
     sun = drawing.get_first_group_from_file("media/tree2/weather/sun_%d.svg" % sun_level)
     th=TransformBuilder()
     scale = drawing.width / svg_width
 
-    #xpix = svg_width / 1440 * minute - sun_width / 2
-    xpix = svg_width / 2 - sun_width / 2
-    ypix = svg_width / 8 - sun_width / 2
+    # some constants for working out sun pos
+    arc_l = math.pi / 5
+    r = svg_width * 2 / 3
+    ratio = arc_l / (12 - tmin)
+    angle = (time-12)*ratio
+
+    # x and y offsets
+    x_off = svg_width / 2 - sun_width / 2
+    y_off = r + sun_width / 4
+
+    ypix = y_off - r * math.cos(angle)
+    xpix = x_off + r * math.sin(angle)
+#    import ipdb; ipdb.set_trace()
+    
 
     #doesn't matter what order we put these in, trans happens first so we need to take into account the scaling that happens after
     th.setTranslation("%d,%d" % (xpix*scale, ypix*scale))
