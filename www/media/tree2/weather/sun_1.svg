@@ -43,13 +43,8 @@
      inkscape:window-y="24"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2" /><g
-     id="g3005"><rect
-       y="-4.0244408"
-       x="-4.0884919"
-       height="134.45132"
-       width="137.13937"
-       id="rect2990"
-       style="fill:#ffffff;fill-opacity:1;stroke:none" /><path
+     id="g3005">
+       <path
        style="fill:#ffd100;stroke:none"
        d="m 64.051,96.944 c -18.814,0 -34.067,-15.254 -34.067,-34.068 0,-18.814 15.252,-34.067 34.067,-34.067 18.815,0 34.067,15.253 34.067,34.067 0,18.814 -15.252,34.068 -34.067,34.068"
        id="path5"
