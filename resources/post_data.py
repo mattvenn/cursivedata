@@ -81,7 +81,10 @@ if __name__ == '__main__':
     print url
 
     if args.file:
-        keys = args.stream_id.split(',')
+        if ',' in args.stream_id:
+            keys = args.stream_id.split(',')
+        else:
+            keys = [args.stream_id]
         records = 0
 
         with open(args.file) as fh:
