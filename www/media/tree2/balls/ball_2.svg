@@ -34,8 +34,8 @@
      id="namedview3860"
      showgrid="false"
      inkscape:zoom="15.733333"
-     inkscape:cx="7.5"
-     inkscape:cy="7.5"
+     inkscape:cx="7.4999998"
+     inkscape:cy="7.4999998"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="0"
@@ -43,7 +43,8 @@
      id="metadata3345"><rdf:RDF><cc:Work
          rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><g
-     id="ball2"><path
-       fill="#f7a27a"
-       d="M7.5,15c4.142,0,7.5-3.358,7.5-7.5s-3.358-7.5-7.5-7.5c-4.143,0-7.5,3.358-7.5,7.5s3.357,7.5,7.5,7.5"
-       id="ball2" /></g></svg>
+     id="g6825"><polygon
+       id="polygon6122"
+       points="152.286,127.554 156.549,123.292 156.549,117.263 152.286,113 146.257,113 141.994,117.263 141.994,123.292 146.257,127.554 "
+       style="fill:#cccc00"
+       transform="translate(-141.7715,-112.777)" /></g></svg>
