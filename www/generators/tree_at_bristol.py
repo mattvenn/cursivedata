@@ -29,6 +29,7 @@ def get_minute(date):
 def process(drawing,data,params,internal_state) :
     aggregate = 0
     power_minute = int(internal_state.get("power_minute",0))
+    energy = internal_state.get("energy",0)
     sun_minute = int(internal_state.get("sun_minute",0))
     interval = int(params.get("interval",10))
     last_drawn = None
@@ -49,9 +50,13 @@ def process(drawing,data,params,internal_state) :
                 
         else:
             aggregate += float(point.getValue())
-            print "aggregate:", aggregate
-            print "current minute", current_minute
-            print "minute + interval", power_minute + interval
+            energy += float(point.getValue())
+            batt_bar = int(energy / params.get('energy_per_div'))
+            draw_battery(drawing,batt_bar)
+            print("total energy = %f" % energy)
+            print("aggregate = %f" % aggregate)
+            print("current minute = %d" % current_minute)
+            print("minute + interval = %d" % (power_minute + interval))
             #if we've got enough time & aggregate to draw a leaf
             if (current_minute > (power_minute + interval)) and aggregate > 0:
 
@@ -65,9 +70,27 @@ def process(drawing,data,params,internal_state) :
         
     internal_state["power_minute"] = power_minute
     internal_state["sun_minute"] = sun_minute
+    internal_state["energy"] = energy
 
     return last_drawn
 
+
+def draw_battery(drawing,level):
+    if level < 1:
+        level = 1
+    if level > 6:
+        level = 6
+
+    batt = drawing.get_first_group_from_file("media/tree2/batt/batt%d.svg" % level)
+    th=TransformBuilder()
+    scale = drawing.width / svg_width
+
+
+#    th.setTranslation("%d,%d" % (xpix*scale, ypix*scale))
+    th.setScaling(scale) 
+    batt.set_transform(th.getTransform())
+    drawing.doc.addElement(batt)
+    
 
 # time is an interger hour
 def draw_sun(drawing,sun_level,time):
@@ -218,8 +241,9 @@ def begin(drawing,params,internal_state) :
 #    for i in range(50):
 #        draw_ball_in_pos(drawing,internal_state,2)
     #draw_all_balls(drawing)
-    #draw_all_suns(drawing)
-    #draw_sun(drawing,1)
+    #draw_sun(drawing,1,12)
+    #draw_battery(drawing,6)
+
     
 def end(drawing,params,internal_state) :
     pass
@@ -243,9 +267,10 @@ def write_scale(drawing,params):
 def get_params() :
     return  [ 
         #changing this needs to update the internal state, as we store an array of this number
-        {"name":"value", "default":1, "description":"an input value of this will draw a leaf the same size as the scale leaf" },
+        {"name":"value", "default":1, "description":"an input value of this will draw a leaf on the tree, double will draw the next colour ball" },
         {"name":"interval", "default":10, "description":"how long (minutes) to wait before drawing a new leaf" },
         {"name":"sun_name", "default": 'sun', "description":"which source name for sun", 'data_type':"text" }, 
+        {"name":"energy_per_div", "default": 100, "description":"amount of energy required to draw another battery segment" }, 
             ]
 
 def get_name() : return "Tree"
