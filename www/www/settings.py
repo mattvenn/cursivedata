@@ -15,7 +15,9 @@ from django.core.urlresolvers import reverse_lazy
 PROJECT_ROOT = path.dirname(path.dirname(__file__))
 LOGIN_REDIRECT_URL = '/'
 
-DEBUG = True
+EMAIL_HOST = 'localhost'
+
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -195,7 +197,7 @@ LOGGING = {
         },
         'api': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'graphics': {
             'handlers': ['file'],
@@ -203,11 +205,11 @@ LOGGING = {
         },
         'data': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'generator': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'views': {
             'handlers': ['file'],

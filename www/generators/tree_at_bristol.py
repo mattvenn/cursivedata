@@ -44,7 +44,7 @@ def process(drawing,data,params,internal_state) :
                 #clouds go from 0 to 100%
                 clouds = int(float(point.getValue()))
                 clouds /= 20
-                log("got %f for sun" % clouds)
+                log.debug("got %f for sun" % clouds)
                 hour = get_hour(point.date)
                 draw_sun(drawing,clouds,hour)
                 sun_minute = current_minute
