@@ -2,7 +2,9 @@
 
 from os import path
 import sys
+import socket
 
+hostname = socket.gethostname()
 # Try and import pycairo or fallback to cairocffi and install as cairo
 try:
     import cairo
@@ -17,7 +19,12 @@ LOGIN_REDIRECT_URL = '/'
 
 EMAIL_HOST = 'localhost'
 
-DEBUG = False
+# debug on dev machines
+if hostname == 'vennzaa1.miniserver.com':
+    DEBUG = False
+else:
+    DEBUG = True
+
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -169,6 +176,17 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+if DEBUG:
+    default_logger = {
+                        'handlers': ['console','file'],
+                        'level': 'DEBUG',
+                     }
+else:
+    default_logger = {
+                        'handlers': ['file'],
+                        'level': 'INFO',
+                     }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -191,30 +209,13 @@ LOGGING = {
         },
     },
     'loggers': {
-        'endpoint': {
-            'handlers': ['file'],
-            'level': 'INFO',
-        },
-        'api': {
-            'handlers': ['file'],
-            'level': 'INFO',
-        },
-        'graphics': {
-            'handlers': ['file'],
-            'level': 'INFO',
-        },
-        'data': {
-            'handlers': ['file'],
-            'level': 'INFO',
-        },
-        'generator': {
-            'handlers': ['file'],
-            'level': 'INFO',
-        },
-        'views': {
-            'handlers': ['file'],
-            'level': 'INFO',
-        },
+        'endpoint': default_logger,
+        'api': default_logger,
+        'graphics': default_logger,
+        'data': default_logger,
+        'generator': default_logger,
+        'views': default_logger,
+        'pipeline': default_logger,
     },
 }
 LOGIN_URL = reverse_lazy('login')
