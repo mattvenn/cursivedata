@@ -1,6 +1,7 @@
 # Django settings for testsite project.
 
 from os import path
+import sys
 
 # Try and import pycairo or fallback to cairocffi and install as cairo
 try:
@@ -169,26 +170,23 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            #'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        },
+        'file': {
+                    'level': 'INFO',
+                    'class': 'logging.FileHandler',
+                    'filename': 'log/info.log',
+        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
+        'cosm': {
+            'handlers': ['file'],
+            'level': 'INFO',
         },
-    }
+    },
 }
-
 LOGIN_URL = reverse_lazy('login')
 LOGOUT_URL = reverse_lazy('logout')
