@@ -3,6 +3,8 @@ bugs:
   with squareIncMM an odd number, the squares don't join up properly...
 """
 from django.utils.datetime_safe import datetime
+import logging
+log = logging.getLogger('generator')
 
 def get_minute(date):
     minute = int( date.strftime("%M") ) # minute 0 -59
@@ -23,24 +25,24 @@ def process(drawing,data,params,internal_state) :
         #if we move to a new cell, start small again
         if cell_index != internal_state.get("last_cell",0):
             internal_state["last_cell"] = cell_index
-            print "cell index changed"
+            log.debug("cell index changed")
             aggregate = 0
             square_num = 0
 
-        aggregate += float(point.getValue())
+        aggregate += float(point.data['value'])
 
         #work out where to draw
         cell = grid.cell(cell_index)
         cx, cy = cell.cent()
         
         
-        print "number:%d\naggregate:%.2f" % (cell_index, aggregate)
-        print "x:%d y:%d" % ( cx, cy )
+        log.debug("number:%d aggregate:%.2f" % (cell_index, aggregate))
+        log.debug("x:%d y:%d" % ( cx, cy ))
 
         #if we have aggregated enough values to draw a square
         while aggregate > params.get("Value"):
             width = params.get("SquareInc") + square_num * params.get("SquareInc")
-            print "square #%d width %d" % ( square_num, width )
+            log.debug("square #%d width %d" % ( square_num, width ))
             transform = None
             if params.get("Rotate"):
                 rotate = int(square_num*params.get("Rotate")) % 360 
@@ -60,11 +62,11 @@ def process(drawing,data,params,internal_state) :
     return None
 
 def begin(drawing,params,internal_state) :
-    print "Starting drawing squares: ",map(str,params)
+    log.info("Starting drawing squares with params: %s" % map(str,params))
     drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
     
 def end(drawing,params,internal_state) :
-    print "Ending exmaple drawing with params:",map(str,params)
+    log.info("Ending drawing")
     content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("last_cell",0)) + " sets of squares"
     drawing.bl_text(content,stroke="red",size=15)
     
@@ -89,14 +91,14 @@ def can_run(data,params,internal_state):
         #if enough time passes, reset aggregate
         cell_index = get_minute(point.date)
         if cell_index != last_cell_index:
-            print "resetting aggregate as cell index has changed to", cell_index
+            log.debug("resetting aggregate as cell index has changed to %d" % cell_index)
             last_cell_index = cell_index
             aggregate = 0
         aggregate += float(point.getValue())
         if aggregate > params.get("Value"):
-            print "squares can run"
+            log.debug("squares can run")
             return True
-    print "aggregate %f < value %f so not running" % ( aggregate, params.get("Value") )
+    log.debug("aggregate %f < value %f so not running" % ( aggregate, params.get("Value") ))
   #  internal_state["aggregate"]=aggregate
   #  internal_state["cell_index"]=last_cell_index
     return False

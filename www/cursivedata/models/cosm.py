@@ -16,7 +16,7 @@ from cursivedata.models.data import DataStore
 from django.utils.datetime_safe import datetime
 import re
 import logging
-logger = logging.getLogger('cosm')
+log = logging.getLogger('data')
 
 #Represents a COSM trigger which can be connected to any pipelines
 class COSMSource( models.Model ):
@@ -41,7 +41,7 @@ class COSMSource( models.Model ):
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
     def receive_data(self,msg):
-        logger.info( "DS: %s got message for pipeline %s" % (str(self.pipelines),str(msg)))
+        log.info( "DS: %s got message for pipeline %s" % (str(self.pipelines),str(msg)))
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         datapoint = {}
@@ -87,32 +87,32 @@ class COSMSource( models.Model ):
             url = "http://"+url
         data["url"]=url
         
-        logger.info("Setting up COSM trigger for pipelines %s from feed %s stream %s key %s" % (self.pipelines ,self.feed_id, self.stream_id, self.api_key))
-        logger.info("Pointing to URL %s" % data['url'])
+        log.info("Setting up COSM trigger for pipelines %s from feed %s stream %s key %s" % (self.pipelines ,self.feed_id, self.stream_id, self.api_key))
+        log.info("Pointing to URL %s" % data['url'])
         r=requests.post(self.cosm_url,data=json.dumps(data),headers = headers)
         if r.status_code == 201:
             cosm_trigger_id=r.headers['location'].split("/")[-1]
-            logger.info("Setup with id: %s" % cosm_trigger_id)
+            log.info("Setup with id: %s" % cosm_trigger_id)
             self.cosm_trigger_id=cosm_trigger_id
             self.save()
             return "OK"
         elif r.status_code == 404:
-            logger.warning("no such stream id, check stream id")
+            log.warning("no such stream id, check stream id")
         elif r.status_code == 401:
-            logger.warning("not authorized, check api key")
+            log.warning("not authorized, check api key")
         elif r.status_code == 500:
-            logger.warning("no such data stream, check environment id")
+            log.warning("no such data stream, check environment id")
         else:
-            logger.warning("unknown error: %d %s" % (r.status_code, json.loads(r.text)))
+            log.warning("unknown error: %d %s" % (r.status_code, json.loads(r.text)))
         
     def stop_trigger(self):
         if self.cosm_trigger_id :
-            logger.info("Removing trigger")
+            log.info("Removing trigger")
             requests.delete(self.cosm_url+str(self.cosm_trigger_id),headers={'X-ApiKey':self.api_key})
             self.cosm_trigger_id=""
             self.save()
         else:
-            logger.info("Trigger not set")
+            log.info("Trigger not set")
 
     def is_running(self):
         if self.cosm_trigger_id:

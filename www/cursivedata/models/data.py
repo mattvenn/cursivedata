@@ -15,8 +15,8 @@ import requests
 import dateutil.parser
 import jsonfield
 
-
-
+import logging
+log = logging.getLogger('data')
 
 #This takes in data that's been produced by some process and a) makes current stuff
 #available, and b) stores historic values
@@ -68,27 +68,26 @@ class DataStore( models.Model ) :
         else:
             data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
         #data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
-        print "Final size", len(data)
+        log.info("Final size %d" % len(data))
         return data.reverse()
     
     #Adds the data to the current data and sets available to true
     #Data must be a list of dicts 
     def add_data(self,data):
         self.update_current_data(data)
-        print "Pre-Pipeline Data length:",len(self.get_current())
-        print "Datastore ID is:",self.id
-#        print "Data Hash",hash(self)
+        log.info("Pre-Pipeline Data length: %s" % len(self.get_current()))
+        log.info("Datastore ID is: %d" % self.id)
         self.clean()
         if hasattr(self, 'pipeline'):
-            print "Trying to run pipeline:",self.pipeline
+            log.info("Trying to run pipeline: %s" % self.pipeline)
             self.pipeline.update(self)
         else:
-            print "datastore has no pipeline to run"
-        print "Post-Pipeline Data length:",len(self.get_current())
+            log.info("datastore has no pipeline to run")
+        log.info("Post-Pipeline Data length: %d" % len(self.get_current()))
     
     #data is a list with each member containing a date and a data field
     def update_current_data(self,data):
-        print "Adding %d lines of data:" % len(data)
+        log.info("Adding %d lines of data: %d" % len(data))
         self.available=True
         self.fresh=True
         for entry in data :
@@ -101,7 +100,7 @@ class DataStore( models.Model ) :
     def load_from_csv(self,data, time_field=None):
         reader = csv.DictReader(data,skipinitialspace=True)
         data = []
-        print "Adding data to store",str(self)
+        log.debug("Adding csv data to store") #,str(self)
         for row in reader:
             #check we have a value
             if not row.has_key('value'):
@@ -117,7 +116,7 @@ class DataStore( models.Model ) :
             
 
             data.append(datapoint)
-        print "loaded %d lines" % len(data)
+        log.debug("loaded %d lines" % len(data))
         self.update_current_data(data)
     
     def load_from_csv_file(self,datafile,time_field=None):

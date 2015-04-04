@@ -16,6 +16,8 @@ import tempfile
 import subprocess
 import os
 
+import logging
+log = logging.getLogger('endpoint')
 
 # a fantastic error class!
 class EndpointConversionError(Exception):
@@ -110,13 +112,13 @@ class Endpoint( DrawingState ):
             try:
                 so = GCodeOutput(endpoint=self)
                 so.save()
-                print "creating gcode in %s from %s" % (so.get_filename(), self.robot_svg_file)
+                log.info("creating gcode in %s from %s" % (so.get_filename(), self.robot_svg_file))
                 self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
             except EndpointConversionError, e:
-                print "problem converting svg:", e
+                log.warning("problem converting svg: %s" % e)
                 so.delete()
                 raise EndpointConversionError(e)
-            print "gcode done"
+            log.debug("gcode done")
 
     #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
     #returns an svg document (not a file)
@@ -129,7 +131,6 @@ class Endpoint( DrawingState ):
         tr.setScaling(x=1,y=-1)
         trans = str(self.side_margin) + " " + str(self.img_height) 
         tr.setTranslation( trans )
-#            print "Endpoint transform:"+tr.getTransform()
         group = pysvg.structure.g()
         group.set_transform(tr.getTransform())
         #add the drawing
@@ -152,7 +153,6 @@ class Endpoint( DrawingState ):
         tr.setScaling(scale)
         trans = str(xoffset) + " " + str(yoffset) 
         tr.setTranslation( trans )
-#            print "Pipeline transform:"+tr.getTransform()
         group = pysvg.structure.g()
         group.set_transform(tr.getTransform())
 
@@ -168,10 +168,10 @@ class Endpoint( DrawingState ):
         pycam="/usr/bin/pycam"
         #pycam="/Users/dmrust/.virtualenvs/polarsite/lib/python2.7/site-packages/pycam-0.5.1/pycam"
         pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave"]
-        print pycam_args
+        log.debug("pycam args %s" % pycam_args)
         p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
         stdout,stderr = p.communicate()
-        print "pycam done"
+        log.debug("pycam done")
 
         self.parse_gcode_to_polar(tmp_gcode,polarfile)
         os.close(fd)
@@ -229,7 +229,6 @@ class Endpoint( DrawingState ):
                 lastY = y
 
         file = open(outfile,"w")
-        #print "writing polar file to ", outfile
         for line in polar_code:
             file.write(line + "\n")
         file.close()
@@ -273,7 +272,7 @@ class Endpoint( DrawingState ):
     def calibrate(self):
         so = GCodeOutput(endpoint=self)
         so.save()
-        print "creating gcode in ", so.get_filename()
+        log.debug("creating gcode in %s" % so.get_filename())
         f = open(so.get_filename(),'w')
         f.write("c\n")
         f.close()
@@ -323,21 +322,17 @@ class Transform( models.Model ):
     def build_from_endpoint(self,endpoint,svg_file,width):
         (svgwidth,svgheight) = svg.get_dimensions(svg_file)
         if width > endpoint.img_width:
-            print "not scaling larger than endpoint"
+            log.info("not scaling larger than endpoint")
             raise EndpointConversionError("width %d is too large for endpoint, max width is %d" % (width, endpoint.img_width))
         if width == 0:
-            print "not using a 0 width"
+            log.info("not using a 0 width")
             width = endpoint.img_width
         #put it in the middle of the page
         self.xoffset = (endpoint.img_width - width ) / 2
         self.yoffset = 0
         self.scale = width / svgwidth
 
-        print "width of svg", svgwidth
-        print "desired width", width
-        print "scale", self.scale
-        #FIXME scale results in a pic too big. 
-        #self.scale *= 0.90
+        log.debug("width of svg=%s, desired width=%s, scale=%s" % (svgwidth, width, self.scale))
 
 class GCodeOutput( models.Model ):
     endpoint = models.ForeignKey(Endpoint)

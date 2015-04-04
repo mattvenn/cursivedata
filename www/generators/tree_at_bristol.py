@@ -6,7 +6,9 @@ from pysvg.builders import *
 import pysvg.structure
 import math
 import random
-    
+import logging
+log = logging.getLogger('generator')
+
 grid = 21
 #measured these
 ball_space = 24.5
@@ -42,7 +44,7 @@ def process(drawing,data,params,internal_state) :
                 #clouds go from 0 to 100%
                 clouds = int(float(point.getValue()))
                 clouds /= 20
-                print("got %f for sun" % clouds)
+                log("got %f for sun" % clouds)
                 hour = get_hour(point.date)
                 draw_sun(drawing,clouds,hour)
                 sun_minute = current_minute
@@ -53,10 +55,10 @@ def process(drawing,data,params,internal_state) :
             energy += float(point.getValue())
             batt_bar = int(energy / params.get('energy_per_div'))
             draw_battery(drawing,batt_bar)
-            print("total energy = %f" % energy)
-            print("aggregate = %f" % aggregate)
-            print("current minute = %d" % current_minute)
-            print("minute + interval = %d" % (power_minute + interval))
+            log.debug("total energy = %f" % energy)
+            log.debug("aggregate = %f" % aggregate)
+            log.debug("current minute = %d" % current_minute)
+            log.debug("minute + interval = %d" % (power_minute + interval))
             #if we've got enough time & aggregate to draw a leaf
             if (current_minute > (power_minute + interval)) and aggregate > 0:
 
@@ -181,7 +183,6 @@ def draw_all_balls(drawing):
     for x in range(grid):
         for y in range(grid):
             ball_num = prob_grid[y][x]
-    #        print("%d,%d" % (x*xscale+xoffset,y*yscale+yoffset))
             if ball_num:
                 draw_ball(drawing,x,y,ball_num)
 
@@ -214,7 +215,7 @@ def draw_ball_in_pos(drawing,internal_state,size):
             draw_ball(drawing,x,y,size+1)
             break
     else:
-        print("ran out of positions to draw in!")
+        log.warning("ran out of positions to draw in!")
 
 
     
@@ -222,7 +223,7 @@ def draw_ball_in_pos(drawing,internal_state,size):
    #     draw_ball(drawing,x,y,ball_num+1)
     
 def begin(drawing,params,internal_state) :
-    print "Starting tree: ",map(str,params)
+    log.info("Starting tree with params %s" % map(str,params))
     store_starting_probs(internal_state)
     #tree = drawing.load_svg("media/tree2/tree/tree.svg")
     tree = drawing.get_first_group_from_file("media/tree2/tree/tree.svg")
@@ -247,9 +248,6 @@ def begin(drawing,params,internal_state) :
     
 def end(drawing,params,internal_state) :
     pass
-    #print "Ending drawing with params:",map(str,params)
-    #content="Ended at " + str(datetime.now())
-    #drawing.bl_text(content,stroke="red",size=15)
     
 def write_scale(drawing,params):
     draw_leaf(drawing,10,drawing.height - 100,0,1)
@@ -283,16 +281,16 @@ def can_run(data,params,internal_state):
     for point in data.get_current():
         current_minute = get_minute(point.date) 
         if point.getStreamName() == params.get('sun_name'):
-            print("found sun point - running")
-            print("can run? %d > %d + %d" % (current_minute, sun_minute, interval))
+            log.info("found sun point")
+            log.debug("can run? %d > %d + %d" % (current_minute, sun_minute, interval))
             if current_minute > sun_minute + interval:
-                print("time out, running")
+                log.info("sun time out, running")
                 return True
         else:
-            print("can run? %d > %d + %d" % (current_minute, power_minute, interval))
+            log.debug("can run? %d > %d + %d" % (current_minute, power_minute, interval))
             if current_minute > power_minute + interval:
-                print("time out, running")
+                log.info("power time out, running")
                 return True 
-    print "leaf not running"
+    log.info("tree at bristol")
     return False
 

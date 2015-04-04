@@ -170,19 +170,46 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] %(module)s : %(message)s'
+                    },
+                },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'stream': sys.stdout,
+            'formatter': 'verbose',
         },
         'file': {
                     'level': 'INFO',
                     'class': 'logging.FileHandler',
                     'filename': 'log/info.log',
+                    'formatter': 'verbose',
         },
     },
     'loggers': {
-        'cosm': {
+        'endpoint': {
+            'handlers': ['file'],
+            'level': 'INFO',
+        },
+        'api': {
+            'handlers': ['file'],
+            'level': 'INFO',
+        },
+        'graphics': {
+            'handlers': ['file'],
+            'level': 'INFO',
+        },
+        'data': {
+            'handlers': ['file'],
+            'level': 'INFO',
+        },
+        'generator': {
+            'handlers': ['file'],
+            'level': 'INFO',
+        },
+        'views': {
             'handlers': ['file'],
             'level': 'INFO',
         },

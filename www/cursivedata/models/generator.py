@@ -13,6 +13,9 @@ from django.utils.datetime_safe import datetime
 from cursivedata.models.data import DataStore,  FakeDataStore
 from cursivedata.drawing import Drawing
 
+import logging
+log = logging.getLogger('generator')
+
 
 #Points to some code and associated parameters which are needed to process data
 #This is not an actual running generator, but an template to make new real generators
@@ -42,7 +45,7 @@ class Generator( models.Model ) :
         except Exception as e:
             if should_work :
                 #raise e
-                print "Empty module",e
+                log.error("Empty module: %s" % e)
         return
 
     #Processes a given chunk of data to return some SVG
@@ -116,7 +119,7 @@ class Generator( models.Model ) :
         #TODO this just filters out the old parameters - doesn't remove them
         for param in self.parameter_set.all():
             if not [p for p in mod.get_params() if p['name'] == param.name]:
-                print "old param", param.name
+                log.info("old param %s" % param.name)
             else:
                 params.append({"name":param.name,
                                "description":param.description,
@@ -193,21 +196,21 @@ class GeneratorRunner(DrawingState):
         data.load_data(input_data)
         
         state = generator.get_state(False) 
-        print "State:",state.state
+        log.info("State: %s" % state.state)
         params = state.params
         for (key, value) in input_params.iteritems():
             params[key] = value
         internal = {}
         doc = self.create_svg_doc(width, height) #in mm
         drwg = Drawing( doc )
-        #capture prints to stdout
+        # capture prints to stdout
         backup = sys.stdout
         sys.stdout = StringIO()
-        #do the processing
-        generator.begin_drawing( drwg, params, internal )
-        generator.process_data(  drwg, data, params, internal )
-        generator.end_drawing( drwg, params, internal )
-        #grab the output
+        # do the processing
+        generator.begin_drawing(drwg, params, internal)
+        generator.process_data(drwg, data, params, internal)
+        generator.end_drawing(drwg, params, internal)
+        # grab the output
         out = sys.stdout.getvalue()
         output_lines = []
         #take opportunity to supress inkscape warnings...

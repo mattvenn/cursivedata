@@ -1,8 +1,10 @@
 from django.utils.datetime_safe import datetime
+import logging
+log = logging.getLogger('generator')
 
 
 def process(drawing,data,params,internal_state) :
-    print "Example Processing data with parameters",map(str,params)
+    log.debug("Example Processing data with parameters %s" % params)
     
     #Read in parameters
     it = internal_state.get("i",0) 
@@ -29,11 +31,11 @@ def process(drawing,data,params,internal_state) :
     return None
 
 def begin(drawing,params,internal_state) :
-    print "Starting example drawing with params: ",map(str,params)
+    log.info("Starting example drawing with params %s" % params)
     drawing.tl_text("Started at " + str(datetime.now()),fill="blue",size=15)
     
 def end(drawing,params,internal_state) :
-    print "Ending exmaple drawing with params:",map(str,params)
+    log.info("Ending example drawing")
     content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("i",0)) + " updates"
     drawing.bl_text(content,fill="red",size="30")
     
