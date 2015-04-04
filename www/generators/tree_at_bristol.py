@@ -30,6 +30,7 @@ def get_minute(date):
 
 def process(drawing,data,params,internal_state) :
     aggregate = 0
+    last_batt_bar = int(internal_state.get("last_batt_bar",0))
     power_minute = int(internal_state.get("power_minute",0))
     energy = internal_state.get("energy",0)
     sun_minute = int(internal_state.get("sun_minute",0))
@@ -52,9 +53,14 @@ def process(drawing,data,params,internal_state) :
                 
         else:
             aggregate += float(point.getValue())
+
+            # battery calcs
             energy += float(point.getValue())
             batt_bar = int(energy / params.get('energy_per_div'))
-            draw_battery(drawing,batt_bar)
+            if batt_bar > last_batt_bar:
+                draw_battery(drawing,batt_bar)
+                last_batt_bar = batt_bar
+
             log.debug("total energy = %f" % energy)
             log.debug("aggregate = %f" % aggregate)
             log.debug("current minute = %d" % current_minute)
@@ -73,6 +79,7 @@ def process(drawing,data,params,internal_state) :
     internal_state["power_minute"] = power_minute
     internal_state["sun_minute"] = sun_minute
     internal_state["energy"] = energy
+    internal_state["last_batt_bar"] = last_batt_bar
 
     return last_drawn
 
