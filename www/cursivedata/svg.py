@@ -108,7 +108,7 @@ def clear_blank_lines(main_file):
 
 def convert_svg_to_png( svgfile, pngfilename ):
     with open( pngfilename, 'w+') as png_file:
-        log.debug("NOT converting SVG %s to PNG %s" % (svgfile, pngfilename))
+        log.debug("NOT converting SVG %s to PNG" % (svgfile))
         #cairosvg.svg2png(url=svgfile,write_to=png_file)
         log.debug("done")
 
