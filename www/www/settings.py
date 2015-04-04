@@ -172,7 +172,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(asctime)s [%(levelname)s] %(module)s : %(message)s'
+            'format': '[%(asctime)s] [%(levelname)s] %(process)d %(module)s : %(message)s'
                     },
                 },
     'handlers': {
@@ -182,7 +182,7 @@ LOGGING = {
             'formatter': 'verbose',
         },
         'file': {
-                    'level': 'INFO',
+                    'level': 'DEBUG',
                     'class': 'logging.FileHandler',
                     'filename': 'log/info.log',
                     'formatter': 'verbose',
@@ -195,7 +195,7 @@ LOGGING = {
         },
         'api': {
             'handlers': ['file'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'graphics': {
             'handlers': ['file'],
@@ -203,11 +203,11 @@ LOGGING = {
         },
         'data': {
             'handlers': ['file'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'generator': {
             'handlers': ['file'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'views': {
             'handlers': ['file'],

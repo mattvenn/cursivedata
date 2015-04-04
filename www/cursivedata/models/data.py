@@ -75,19 +75,19 @@ class DataStore( models.Model ) :
     #Data must be a list of dicts 
     def add_data(self,data):
         self.update_current_data(data)
-        log.info("Pre-Pipeline Data length: %s" % len(self.get_current()))
-        log.info("Datastore ID is: %d" % self.id)
+        log.debug("Pre-Pipeline Data length: %s" % len(self.get_current()))
+        log.debug("Datastore ID is: %d" % self.id)
         self.clean()
         if hasattr(self, 'pipeline'):
-            log.info("Trying to run pipeline: %s" % self.pipeline)
+            log.debug("Trying to run pipeline: %s" % self.pipeline)
             self.pipeline.update(self)
         else:
-            log.info("datastore has no pipeline to run")
-        log.info("Post-Pipeline Data length: %d" % len(self.get_current()))
+            log.warning("datastore has no pipeline to run")
+        log.debug("Post-Pipeline Data length: %d" % len(self.get_current()))
     
     #data is a list with each member containing a date and a data field
     def update_current_data(self,data):
-        log.info("Adding %d lines of data: %d" % len(data))
+        log.debug("Adding %d lines of data" % len(data))
         self.available=True
         self.fresh=True
         for entry in data :

@@ -83,6 +83,7 @@ def draw_battery(drawing,level):
     if level > 6:
         level = 6
 
+    log.debug("drawing battery bar %d" % level)
     batt = drawing.get_first_group_from_file("media/tree2/batt/batt%d.svg" % level)
     th=TransformBuilder()
     scale = drawing.width / svg_width
@@ -111,6 +112,7 @@ def draw_sun(drawing,sun_level,time):
     if sun_level < 1:
         sun_level = 1
 
+    log.debug("drawing sun %d" % sun_level)
     sun = drawing.get_first_group_from_file("media/tree2/weather/sun_%d.svg" % sun_level)
     th=TransformBuilder()
     scale = drawing.width / svg_width
@@ -144,6 +146,7 @@ def draw_ball(drawing,x,y,ball_num):
     xpix = x*ball_space+ball_xoffset-ball_width/2
     ypix = y*ball_space+ball_yoffset-ball_width/2
 
+    log.debug("drawing ball %d" % ball_num)
     ball = drawing.get_first_group_from_file("media/tree2/balls/ball_%d.svg" % ball_num)
     th=TransformBuilder()
 

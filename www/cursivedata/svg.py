@@ -76,7 +76,7 @@ def append_svg_to_file(fragment_file, main_file):
         log.debug("using svg_id as %s" % svg_id)
         mainroot= svg_main.getroot()
         fragroot =svg_frag.getroot()
-        log.debug("adding frags to main" % main_file)
+        log.debug("adding frags to main %s" % main_file)
         for child in fragroot:
             child.set('id',svg_id)
             child.set('class','frame')
@@ -84,11 +84,11 @@ def append_svg_to_file(fragment_file, main_file):
             
         svg_main.write(main_file)
     except ParseError as e:
-        log.warning("problem appending %s to %s: %s" % (fragment_file,main_file,e))
+        log.exception("problem appending %s to %s" % (fragment_file,main_file))
         raise
     #no need to do this with new parser
     #clear_blank_lines(main_file)
-    log.info("finished in %d secs" % (time.time() - start_time))
+    log.debug("finished in %d secs" % (time.time() - start_time))
 
 def is_blank_line(line):
     if line == "\n":
@@ -108,7 +108,7 @@ def clear_blank_lines(main_file):
 
 def convert_svg_to_png( svgfile, pngfilename ):
     with open( pngfilename, 'w+') as png_file:
-        log.info("NOT converting SVG %s to PNG %s" % (svgfile, pngfilename))
+        log.debug("NOT converting SVG %s to PNG %s" % (svgfile, pngfilename))
         #cairosvg.svg2png(url=svgfile,write_to=png_file)
         log.debug("done")
 

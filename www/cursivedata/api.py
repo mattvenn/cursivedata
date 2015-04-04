@@ -55,16 +55,17 @@ class COSMSourceResource(ModelResource):
         allowed_methods = ['get','post','patch']
     
     def post_detail(self, request, **kwargs):
-        log.info("cosm update")
         store_id=int(request.path.split("/")[-2])
+        log.info("cosm update for datastore %d" % store_id)
         ce = COSMSource.objects.get(id=store_id)  # Uuuugh. Sorry!
         data_string = request.POST.get('body') or request.raw_post_data
         data = json.loads(data_string)
+        log.debug("data is %s" % data)
         try:
             ce.receive_data(data)
             return {"OK":"True"}
-        except Exception, e:
-            log.warning("cosm update failed %s" % e)
+        except Exception as e:
+            log.exception("cosm update failed: %s" % str(e))
     
 class EndpointResource(ModelResource):
     class Meta:
