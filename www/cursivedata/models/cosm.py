@@ -80,8 +80,8 @@ class COSMSource( models.Model ):
         data["environment_id"]=self.feed_id
         data["stream_id"]=self.stream_id 
 #        import ipdb; ipdb.set_trace()
-        domain = 'mattvenn.net'
-        port = '8080'
+        domain = 'cursivedata.co.uk'
+        port = '80'
         url = self.get_url(domain,port)
         if not re.match("^http://",url):
             url = "http://"+url
