@@ -51,7 +51,6 @@ def get_dimensions(svg_file):
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
 def append_svg_to_file(fragment_file, main_file):
-
     #locking
     import fcntl
     start_time = time.time()
@@ -88,7 +87,7 @@ def append_svg_to_file(fragment_file, main_file):
         raise
     #no need to do this with new parser
     #clear_blank_lines(main_file)
-    log.debug("finished in %d secs" % (time.time() - start_time))
+    log.info("finished in %d secs" % (time.time() - start_time))
 
 def is_blank_line(line):
     if line == "\n":
