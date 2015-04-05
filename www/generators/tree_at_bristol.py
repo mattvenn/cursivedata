@@ -233,7 +233,7 @@ def draw_ball_in_pos(drawing,internal_state,size):
    #     draw_ball(drawing,x,y,ball_num+1)
     
 def begin(drawing,params,internal_state) :
-    log.info("Starting tree with params %s" % map(str,params))
+    log.info("Starting tree with params: %s" % params)
     store_starting_probs(internal_state)
     #tree = drawing.load_svg("media/tree2/tree/tree.svg")
     tree = drawing.get_first_group_from_file("media/tree2/tree/tree.svg")
