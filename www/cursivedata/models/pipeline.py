@@ -36,8 +36,8 @@ class Pipeline( DrawingState ) :
     description = models.CharField(max_length=2000,default="",blank=True)
     generator = models.ForeignKey( Generator)
     data_store = models.OneToOneField( DataStore)
-    state = models.OneToOneField( GeneratorState)
-    endpoint = models.ForeignKey( "Endpoint")
+    state = models.OneToOneField(GeneratorState)
+    endpoint = models.ForeignKey("Endpoint")
     paused = models.BooleanField(default=False)
     sources = models.ManyToManyField(COSMSource, through=COSMSource.pipelines.through, blank=True)
 
