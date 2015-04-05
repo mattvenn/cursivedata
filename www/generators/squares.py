@@ -98,7 +98,7 @@ def can_run(data,params,internal_state):
         if aggregate > params.get("Value"):
             log.debug("squares can run")
             return True
-    log.debug("aggregate %f < value %f so not running" % ( aggregate, params.get("Value") ))
+    log.debug("aggregate %s < value %s so not running" % ( aggregate, params.get("Value") ))
   #  internal_state["aggregate"]=aggregate
   #  internal_state["cell_index"]=last_cell_index
     return False
