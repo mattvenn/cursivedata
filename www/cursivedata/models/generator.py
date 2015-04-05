@@ -45,7 +45,7 @@ class Generator( models.Model ) :
         except Exception as e:
             if should_work :
                 #raise e
-                log.error("Empty module: %s" % e)
+                log.exception("exception caught for generator id %s name %s" % (self.id,self.module_name))
         return
 
     #Processes a given chunk of data to return some SVG
