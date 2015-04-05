@@ -134,36 +134,6 @@ class DataStore( models.Model ) :
         self.fresh=False
         self.save()
         
-    """ 
-    def load_current(self):
-        cur = json.loads(self.current_data)
-        return cur
-    def store_current(self, current ):
-        self.current = current or []
-        current = deepcopy(self.current)
-        for entry in current:
-            #print "Before",entry
-            self.serialise_time(entry)
-            #print "After",entry
-        totals = json.dumps(current)
-        #print "Storing:",totals
-        self.current_data = totals
-    
-    def serialise_time(self,entry):
-        entry['time_ser'] = entry.get('time', timezone.now() ).isoformat()
-        if entry.has_key('time'):
-            del entry['time']
-    
-    def deserialise_time(self,entry):
-        if entry.has_key('time_ser'):
-            date_str = entry.get('time_ser',timezone.now().isoformat())
-            entry['time'] = dateutil.parser.parse(date_str)
-            del entry['time_ser']
-        elif entry.has_key('time'):
-            date_str = entry.get('time',timezone.now().isoformat())
-            entry['time'] = dateutil.parser.parse(date_str)
-    
-    """
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.id)
 

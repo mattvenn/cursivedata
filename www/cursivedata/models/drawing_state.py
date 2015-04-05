@@ -12,6 +12,9 @@ from django.utils.datetime_safe import datetime
 import shutil
 import os
 
+import logging
+log = logging.getLogger('graphics')
+
 '''
 DrawingState is a class which deals with drawings that change incrementally over time. It:
 * maintains a current drawing and a drawing with the last bit which was added
@@ -34,17 +37,12 @@ class DrawingState( models.Model ):
         self.last_svg_file = self.get_partial_svg_filename()
         svg_document.save(self.last_svg_file)
         self.update_latest_image()
-#        print "Saved update as:",self.last_image_file
 
         self.ensure_full_document()
         # Add the last SVG to full output SVG history
         #try:
         svg.append_svg_to_file( self.last_svg_file, self.full_svg_file )
         self.update_full_image()
-#        print "Saved whole image as:",self.full_image_file
-        #except IOError:
-        #print "problem appending svg file, file already in use"
-        #pass
         self.last_updated = timezone.now()
         self.save()
 
@@ -162,7 +160,7 @@ class StoredOutput( models.Model ):
     def set_file(self,fn):
         base,extension = os.path.splitext(fn)
         if extension != "."+self.filetype:
-            print "Warning: got a "+extension+", but was expecting a "+self.filetype
+            log.warning("got a %s, but was expecting a %s" % (extensions, self.filetype))
         self.filename = self.get_filename()
         shutil.copy2(fn,self.filename)
         self.save()

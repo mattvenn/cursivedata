@@ -1,9 +1,10 @@
 from django.utils.datetime_safe import datetime
 import math
+import logging
+log = logging.getLogger('generator')
 
 
 def process(drawing,data,params,internal_state) :
-    print "Example Processing data with parameters",map(str,params)
     
     #Read in parameters
     index = internal_state.get("index",0) 
@@ -15,7 +16,7 @@ def process(drawing,data,params,internal_state) :
         index = index + 1
         initial = float(point.getValue())
         val = ( initial-min)  / ( max - min )
-        print "Data value",val
+        log.debug("Data value = %s" % val)
         draw_wave(drawing,params,val,index)
         
     #Write back any state we want to keep track of
@@ -39,12 +40,10 @@ def draw_wave(drawing,params,datapoint,index) :
         yprev = y
 
 def begin(drawing,params,internal_state) :
- #   print "Starting example drawing with params: ",map(str,params)
-  #  drawing.tl_text("Started at " + str(datetime.now()),fill="blue",size=15)
+    log.info("Starting sinewaves with params: %s" % params)
     pass
     
 def end(drawing,params,internal_state) :
-  #  print "Ending exmaple drawing with params:",map(str,params)
    # content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("i",0)) + " updates"
     #drawing.bl_text(content,fill="red",size="30")
     pass

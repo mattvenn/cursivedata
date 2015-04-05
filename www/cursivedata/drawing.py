@@ -10,6 +10,9 @@ from pysvg.parser import parse
 from pysvg.shape import *
 import math
 
+import logging
+log = logging.getLogger('graphics')
+
 class Drawing:
     doc = None
     shapes = pysvg.builders.ShapeBuilder()
@@ -83,7 +86,7 @@ class Drawing:
             for e in svg_parsed.getAllElements():
                 self.doc.addElement( e )
         except (ExpatError, IOError) as e:
-            print "problem parsing %s:%s" % (svg_file,e)
+            log.error("problem parsing %s:%s" % (svg_file,e))
             raise
 
     def load_svg(self,svg_file):

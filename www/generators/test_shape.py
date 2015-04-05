@@ -2,6 +2,9 @@ import pysvg.text
 import colorsys
 from pysvg.builders import *
 
+import logging
+log = logging.getLogger('generator')
+
 #Not used now. Left for posterity and how to do paths
 def square(x,y,width,height,dwg):
     style_dict = { "fill":"none", "stroke":"#000", "stroke-width":"1" }
@@ -21,10 +24,10 @@ def process(drawing,data,params,internal_state) :
     y = params.get('y')
     for point in data.get_current():
         if point.getStreamName() == params.get('colourid'):
-            print("colour = %f" %  point.getValue())
+            log.debug("colour = %f" %  point.getValue())
             colour = point.getValue()
         elif point.getStreamName() == params.get('rotateid'):
-            print("rotate = %f" % point.getValue())
+            log.debug("rotate = %f" % point.getValue())
             rotate = point.getValue()
         else:
             colour = 0
@@ -33,7 +36,7 @@ def process(drawing,data,params,internal_state) :
     transform = "rotate(%d,%d,%d)" % (rotate,x,y)
     colour = 'rgb({0},{0},{0})'.format(colour)
 
-    print "Drawing an example rectangle",map(str,params)
+    log.debug("Drawing an example rectangle with params: %s" % params)
     drawing.rect(x,y,params.get('Width'),params.get('Height'),transform=transform,fill=colour) 
 
     internal_state["colour"] = colour

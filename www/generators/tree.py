@@ -7,6 +7,9 @@ import pysvg.structure
 import math
 import random
 
+import logging
+log = logging.getLogger('generator')
+
 def get_minute(date):
     minute = int( date.strftime("%M") ) # minute 0 -59
     hour = int(date.strftime("%H") ) # hour 0 -23
@@ -21,9 +24,9 @@ def process(drawing,data,params,internal_state) :
     for point in data.get_current():
         current_minute = get_minute(point.date) 
         aggregate += float(point.data['value'])
-        print "aggregate:", aggregate
-        print "current minute", current_minute
-        print "minute + interval", minute + interval
+        log.debug("aggregate: %s" % aggregate)
+        log.debug("current minute: %s" % current_minute)
+        log.debug("minute + interval: %s" % (minute + interval))
         #if we've got enough time & aggregate to draw a leaf
         if (current_minute > (minute + interval)) and aggregate > 0:
 
@@ -36,7 +39,7 @@ def process(drawing,data,params,internal_state) :
             startx =  random.randint(border, drawing.width-border)
             while starty > (drawing.height / 2) or starty < border:
                 starty = random.randint(0, drawing.height)
-            print "drawing leaf at", startx,starty,aggregate
+            log.debug("drawing a %d leaf at %d,%d" % (aggregate, startx, starty))
             draw_leaf(drawing,startx,starty,rotate,aggregate / scale)
 
             #reset
@@ -59,7 +62,7 @@ def draw_leaf(drawing,x,y,rotate,width):
 
 ##all this stuff needs a bit of work, been hacked at mfuk
 def begin(drawing,params,internal_state) :
-    print "Starting tree: ",map(str,params)
+    log.info("Starting tree with params: %s" % params)
     """
     internal_state["last_length"]= [0 for i in range(divs)]
     internal_state["last_div"]= 0
@@ -83,7 +86,6 @@ def begin(drawing,params,internal_state) :
     
 def end(drawing,params,internal_state) :
     pass
-    #print "Ending drawing with params:",map(str,params)
     #content="Ended at " + str(datetime.now())
     #drawing.bl_text(content,stroke="red",size=15)
     
@@ -117,8 +119,8 @@ def can_run(data,params,internal_state):
     for point in data.get_current():
         current_minute = get_minute(point.date) 
         if current_minute > minute + interval:
-            print "leaf can run, %d > %d + %d" % (current_minute, minute, interval)
+            log.info("leaf can run, %d > %d + %d" % (current_minute, minute, interval))
             return True
-    print "leaf not running"
+    log.info("leaf not running")
     return False
 

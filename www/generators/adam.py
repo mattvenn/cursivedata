@@ -4,6 +4,8 @@ bugs:
 """
 from django.utils.datetime_safe import datetime
 import math
+import logging
+log = logging.getLogger('generator')
 
 
 
@@ -51,9 +53,10 @@ class Periods:
 
 def process(drawing,data,params,internal_state) :
     p = Periods(data.get_current()[0].date, params)
-    print "p.get_periods() = ", p.get_periods()
-    print "p.get_num_periods() = ", p.get_num_periods()
-    print "p.get_current_periods() = ", p.get_current_periods()
+
+    log.debug("p.get_periods() = %s" % p.get_periods())
+    log.debug("p.get_num_periods() = %s" % p.get_num_periods())
+    log.debug("p.get_current_periods() = %s" % p.get_current_periods())
     current_periods = p.get_current_periods()
     aggregate = internal_state.get("aggregate",0)
     grid = drawing.get_grid(nx=p.get_num_periods(),ny=params.get("Ydiv"))
@@ -69,11 +72,10 @@ def process(drawing,data,params,internal_state) :
         cell = grid.cell(current_periods[0] + current_periods[1])
         cx, cy = cell.cent()
        
-        #print "number:%d\naggregate:%.2f" % (current_periods, aggregate)
-        print "x:%d y:%d" % ( cx, cy )
+        log.debug("x:%d y:%d" % (cx, cy))
 
         #if we have aggregated enough values to draw a square
-        print "current_periods = ", current_periods, "; last_periods = ", last_periods
+        log.debug("current_periods = %s, last_periods = %s" % (current_periods, last_periods))
         if current_periods != last_periods :
             width = math.sqrt( aggregate / float(params.get("Value")) )
             hWidth = width / 2
@@ -88,11 +90,11 @@ def process(drawing,data,params,internal_state) :
     return None
 
 def begin(drawing,params,internal_state) :
-    print "Starting drawing squares: ",map(str,params)
+    log.info("Starting drawing adams with params: %s" % params)
     drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
    
 def end(drawing,params,internal_state) :
-    print "Ending exmaple drawing with params:",map(str,params)
+    log.info("Ending drawing")
     content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("last_cell",0)) + " sets of squares"
     drawing.bl_text(content,stroke="red",size=15)
    
@@ -115,9 +117,9 @@ def can_run(data,params,internal_state):
     last_periods = internal_state.get("last_periods",0)
     for point in data.get_current():
         p = Periods(point.date, params)
-        print "point.date = ", point.date
+        log.debug("point.date = %s" % point.date)
         current_periods = p.get_current_periods() #get_current_periods(point.date, params)
         if current_periods != last_periods:
-            print "squares can run"
+            log.info("adams can run")
             return True
     return False
