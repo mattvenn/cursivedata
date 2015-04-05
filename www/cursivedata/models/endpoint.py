@@ -97,7 +97,10 @@ class Endpoint( DrawingState ):
         current_drawing = self.transform_svg(svg_file,transform)
 
         #this will save out the latest svg as a file
-        self.add_svg(current_drawing)
+        try:
+            self.add_svg(current_drawing)
+        except IOError as e: #  file is locked by another endpoint
+            log.warn("unable to update svg")
 
         #transform the current svg for the robot
         current_drawing = self.transform_svg_for_robot(self.last_svg_file)
