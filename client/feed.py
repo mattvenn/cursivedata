@@ -92,6 +92,8 @@ def update_robot_config():
 def fetch_robot_id():
     if args.norobot:
         return "1"
+    if args.robot_id:
+        return str(args.robot_id)
 
     (pack,names,values) = get_robot_config()
     index = names.index("id")
@@ -319,6 +321,9 @@ if __name__ == '__main__':
     parser.add_argument('--pwm',
         action='store', dest='pwm', type=int, default=80,
         help="pwm to draw")
+    parser.add_argument('--robot-id',
+        action='store', dest='robot_id', type=int, default=None,
+        help="override robot id")
     parser.add_argument('--speed',
         action='store', dest='speed', type=int, default=4,
         help="speed to draw")
