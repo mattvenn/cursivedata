@@ -153,7 +153,7 @@ def show_pipeline(request, pipelineID):
                     pipeline.state.params[key]= value
             pipeline.state.save()
         elif act != "none":
-            log.warning("Unknown pipeline action: %s" % act)
+            log.warning("unknown pipeline action: %s" % act)
         
         form = PipelineModify(instance=pipeline) 
         context = {"pipeline":pipeline, "form": form}
@@ -189,7 +189,7 @@ def show_endpoint(request, endpointID):
         endpoint = Endpoint.objects.get(pk=endpointID)
         act = request.POST.get('action',"none")
         if act == "Calibrate":
-            log.debug("Calibrating")
+            log.debug("calibrating")
             endpoint.calibrate()
         elif act == "Upload SVG":
             log.debug("uploading svg")
@@ -217,7 +217,7 @@ def show_endpoint(request, endpointID):
         elif act == "Update Parameters":
             pass
         elif act != "none":
-            log.warning("Unknown action: %s" % act)
+            log.warning("unknown action: %s" % act)
     except Endpoint.DoesNotExist:
         raise Http404
     except Exception, e:
@@ -303,7 +303,7 @@ def show_generator(request, generatorID):
             if ds_form.data_store :
                 (filename,output_lines) = GeneratorRunner().run(generator,data,param_values,width,height)
             else:
-                log.warning("No data store setup")
+                log.warning("no data store setup")
         elif act == "Create Datastore":
             ds_form.create_data_store(request.POST.get("ds_name","Unnamed Datastore"))
         elif act == "Import CSV":
@@ -322,7 +322,7 @@ def show_generator(request, generatorID):
             code_form = GeneratorCode(request.POST)
             code_form.save_code(generator)
         else:
-            log.warning("Unknown Action: %s" % act)
+            log.warning("unknown Action: %s" % act)
             
         code_form = GeneratorCode()
         code_form.load_code(generator)
@@ -387,23 +387,25 @@ def get_gcode(request, endpointID ):
         endpoint = Endpoint.objects.get(pk=endpointID)
         filename = endpoint.get_next_filename()
     except Endpoint.DoesNotExist:
+        log.warning("endpoint %s doesn't exist" % endpointID)
         raise Http404
     if endpoint.paused:
-        log.debug("endpoint is paused")
+        log.info("endpoint is paused")
         raise Http404
     if not filename:
         raise Http404
 
-    log.debug("Filename = %s" % filename)
+    log.debug("filename = %s" % filename)
     consume = request.REQUEST.get('consume', False)
 
     if consume:
-        log.debug("Consuming...")
+        log.debug("consuming...")
         endpoint.consume()
     try:
         wrapper = FileWrapper(file(filename))
     except IOError:
-        log.warning("no gcode file when we expected one")
+        log.warning("no gcode file %s so calling endpoint.consume()" % filename)
+        endpoint.consume()
         raise Http404
     response = HttpResponse(wrapper, content_type='text/plain')
     response['Content-Length'] = os.path.getsize(filename)
