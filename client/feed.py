@@ -167,9 +167,12 @@ def fetch_data():
                 if args.verbose:
                     print "%d: got %d gcodes from server" % ( count, len(new_codes) )
                 gcodes = gcodes + new_codes
-            elif r.status_code == 404:
+            elif r.status_code == 204:
                 #end of the gcodes
                 return gcodes
+            elif r.status_code == 404:
+                print("server has a problem with the gcodes")
+                print("try refreshing URL by hand to clear bad gcode files")
             else:
                 print "unexpected server response ", r.status_code 
                 return None
@@ -304,7 +307,7 @@ if __name__ == '__main__':
         action='store', dest='store_file', 
         help="file to write robot responses in")
     parser.add_argument('--verbose',
-        action='store_const', const=True, dest='verbose', default=False,
+        action='store_const', const=True, dest='verbose', default=True,
         help="verbose")
     parser.add_argument('--send-status',
         action='store_const', const=True, dest='sendstatus', default=False,
@@ -380,6 +383,7 @@ if __name__ == '__main__':
         for i in range(len(names)):
           print names[i], '=', values[i]
           config[names[i]] = values[i]
+        print("config dumped to file: config")
         open("config",'w').write(json.dumps(config))
     if args.updateconfig:
         update_robot_config()

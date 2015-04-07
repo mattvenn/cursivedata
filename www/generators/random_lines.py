@@ -1,8 +1,9 @@
 from django.utils.datetime_safe import datetime
 import random
+import logging
+log = logging.getLogger('generator')
 
 def process(drawing,data,params,internal_state) :
-    print "Example Processing data with parameters",map(str,params)
     
     #Read in parameters
     stroke_width = params.get("Stroke Width",0.1)
@@ -14,7 +15,7 @@ def process(drawing,data,params,internal_state) :
     max_density = params.get("Max Density",20)
     npoints = int(params.get("Points per strip",20))
     strips = int(params.get("Vertical Strips",30))
-    print("Num strips",strips)
+    log.debug("Num strips: %s" % strips)
 
     #Read in state
     current = internal_state.get("current",None) 
@@ -25,13 +26,13 @@ def process(drawing,data,params,internal_state) :
     grid = drawing.get_grid(nx=npoints,ny=strips,force_square=False)
     w = grid.size_x
     h = grid.size_y
-    print("Grid",w,h)
+    log.debug("Grid : %d x %d" % (w, h))
     
     #Run through all the data points
     for point in data.get_current():
-        initial = float(point.data['value'])
+        initial = float(point.getValue())
         val = ( initial-min)  / ( max - min )
-        print "Data value",val
+        log.debug("Data value %s" % val)
         
         cell = grid.cell(it)
         if( cell.x != last_row ): #When we start a new row, don't draw from the last point
@@ -63,11 +64,11 @@ def get_point(x,y,width,height):
     return (random.uniform(x-width/2,x+width/2),random.uniform(y-height/2,y+height/2))
 
 def begin(drawing,params,internal_state) :
-    print "Starting example drawing with params: ",map(str,params)
+    log.info("Starting random lines drawing with params: %s" % params)
     #drawing.tl_text("Started at " + str(datetime.now()),fill="blue",size=15)
     
 def end(drawing,params,internal_state) :
-    print "Ending exmaple drawing with params:",map(str,params)
+    log.info("Ending drawing")
     content="Ended at " + str(datetime.now()) + " after drawing " + str(internal_state.get("i",0)) + " updates"
     #drawing.bl_text(content,fill="red",size="30")
     

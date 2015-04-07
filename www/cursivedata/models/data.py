@@ -15,8 +15,8 @@ import requests
 import dateutil.parser
 import jsonfield
 
-
-
+import logging
+log = logging.getLogger('data')
 
 #This takes in data that's been produced by some process and a) makes current stuff
 #available, and b) stores historic values
@@ -68,27 +68,26 @@ class DataStore( models.Model ) :
         else:
             data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
         #data = DataPoint.objects.filter( datastore=self).order_by('-id')[:max_records]
-        print "Final size", len(data)
+        log.info("Final size %d" % len(data))
         return data.reverse()
     
     #Adds the data to the current data and sets available to true
     #Data must be a list of dicts 
     def add_data(self,data):
         self.update_current_data(data)
-        print "Pre-Pipeline Data length:",len(self.get_current())
-        print "Datastore ID is:",self.id
-#        print "Data Hash",hash(self)
+        log.debug("Pre-Pipeline Data length: %s" % len(self.get_current()))
+        log.debug("Datastore ID is: %d" % self.id)
         self.clean()
         if hasattr(self, 'pipeline'):
-            print "Trying to run pipeline:",self.pipeline
+            log.debug("Trying to run pipeline: %s" % self.pipeline)
             self.pipeline.update(self)
         else:
-            print "datastore has no pipeline to run"
-        print "Post-Pipeline Data length:",len(self.get_current())
+            log.warning("datastore has no pipeline to run")
+        log.debug("Post-Pipeline Data length: %d" % len(self.get_current()))
     
     #data is a list with each member containing a date and a data field
     def update_current_data(self,data):
-        print "Adding %d lines of data:" % len(data)
+        log.debug("Adding %d lines of data" % len(data))
         self.available=True
         self.fresh=True
         for entry in data :
@@ -101,7 +100,7 @@ class DataStore( models.Model ) :
     def load_from_csv(self,data, time_field=None):
         reader = csv.DictReader(data,skipinitialspace=True)
         data = []
-        print "Adding data to store",str(self)
+        log.debug("Adding csv data to store") #,str(self)
         for row in reader:
             #check we have a value
             if not row.has_key('value'):
@@ -117,7 +116,7 @@ class DataStore( models.Model ) :
             
 
             data.append(datapoint)
-        print "loaded %d lines" % len(data)
+        log.debug("loaded %d lines" % len(data))
         self.update_current_data(data)
     
     def load_from_csv_file(self,datafile,time_field=None):
@@ -135,36 +134,6 @@ class DataStore( models.Model ) :
         self.fresh=False
         self.save()
         
-    """ 
-    def load_current(self):
-        cur = json.loads(self.current_data)
-        return cur
-    def store_current(self, current ):
-        self.current = current or []
-        current = deepcopy(self.current)
-        for entry in current:
-            #print "Before",entry
-            self.serialise_time(entry)
-            #print "After",entry
-        totals = json.dumps(current)
-        #print "Storing:",totals
-        self.current_data = totals
-    
-    def serialise_time(self,entry):
-        entry['time_ser'] = entry.get('time', timezone.now() ).isoformat()
-        if entry.has_key('time'):
-            del entry['time']
-    
-    def deserialise_time(self,entry):
-        if entry.has_key('time_ser'):
-            date_str = entry.get('time_ser',timezone.now().isoformat())
-            entry['time'] = dateutil.parser.parse(date_str)
-            del entry['time_ser']
-        elif entry.has_key('time'):
-            date_str = entry.get('time',timezone.now().isoformat())
-            entry['time'] = dateutil.parser.parse(date_str)
-    
-    """
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.id)
 
@@ -184,5 +153,15 @@ class DataPoint( models.Model ):
     datastore = models.ForeignKey( DataStore )
     current = models.BooleanField(default=True)
 
+    def getStreamName(self):
+        #return first key
+        if len(self.data.keys()) > 1:
+            raise Exception("we got a datapoint with more than 1 data value in it")
+        return self.data.keys()[0]
+
+    def getValue(self):
+        return self.data[self.getStreamName()]
+
     class Meta:
         app_label = 'cursivedata'
+

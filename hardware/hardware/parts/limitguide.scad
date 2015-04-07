@@ -3,6 +3,7 @@ include <../case/globals.scad>
 include </home/mattvenn/cad/MCAD/shapes.scad>
 include </home/matthew/work/cad/MCAD/shapes.scad>
 
+thickness = 3; //override
 wire_clearance = 10;
 edge_clearance = 3;
 //m3 plastic pcb spacer
@@ -32,10 +33,10 @@ guide_height = thickness + wire_z + 5; //wire_z * 2;
 
 //for laser cutting
 *projection() wireguide();
-*projection() made_mount_plate();
+projection() made_mount_plate();
 
 //to see what's going on 
-made_wireguide();
+*made_wireguide();
 *made_mount_plate();
 
 //the mount plate in correct orientation

@@ -4,6 +4,8 @@ todo:
     ability to set a ymin
 """
 from django.utils.datetime_safe import datetime
+import logging
+log = logging.getLogger('generator')
 
 def get_x(point,params):
     return get_minute(point.date) % params.get("MaxTime")
@@ -27,7 +29,7 @@ def process(drawing,data,params,internal_state) :
     
     #Run through all the data points
     for point in data.get_current():
-        y = float(point.data['value'])
+        y = float(point.getValue())
         if y > params.get("MaxY"):
             y = params.get("MaxY")
         #flip y
@@ -37,30 +39,26 @@ def process(drawing,data,params,internal_state) :
         #import pdb; pdb.set_trace()
         #if we wrap back round, don't draw the connecting line, just update old x and y
         if x < oldx or (x - oldx) > params.get("SkipDrawTime"):
-            print "not drawing, wrapping"
-            print "x: %d oldx: %d, skip time: %d" % (x, oldx, params.get("SkipDrawTime"))
+            log.debug("not drawing, wrapping")
+            log.debug("x: %d oldx: %d, skip time: %d" % (x, oldx, params.get("SkipDrawTime")))
             oldx = x
             oldy = y
             continue
-        print "drawing", oldx,oldy,x,y
+        log.debug("drawing %d,%d -> %d,%d" % (oldx,oldy,x,y))
         drawing.line(oldx*x_scale,oldy*y_scale,x*x_scale,y*y_scale)
         oldx = x
         oldy = y
         
-    #print "saving:" ,oldx,oldy
     #Write back any state we want to keep track of
     internal_state["oldx"]=oldx
     internal_state["oldy"]=oldy
     return None
 
 def begin(drawing,params,internal_state) :
-    print "Starting example drawing with params: ",map(str,params)
-    drawing.tl_text("Started at " + str(datetime.now().strftime(drawing.get_time_format())),fill="blue",size=15)
+    log.info("Starting graph with params %s" % map(str,params))
     
 def end(drawing,params,internal_state) :
-    print "Ending exmaple drawing with params:",map(str,params)
-    content="Ended at " + str(datetime.now().strftime(drawing.get_time_format()))
-    drawing.bl_text(content,fill="red",size="15")
+    log.info("Ending graph")
     
 def get_params() :
     return  [ 

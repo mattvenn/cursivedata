@@ -18,6 +18,7 @@ import argparse
 
 def fetchRange(start_date,end_date,key,feed_number):
     alldatapoints = {}
+    last_start_date = None
     url = 'http://api.cosm.com/v2/feeds/%d.json' % feed_number
 
     while start_date < end_date:
@@ -67,8 +68,18 @@ def fetchRange(start_date,end_date,key,feed_number):
             break
 
         first_key = alldatapoints.keys()[0]
-        last_datetime = alldatapoints[first_key][-1]["at"]
-        start_date = dateutil.parser.parse(last_datetime)
+        old_start_date = start_date
+        newest_date = start_date
+        for streams in alldatapoints.keys():
+            last_datetime = alldatapoints[streams][-1]["at"]
+            last_datetime = dateutil.parser.parse(last_datetime)
+            if last_datetime > newest_date:
+                newest_date = last_datetime
+            
+        start_date = newest_date
+        if start_date == old_start_date:
+            print "new start date is the same as last start date - quitting!"
+            break
 
     return alldatapoints
 

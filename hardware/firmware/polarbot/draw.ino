@@ -1,5 +1,6 @@
 //arguments are measured in steps
-static void FK(int l1, int l2) {
+//l1 and l2 are distance from the top corners to the gondola attachment points
+static void FK(long int l1, long int l2) {
 
   float a = l1; 
   float b = config.width*config.stepsPerMM - config.gondola_width*config.stepsPerMM;
@@ -18,7 +19,7 @@ static void FK(int l1, int l2) {
 }
 
 //don't try to move the pen to a point that is unreachable
-boolean validate(int x, int y)
+boolean validate(long int x, long int y)
 {
   if(x < config.side_margin*config.stepsPerMM)
     return false;
@@ -45,8 +46,8 @@ void moveTo(float x2, float y2)
   int b2 = sqrt(pow((w-x2),2)+pow(y2,2));*/
  //take into account the gondola width
 
-  int a2 = sqrt(pow(x2-config.gondola_width*config.stepsPerMM/2,2)+pow(y2-config.gondola_height*config.stepsPerMM,2));
-  int b2 = sqrt(pow((config.width*config.stepsPerMM-x2-config.gondola_width*config.stepsPerMM/2),2)+pow(y2-config.gondola_height*config.stepsPerMM,2));
+  long int a2 = sqrt(pow(x2-config.gondola_width*config.stepsPerMM/2,2)+pow(y2-config.gondola_height*config.stepsPerMM,2));
+  long int b2 = sqrt(pow((config.width*config.stepsPerMM-x2-config.gondola_width*config.stepsPerMM/2),2)+pow(y2-config.gondola_height*config.stepsPerMM,2));
 
   int stepA;
   int stepB;

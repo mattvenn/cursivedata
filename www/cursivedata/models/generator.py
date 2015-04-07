@@ -13,6 +13,9 @@ from django.utils.datetime_safe import datetime
 from cursivedata.models.data import DataStore,  FakeDataStore
 from cursivedata.drawing import Drawing
 
+import logging
+log = logging.getLogger('generator')
+
 
 #Points to some code and associated parameters which are needed to process data
 #This is not an actual running generator, but an template to make new real generators
@@ -42,7 +45,7 @@ class Generator( models.Model ) :
         except Exception as e:
             if should_work :
                 #raise e
-                print "Empty module",e
+                log.exception("exception caught for generator id %s name %s" % (self.id,self.module_name))
         return
 
     #Processes a given chunk of data to return some SVG
@@ -98,6 +101,7 @@ class Generator( models.Model ) :
             pr = Parameter(generator=self)
         pr.name=param_spec['name']
         pr.default=param_spec.get('default',param_spec.get('default',0))
+        pr.data_type=param_spec.get('data_type',param_spec.get('data_type','float'))
         pr.description=param_spec.get('description',param_spec.get('description',"Unknown"))
         pr.save()
         
@@ -115,10 +119,11 @@ class Generator( models.Model ) :
         #TODO this just filters out the old parameters - doesn't remove them
         for param in self.parameter_set.all():
             if not [p for p in mod.get_params() if p['name'] == param.name]:
-                print "old param", param.name
+                log.info("old param %s" % param.name)
             else:
                 params.append({"name":param.name,
                                "description":param.description,
+                               "data_type":param.data_type,
                                "value":param_values.get(param.name,param.default)})
         return params
     
@@ -139,7 +144,8 @@ class Generator( models.Model ) :
 #Generators have parameters. These can result in UI elements
 class Parameter( models.Model ) :
     name = models.CharField(max_length=200)
-    default = models.FloatField(default=0,blank=True)
+    data_type = models.CharField(default="float",max_length=20)
+    default = models.CharField(default="0",blank=True,max_length=200)
     description = models.CharField(default="Some parameter",blank=True,max_length=1000)
     generator = models.ForeignKey( Generator )
 
@@ -190,21 +196,21 @@ class GeneratorRunner(DrawingState):
         data.load_data(input_data)
         
         state = generator.get_state(False) 
-        print "State:",state.state
+        log.info("State: %s" % state.state)
         params = state.params
         for (key, value) in input_params.iteritems():
             params[key] = value
         internal = {}
         doc = self.create_svg_doc(width, height) #in mm
         drwg = Drawing( doc )
-        #capture prints to stdout
+        # capture prints to stdout
         backup = sys.stdout
         sys.stdout = StringIO()
-        #do the processing
-        generator.begin_drawing( drwg, params, internal )
-        generator.process_data(  drwg, data, params, internal )
-        generator.end_drawing( drwg, params, internal )
-        #grab the output
+        # do the processing
+        generator.begin_drawing(drwg, params, internal)
+        generator.process_data(drwg, data, params, internal)
+        generator.end_drawing(drwg, params, internal)
+        # grab the output
         out = sys.stdout.getvalue()
         output_lines = []
         #take opportunity to supress inkscape warnings...

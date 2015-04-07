@@ -1,7 +1,10 @@
 # Django settings for testsite project.
 
 from os import path
+import sys
+import socket
 
+hostname = socket.gethostname()
 # Try and import pycairo or fallback to cairocffi and install as cairo
 try:
     import cairo
@@ -14,7 +17,14 @@ from django.core.urlresolvers import reverse_lazy
 PROJECT_ROOT = path.dirname(path.dirname(__file__))
 LOGIN_REDIRECT_URL = '/'
 
-DEBUG = False
+EMAIL_HOST = 'localhost'
+
+# debug on dev machines
+if hostname == 'vennzaa1.miniserver.com':
+    DEBUG = False
+else:
+    DEBUG = True
+
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -166,29 +176,47 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+if DEBUG:
+    default_logger = {
+                        'handlers': ['console','file'],
+                        'level': 'DEBUG',
+                     }
+else:
+    default_logger = {
+                        'handlers': ['file'],
+                        'level': 'INFO',
+                     }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s] [%(levelname)s] %(process)d %(module)s : %(message)s'
+                    },
+                },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            #'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'verbose',
+        },
+        'file': {
+                    'level': 'DEBUG',
+                    'class': 'logging.FileHandler',
+                    'filename': 'log/info.log',
+                    'formatter': 'verbose',
+        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
+        'endpoint': default_logger,
+        'api': default_logger,
+        'graphics': default_logger,
+        'data': default_logger,
+        'generator': default_logger,
+        'views': default_logger,
+        'pipeline': default_logger,
+    },
 }
-
 LOGIN_URL = reverse_lazy('login')
 LOGOUT_URL = reverse_lazy('logout')

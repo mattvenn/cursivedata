@@ -15,6 +15,8 @@ import requests
 from cursivedata.models.data import DataStore
 from django.utils.datetime_safe import datetime
 import re
+import logging
+log = logging.getLogger('data')
 
 #Represents a COSM trigger which can be connected to any pipelines
 class COSMSource( models.Model ):
@@ -39,7 +41,7 @@ class COSMSource( models.Model ):
     #Extracts the data from the COSM trigger.
     #We could do something more clever here to stick datastreams together, but this works for now.
     def receive_data(self,msg):
-        print "DS:",str(self.pipelines),"Got message for pipelines:",str(msg)
+        log.debug( "got data %s" % msg)
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         datapoint = {}
@@ -77,40 +79,41 @@ class COSMSource( models.Model ):
         data = { "trigger_type":"change" }
         data["environment_id"]=self.feed_id
         data["stream_id"]=self.stream_id 
+#        import ipdb; ipdb.set_trace()
+        domain = 'cursivedata.co.uk'
+        port = '80'
         url = self.get_url(domain,port)
         if not re.match("^http://",url):
             url = "http://"+url
         data["url"]=url
         
-        print "Setting up COSM trigger for pipelines",self.pipelines,\
-            " from feed:",self.feed_id,", stream:",self.stream_id,", API Key: ",self.api_key
-        print "Pointing to URL:",data['url']
+        log.info("Setting up COSM trigger for pipelines %s from feed %s stream %s key %s" % (self.pipelines ,self.feed_id, self.stream_id, self.api_key))
+        log.info("Pointing to URL %s" % data['url'])
         r=requests.post(self.cosm_url,data=json.dumps(data),headers = headers)
         if r.status_code == 201:
             cosm_trigger_id=r.headers['location'].split("/")[-1]
-            print "Setup with id:",cosm_trigger_id
+            log.info("Setup with id: %s" % cosm_trigger_id)
             self.cosm_trigger_id=cosm_trigger_id
             self.save()
             return "OK"
         elif r.status_code == 404:
-            print "no such stream id, check stream id"
+            log.warning("no such stream id, check stream id")
         elif r.status_code == 401:
-            print "not authorized, check api key"
+            log.warning("not authorized, check api key")
         elif r.status_code == 500:
-            print "no such data stream, check environment id"
+            log.warning("no such data stream, check environment id")
         else:
-            print "unknown error"
-            print r.status_code
-            print json.loads(r.text)
+            log.warning("unknown error: %d %s" % (r.status_code, json.loads(r.text)))
         
     def stop_trigger(self):
         if self.cosm_trigger_id :
-            print "Removing trigger"
+            log.info("Removing trigger")
             requests.delete(self.cosm_url+str(self.cosm_trigger_id),headers={'X-ApiKey':self.api_key})
             self.cosm_trigger_id=""
             self.save()
         else:
-            print "Trigger not set"
+            log.info("Trigger not set")
+
     def is_running(self):
         if self.cosm_trigger_id:
             return True

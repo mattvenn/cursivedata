@@ -10,6 +10,9 @@ from pysvg.parser import parse
 from pysvg.shape import *
 import math
 
+import logging
+log = logging.getLogger('graphics')
+
 class Drawing:
     doc = None
     shapes = pysvg.builders.ShapeBuilder()
@@ -83,12 +86,25 @@ class Drawing:
             for e in svg_parsed.getAllElements():
                 self.doc.addElement( e )
         except (ExpatError, IOError) as e:
-            print "problem parsing %s:%s" % (svg_file,e)
+            log.error("problem parsing %s:%s" % (svg_file,e))
             raise
 
     def load_svg(self,svg_file):
         svg_parsed = parse(svg_file)
         return svg_parsed
+
+    def get_first_group_from_file(self,name):
+        svg = self.load_svg(name)
+        return self.get_first_group(svg)
+
+    def get_first_group(self,svg):
+        groups = svg.getElementsByType(pysvg.structure.g)
+        #but defs is also a group and we don't want it
+        #there must be a better way to find element type but this is what I've got
+        for group in groups:
+            if group._elementName == 'g':
+                return group
+        return None
 
 class Grid:
     def __init__(self, drawing, nx=None, ny=None,force_square=True ):

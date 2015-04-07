@@ -3,6 +3,8 @@ bugs:
 """
 from django.utils.datetime_safe import datetime
 import math
+import logging
+log = logging.getLogger('generator')
 
 def get_division(date,params,internal_state):
     minute = int( date.strftime("%M") ) # minute 0 -59
@@ -32,7 +34,7 @@ def process(drawing,data,params,internal_state) :
     for point in data.get_current():
 
         div = get_division(point.date,params,internal_state)
-        value = float(point.data['value'])
+        value = float(point.getValue())
         length = (value / params.get('value'))*circle_r
         if length > circle_r:
             length = circle_r
@@ -49,13 +51,9 @@ def process(drawing,data,params,internal_state) :
 
 ##all this stuff needs a bit of work, been hacked at mfuk
 def begin(drawing,params,internal_state) :
-#    print "Starting drawing squares: ",map(str,params)
     pass
     
 def end(drawing,params,internal_state) :
-    #print "Ending drawing with params:",map(str,params)
-    #content="Ended at " + str(datetime.now())
-    #drawing.bl_text(content,stroke="red",size=15)
     pass
     
 def get_params() :

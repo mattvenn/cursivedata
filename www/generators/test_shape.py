@@ -2,6 +2,9 @@ import pysvg.text
 import colorsys
 from pysvg.builders import *
 
+import logging
+log = logging.getLogger('generator')
+
 #Not used now. Left for posterity and how to do paths
 def square(x,y,width,height,dwg):
     style_dict = { "fill":"none", "stroke":"#000", "stroke-width":"1" }
@@ -15,8 +18,30 @@ def square(x,y,width,height,dwg):
     dwg.addElement(p)
 
 def process(drawing,data,params,internal_state) :
-    print "Drawing an example rectangle",map(str,params)
-    drawing.rect(params.get('x'),params.get('y'),params.get('Width'),params.get('Height')) 
+    colour = internal_state.get("colour",0)
+    rotate = internal_state.get("rotate",0)
+    x = params.get('x')
+    y = params.get('y')
+    for point in data.get_current():
+        if point.getStreamName() == params.get('colourid'):
+            log.debug("colour = %f" %  point.getValue())
+            colour = point.getValue()
+        elif point.getStreamName() == params.get('rotateid'):
+            log.debug("rotate = %f" % point.getValue())
+            rotate = point.getValue()
+        else:
+            colour = 0
+            rotate = 0
+
+    transform = "rotate(%d,%d,%d)" % (rotate,x,y)
+    colour = 'rgb({0},{0},{0})'.format(colour)
+
+    log.debug("Drawing an example rectangle with params: %s" % params)
+    drawing.rect(x,y,params.get('Width'),params.get('Height'),transform=transform,fill=colour) 
+
+    internal_state["colour"] = colour
+    internal_state["rotate"] = rotate
+
     return None
 
 def get_params() :
@@ -24,7 +49,9 @@ def get_params() :
              {"name":"Width", "default": 100, "description":"width in mm" },
              {"name":"Height", "default": 100, "description":"height in mm" }, 
              {"name":"x", "default": 0, "description":"x offset" },
-             {"name":"y", "default": 0, "description":"y offset" }, ]
+             {"name":"y", "default": 0, "description":"y offset" }, 
+             {"name":"colourid", "default": 0, "description":"which source name for colour", 'data_type':"text" }, 
+             {"name":"rotateid", "default": 1, "description":"which source name for rotation", 'data_type':"text" }, ]
 
 def get_name() : return "Shape Test"
 def get_description() : return "Draw a square at the set position"

@@ -1,0 +1,1 @@
+{"home_speed": 450, "left_limit": 140, "stepsPerMM": 49.5, "top_margin": 170, "gondola_height": 37.0, "height": 580.0, "lowpower_pwm": 10, "width": 760.0, "right_limit": 140, "microstep": 8, "hanger_l": 0, "home_pwm_high": 250, "gondola_width": 55.0, "default_pwm": 150, "id": 10, "home_pwm_low": 100, "draw_speed": 600, "side_margin": 185}

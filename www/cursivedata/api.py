@@ -14,6 +14,9 @@ from django.utils import simplejson
 from django.http import QueryDict
 from django.utils import timezone
 
+import logging
+log = logging.getLogger('api')
+
 class CustomJSONSerializer(Serializer):
     
     def from_json(self, content):
@@ -38,7 +41,7 @@ class DataStoreResource(ModelResource):
     #Special update - only allows adding data in the "input data" field
     def obj_update(self, bundle, request=None, **kwargs):
         store = bundle.obj
-        print "Adding data to:",store.name
+        log.debug("Adding data to:%s" % store.name)
         store.add_data(bundle.data["input_data"])
         store.save()
         return store
@@ -52,18 +55,17 @@ class COSMSourceResource(ModelResource):
         allowed_methods = ['get','post','patch']
     
     def post_detail(self, request, **kwargs):
-        print "COSM UPDATE!"
         store_id=int(request.path.split("/")[-2])
-        ce = COSMSource.objects.get(id=store_id) #Uuuugh. Sorry!
-        print "Trying to get post stuff"
+        log.info("cosm update for datastore %d" % store_id)
+        ce = COSMSource.objects.get(id=store_id)  # Uuuugh. Sorry!
         data_string = request.POST.get('body') or request.raw_post_data
         data = json.loads(data_string)
-        #    print "Data:",data
+        log.debug("data is %s" % data)
         try:
             ce.receive_data(data)
             return {"OK":"True"}
-        except Exception, e:
-            print ">>cosm update failed!", e
+        except Exception as e:
+            log.exception("cosm update failed: %s" % str(e))
     
 class EndpointResource(ModelResource):
     class Meta:
@@ -78,7 +80,5 @@ class EndpointResource(ModelResource):
         endpoint = bundle.obj
         endpoint.status_updated = timezone.now()
         endpoint.save() 
-        #print "Width: ",endpoint.width," Height:",endpoint.height," top margin:",endpoint.top_margin," side margin:", endpoint.side_margin
-        #print "Status: ",endpoint.status," status updated:",endpoint.status_updated
-        print "endpoint " + endpoint.id + " updated:",endpoint.status_updated
+        log.info("endpoint %s updated: %s" % (endpoint.id, endpoint.status_updated))
         return res

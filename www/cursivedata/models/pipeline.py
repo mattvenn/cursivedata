@@ -27,7 +27,8 @@ import os
 from cursivedata.drawing import Drawing
 from cursivedata.models.cosm import COSMSource
 
-
+import logging
+log = logging.getLogger('pipeline')
 
 #A complete pipeline from data source through to a running algorithm
 class Pipeline( DrawingState ) :
@@ -35,8 +36,8 @@ class Pipeline( DrawingState ) :
     description = models.CharField(max_length=2000,default="",blank=True)
     generator = models.ForeignKey( Generator)
     data_store = models.OneToOneField( DataStore)
-    state = models.OneToOneField( GeneratorState)
-    endpoint = models.ForeignKey( "Endpoint")
+    state = models.OneToOneField(GeneratorState)
+    endpoint = models.ForeignKey("Endpoint")
     paused = models.BooleanField(default=False)
     sources = models.ManyToManyField(COSMSource, through=COSMSource.pipelines.through, blank=True)
 
@@ -73,7 +74,7 @@ class Pipeline( DrawingState ) :
     #Not sure why we need to pass the data object in, but using self.data_store gives funny results
     def update( self, data=None ) :
         if self.paused:
-            print "pipeline paused"
+            log.debug("pipeline paused")
             return
         #check if we need to do an auto begin
         if self.auto_begin_days:
@@ -88,13 +89,13 @@ class Pipeline( DrawingState ) :
                 #update the next auto time
                 self.next_auto_begin_date = timezone.now().replace(hour=0,minute=0,second=0,microsecond=0)+timezone.timedelta(days=self.auto_begin_days)
                 self.save()
-                print ">>>pipeline", self.name, " auto begin"
+                log.info("pipeline %s auto begin" % self.name)
                 self.begin()
 
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state
-        print "Asking generator if it can run"
+        log.debug("Asking generator if it can run")
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
             svg_document = self.create_svg_doc()
@@ -102,20 +103,12 @@ class Pipeline( DrawingState ) :
             self.state.save()
             data.clear_current()
             if len(svg_document.getXML()) == 0:
-                print "!!! found empty XML"
-                #import pdb; pdb.set_trace()
-#            if self.id == 4:
-#                import pdb; pdb.set_trace()
-#                print svg_document.getXML()
-            try:
-                self.add_svg( svg_document )
-            except Exception:
-                #import pdb; pdb.set_trace()
-                pass
+                log.warning("found empty XML")
+            self.add_svg( svg_document )
             self.generator.update_last_used()
-            print "Generator run OK!"
+            log.info("Generator run OK!")
         else:
-            print "Generator not ready to run"
+            log.debug("Generator not ready to run")
     
     def begin(self):
         self.reset();
@@ -133,7 +126,7 @@ class Pipeline( DrawingState ) :
 
     def add_svg(self, svg_document ):
         super(Pipeline, self).add_svg(svg_document)
-        print str(self)," sending data from ",str(self.generator),"to endpoint", str(self.endpoint)
+        log.debug("%s sending data from %s to endpoint %s" % (str(self), str(self.generator), str(self.endpoint)))
         self.endpoint.input_svg( self.last_svg_file,self)
     
     def reset(self):

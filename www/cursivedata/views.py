@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.forms.extras.widgets import SelectDateWidget
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, Http404, Http204, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
@@ -22,6 +22,9 @@ from django.forms.widgets import Textarea, TextInput
 from django.utils.datetime_safe import datetime
 from django import forms
 import re
+
+import logging
+log = logging.getLogger('views')
 
 def contact(request):
     message = request.POST.get('message', '')
@@ -94,31 +97,31 @@ def create_source(request):
 def show_pipeline(request, pipelineID):
     try:
         user_timezone = request.session.get('current_timezone') or settings.TIME_ZONE
-        if timezone:
-             timezone.activate(user_timezone)
+#        if timezone:
+#             timezone.activate(user_timezone)
         act = request.POST.get('action',"none")
         pipeline = Pipeline.objects.get(pk=pipelineID)
         if act == "Reset":
             pipeline.reset()
         elif act == "Modify":
-            print act 
             form = PipelineModify(request.POST,instance=pipeline) # A form bound to the POST data
 #            import pdb; pdb.set_trace()
-            print form.errors
+            if form.errors:
+                log.warning("got errors: %s" % form.errors)
 
             if form.is_valid(): # All validation rules pass
                 #better way of doing this?
                 pipeline.sources = form.cleaned_data['sources']
                 pipeline.generator = form.cleaned_data['generator']
                 pipeline.endpoint = form.cleaned_data['endpoint']
-                print "new endpoint:", form.cleaned_data['endpoint']
+                log.debug("new endpoint: %s" % form.cleaned_data['endpoint'])
                 pipeline.save()
         elif act == "Resume":
-            print "resume"
+            log.debug("resume")
             pipeline.resume()
         elif act == "Pause":
-            print "pause"
-            print pipeline.pause()
+            log.info("pause")
+            pipeline.pause()
         elif act == "Begin":
             pipeline.begin()
         elif act == "End":
@@ -127,12 +130,12 @@ def show_pipeline(request, pipelineID):
             pipeline.print_top_left_x = 0
             pipeline.print_top_left_y = 0
             pipeline.print_width = pipeline.endpoint.img_width
-            print pipeline.print_width
+            log.debug("pipeline print width = %s" % pipeline.print_width)
             pipeline.update_size(pipeline.endpoint.img_width,pipeline.endpoint.img_height)
             pipeline.save()
         elif act == "Update Size":
-            pipeline.update_size( int(request.POST.get('pipeWidth',pipeline.img_width)),
-                    int(request.POST.get('pipeHeight',pipeline.img_height)))
+            pipeline.update_size( float(request.POST.get('pipeWidth',pipeline.img_width)),
+                    float(request.POST.get('pipeHeight',pipeline.img_height)))
         elif act == "Update Print Location":
             pipeline.print_top_left_x = request.POST.get("xOffset")
             pipeline.print_top_left_y = request.POST.get("yOffset")
@@ -141,10 +144,16 @@ def show_pipeline(request, pipelineID):
         elif act == "Update Parameters":
             for (key, value) in request.POST.iteritems():
                 if key.startswith("param"):
-                    pipeline.state.params[key.replace("param","")]= float(value)
+                    key = key.replace("param","")
+                    data_type = pipeline.generator.get_param(key).data_type
+
+                    if data_type == 'float':
+                        value = float(value)
+
+                    pipeline.state.params[key]= value
             pipeline.state.save()
         elif act != "none":
-            print "Unknown pipeline action:",act
+            log.warning("unknown pipeline action: %s" % act)
         
         form = PipelineModify(instance=pipeline) 
         context = {"pipeline":pipeline, "form": form}
@@ -180,10 +189,10 @@ def show_endpoint(request, endpointID):
         endpoint = Endpoint.objects.get(pk=endpointID)
         act = request.POST.get('action',"none")
         if act == "Calibrate":
-            print "Calibrating..."
+            log.debug("calibrating")
             endpoint.calibrate()
         elif act == "Upload SVG":
-            print "uploading svg"
+            log.debug("uploading svg")
             width = request.POST.get("width","0")
             if width == "":
                 width = 0
@@ -192,9 +201,9 @@ def show_endpoint(request, endpointID):
             else:
                 messages.add_message(request, messages.ERROR, 'no svg file found')
         elif act == "Move Area":
-            print endpoint.movearea()
+            endpoint.movearea()
         elif act == "Reset":
-            print endpoint.reset()
+            endpoint.reset()
         elif act == "Start Gcode":
             endpoint.generate_gcode = True;
             endpoint.save()
@@ -202,15 +211,13 @@ def show_endpoint(request, endpointID):
             endpoint.generate_gcode = False;
             endpoint.save()
         elif act == "Resume":
-            print "resume"
             endpoint.resume()
         elif act == "Pause":
-            print "pause"
-            print endpoint.pause()
+            endpoint.pause()
         elif act == "Update Parameters":
-            print "Update Params"
+            pass
         elif act != "none":
-            print "Unknown action:",act
+            log.warning("unknown action: %s" % act)
     except Endpoint.DoesNotExist:
         raise Http404
     except Exception, e:
@@ -233,7 +240,6 @@ def create_generator(request):
             module_name=create_form.cleaned_data['module_name']
             
             source = create_form.cleaned_data['source_id']
-            print "Source:",source
             g = Generator( name=name, description=description, module_name=module_name )
             shutil.copy(source.get_filename(), g.get_filename())
             g.save()
@@ -290,14 +296,14 @@ def show_generator(request, generatorID):
         output_lines = []
         
         data = select_form.query_data_store(ds_form.data_store)
-        print "loaded %d lines" % len(data)
+        log.debug("loaded %d lines" % len(data))
         
         act = request.POST.get('action',"none")
         if act == "Run" :
             if ds_form.data_store :
                 (filename,output_lines) = GeneratorRunner().run(generator,data,param_values,width,height)
             else:
-                print "No data store setup"
+                log.warning("no data store setup")
         elif act == "Create Datastore":
             ds_form.create_data_store(request.POST.get("ds_name","Unnamed Datastore"))
         elif act == "Import CSV":
@@ -316,7 +322,7 @@ def show_generator(request, generatorID):
             code_form = GeneratorCode(request.POST)
             code_form.save_code(generator)
         else:
-            print "Unknown Action:",act
+            log.warning("unknown Action: %s" % act)
             
         code_form = GeneratorCode()
         code_form.load_code(generator)
@@ -345,7 +351,7 @@ class SelectOrMakeDataStore(forms.Form):
         if self.data_store :
             self.data_store.load_from_csv(file.read().split("\n"),time_field=time_field)
         else:
-            print "generator doesn't have a data store yet"
+            log.warning("generator doesn't have a data store yet")
     
 class DataStoreSettings(forms.Form):
     max_time = forms.DateTimeField(widget=SelectDateWidget,label="Data Before",required=False)
@@ -381,21 +387,26 @@ def get_gcode(request, endpointID ):
         endpoint = Endpoint.objects.get(pk=endpointID)
         filename = endpoint.get_next_filename()
     except Endpoint.DoesNotExist:
+        log.warning("endpoint %s doesn't exist" % endpointID)
         raise Http404
     if endpoint.paused:
-        print "endpoint is paused"
+        log.info("endpoint is paused")
         raise Http404
-    print "Filename",filename
     if not filename:
-        raise Http404
-    consume =request.REQUEST.get('consume',False)
+        log.info("no gcodes waiting to be served")
+        raise Http204
+
+    log.debug("filename = %s" % filename)
+    consume = request.REQUEST.get('consume', False)
+
     if consume:
-        print "Consuming..."
+        log.debug("consuming...")
         endpoint.consume()
     try:
         wrapper = FileWrapper(file(filename))
     except IOError:
-        print "no gcode file when we expected one"
+        log.warning("no gcode file %s so calling endpoint.consume()" % filename)
+        endpoint.consume()
         raise Http404
     response = HttpResponse(wrapper, content_type='text/plain')
     response['Content-Length'] = os.path.getsize(filename)
@@ -464,4 +475,4 @@ class PipelineCreation(ModelForm):
 class COSMSourceCreation(ModelForm):
     class Meta:
         model = COSMSource
-        fields = ( 'name', 'feed_id', 'stream_id' )
+        fields = ( 'name', 'feed_id', 'stream_id', 'use_stream_id' )
