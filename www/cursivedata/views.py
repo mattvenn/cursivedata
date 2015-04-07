@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.forms.extras.widgets import SelectDateWidget
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, Http404, Http204, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
@@ -393,7 +393,8 @@ def get_gcode(request, endpointID ):
         log.info("endpoint is paused")
         raise Http404
     if not filename:
-        raise Http404
+        log.info("no gcodes waiting to be served")
+        raise Http204
 
     log.debug("filename = %s" % filename)
     consume = request.REQUEST.get('consume', False)
