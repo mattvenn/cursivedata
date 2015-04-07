@@ -165,9 +165,12 @@ def fetch_data():
                 if args.verbose:
                     print "%d: got %d gcodes from server" % ( count, len(new_codes) )
                 gcodes = gcodes + new_codes
-            elif r.status_code == 404:
+            elif r.status_code == 204:
                 #end of the gcodes
                 return gcodes
+            elif r.status_code == 404:
+                print("server has a problem with the gcodes")
+                print("try refreshing URL by hand to clear bad gcode files")
             else:
                 print "unexpected server response ", r.status_code 
                 return None
