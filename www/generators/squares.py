@@ -63,7 +63,7 @@ def process(drawing,data,params,internal_state) :
 
 def begin(drawing,params,internal_state) :
     log.info("Starting drawing squares with params: %s" % map(str,params))
-    drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
+    #drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
     
 def end(drawing,params,internal_state) :
     log.info("Ending drawing")

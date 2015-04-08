@@ -95,7 +95,7 @@ class Pipeline( DrawingState ) :
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state
-        log.debug("Asking generator if it can run")
+        log.debug("asking generator if it can run")
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
             svg_document = self.create_svg_doc()
@@ -106,9 +106,9 @@ class Pipeline( DrawingState ) :
                 log.warning("found empty XML")
             self.add_svg( svg_document )
             self.generator.update_last_used()
-            log.info("Generator run OK!")
+            log.info("generator %s run ok for pipeline %s" % (self.generator.name, self.name))
         else:
-            log.debug("Generator not ready to run")
+            log.debug("generator not ready to run")
     
     def begin(self):
         self.reset();
