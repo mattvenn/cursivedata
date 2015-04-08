@@ -98,17 +98,30 @@
     
     <div class="row">
             <h2>Current drawing</h2>
-                <!--<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />-->
-                <!-- someone please fix this terrible shit -->
+                <!-- svg -->
                 <div style="background:#fff">
-                    <a href="/{{pipeline.full_svg_file}}"><embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /></a><br/>
-                    </div>
-                    <input id="slider" width="600px" type="range" min="0" max="0" step="1" onchange="toggleVis()">
-                    <input id="rangeVal" type="text" size="8" /><br>
+                    <a href="/{{pipeline.full_svg_file}}"><embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /></a>
+                <!-- controls -->
+                <div>
+		<input type="submit" id="play-animation" onclick="SVGAnimation.playFromStart()" value="Play" style="width:50px;">
+		<input id="frame" type="range" min="0" max="0" step="1" onchange="SVGAnimation.setFrame()" oninput="SVGAnimation.setFrame()" style="width:450px;">
+		<input id="rangeVal" type="text" style="width:100px;display:inline;"/>
+        <input type="hidden" id="speed" value="500">
+        </div>
+		<!-- <input type="submit" id="play-animation" onclick="SVGAnimation.play()" value="Play from current position"> -->
+		<!-- <input type="submit" id="stop-animation" onclick="SVGAnimation.stop()" value="Stop"> -->
+        <!--
+		<label>Playback speed:</label>
+		<input id="speed" type="range" min="0" max="0" step="1" onchange="SVGAnimation.changeSpeed()" title="Choose speed (up to a factor of ten)"> -->
+	</div>
+
+
+    <div>
+                    <!-- links -->
                     <a href="/{{pipeline.full_svg_file}}">image link</a><br/>
-                    <a href="{% url cursivedata:embed_pipeline pipeline.id%}">embeddable svg</a></div>
+                    <a href="{% url cursivedata:embed_pipeline pipeline.id%}">embeddable svg</a>
                     
-                </div>
+    </div>
         <!--
 		<div class="mainOutput">
 			<h3> Last Update <h3>
