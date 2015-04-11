@@ -4,7 +4,10 @@ var SVGAnimation = {
 
 	/* Set behaviour via these properties */
 	
-	refreshSpeed : 500, // Original method = 25% CPU usage, current = 35%
+	refreshSpeed : 100, // Original method = 25% CPU usage, current = 35%
+    minSpeed: 100,
+    maxSpeed: 1000,
+    currentSpeed: 500,
 	_playing : false,
 	
 	/* Handler methods */
@@ -18,9 +21,9 @@ var SVGAnimation = {
 		frameEl.max = parseInt( elements[elements.length-1].id );
 		frameEl.value = parseInt( frameEl.max );
 		//frameEl.dataset.oldValue = '' + frameEl.max;
-		speed.min = parseInt( this.refreshSpeed );
-		speed.max = parseInt( this.refreshSpeed * 10 );
-		speed.value = parseInt( this.refreshSpeed );
+		speed.min = this.minSpeed;
+		speed.max = this.maxSpeed;
+		speed.value = this.currentSpeed;
 		SVGDocument.children[0].setAttribute( 'id', 'background' );
 		this._reverseNodes( SVGDocument );
 		this.setFrame( frameEl.max );
@@ -91,7 +94,7 @@ var SVGAnimation = {
 	_getTime : function( $secs ) { // Currently inactive
 		var t = new Date( 1970, 0, 1 );
 		t.setSeconds( $secs );
-		return ( '0' + t.getHours() ).slice( -2 ) + ':' + ( '0' + t.getMinutes() ).slice( -2 ) + ':' + ( '0' + t.getSeconds() ).slice( -2 );
+		return ( '0' + t.getMonth() ).slice( -2 )  + ' ' + ( '0' + t.getHours() ).slice( -2 ) + ':' + ( '0' + t.getMinutes() ).slice( -2 ) + ':' + ( '0' + t.getSeconds() ).slice( -2 );
 	},
 	_moveNode : function( $node, $relation ) {
 		$node.parentNode.insertBefore( $node, $relation );
