@@ -26,7 +26,8 @@ var SVGAnimation = {
 		speed.min = this.minSpeed;
 		speed.max = this.maxSpeed;
 		speed.value = this.currentSpeed;
-		//SVGDocument.children[0].setAttribute( 'id', 'background' );
+        //this was commented out by Adnan
+		SVGDocument.children[0].setAttribute( 'id', 'background' );
 		this._reverseNodes( SVGDocument );
 
 		this.setFrame( frameEl.max );
