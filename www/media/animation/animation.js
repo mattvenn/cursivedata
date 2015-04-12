@@ -15,26 +15,31 @@ var SVGAnimation = {
 	setup : function() {
 		var frameEl = document.getElementById( 'frame' ),
 			speed = document.getElementById( 'speed' ),
-			SVGDocument = document.getElementById( 'embed' ).getSVGDocument().children[0],
+			//SVGDocument = document.getElementById( 'embed' ).getSVGDocument().children[0],
+			SVGDocument = document.getElementById( 'embed' ).getSVGDocument().documentElement,
 			elements = SVGDocument.getElementsByClassName( 'frame' );
-		frameEl.min = parseInt( elements[0].id );
+		
+			frameEl.min = parseInt( elements[0].id );
 		frameEl.max = parseInt( elements[elements.length-1].id );
 		frameEl.value = parseInt( frameEl.max );
 		//frameEl.dataset.oldValue = '' + frameEl.max;
 		speed.min = this.minSpeed;
 		speed.max = this.maxSpeed;
 		speed.value = this.currentSpeed;
-		SVGDocument.children[0].setAttribute( 'id', 'background' );
+		//SVGDocument.children[0].setAttribute( 'id', 'background' );
 		this._reverseNodes( SVGDocument );
+
 		this.setFrame( frameEl.max );
 	},
 	play : function() {
 		var me = this,
-			SVGDocument = document.getElementById( 'embed' ).getSVGDocument().children[0],
+			SVGDocument = document.getElementById( 'embed' ).getSVGDocument().documentElement,
 			background = SVGDocument.getElementById( 'background' ),
 			frameEl = document.getElementById( 'frame' ),
 			frameCount = parseInt( frameEl.value ),
 			speed = parseInt( document.getElementById( 'speed' ).value );
+
+
 		this.stop();
 		this._playing = true;
 		this.animationCounter = setInterval( function frameTimer() {
@@ -58,12 +63,14 @@ var SVGAnimation = {
 		this._playing = false;
 	},
 	setFrame : function( $frame ) {
-		var SVGDocument = document.getElementById( 'embed' ).getSVGDocument().children[0],
+		var SVGDocument = document.getElementById( 'embed' ).getSVGDocument().documentElement,
 			background = SVGDocument.getElementById( 'background' ),
 			frameEl = document.getElementById( 'frame' );
+
 		if ( !!$frame ) {
 			frameEl.value = $frame;
 		}
+
 		this.stop();
 		this._moveNode( background, this._getNearestFrame( frameEl.value, frameEl.max ) );
 		this._updateTime();
@@ -97,6 +104,7 @@ var SVGAnimation = {
 		return ( '0' + t.getHours() ).slice( -2 ) + ':' + ( '0' + t.getMinutes() ).slice( -2 ) + ':' + ( '0' + t.getSeconds() ).slice( -2 );
 	},
 	_moveNode : function( $node, $relation ) {
+
 		$node.parentNode.insertBefore( $node, $relation );
 	},
 	_reverseNodes : function( $node ) {
@@ -108,6 +116,7 @@ var SVGAnimation = {
 		}
 		$node.appendChild( frag );
 		parentNode.insertBefore( $node, nextSibling );
+
 		return $node;
 	}
 }
