@@ -45,6 +45,12 @@ class COSMSource( models.Model ):
         value = msg["triggering_datastream"]["value"]["value"]
         time = msg["triggering_datastream"]["at"]
         datapoint = {}
+
+        # make a note of this in case an exception happens later on
+        self.last_updated = timezone.now()
+        self.last_value = value
+        self.save()
+
         if self.add_location :
             datapoint['location'] = {}
             datapoint['location']['lat'] = msg["environment"]["location"]["lat"]
