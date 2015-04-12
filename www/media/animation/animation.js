@@ -94,7 +94,7 @@ var SVGAnimation = {
 	_getTime : function( $secs ) { // Currently inactive
 		var t = new Date( 1970, 0, 1 );
 		t.setSeconds( $secs );
-		return ( '0' + t.getMonth() ).slice( -2 )  + ' ' + ( '0' + t.getHours() ).slice( -2 ) + ':' + ( '0' + t.getMinutes() ).slice( -2 ) + ':' + ( '0' + t.getSeconds() ).slice( -2 );
+		return ( '0' + t.getHours() ).slice( -2 ) + ':' + ( '0' + t.getMinutes() ).slice( -2 ) + ':' + ( '0' + t.getSeconds() ).slice( -2 );
 	},
 	_moveNode : function( $node, $relation ) {
 		$node.parentNode.insertBefore( $node, $relation );
