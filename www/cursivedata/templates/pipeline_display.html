@@ -11,7 +11,7 @@
                 <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
             {% endif %}
             <h4 class="subheader">
-            <div class="objectInfo">Sources<ul>{%for source in pipeline.sources.all%}<li><a href="{% url cursivedata:show_source source.id%}">{{source.name}}</a> last updated {{source.last_updated}}</li>{%endfor%}</ul></div>
+            <div class="objectInfo">Data Sources<ul>{%for source in pipeline.sources.all%}<li><a href="{% url cursivedata:show_source source.id%}">{{source.name}}</a> last updated {{source.last_updated}}</li>{%endfor%}</ul></div>
             <div class="objectInfo">Datastore id: {{pipeline.data_store_id}}</div>
             <div class="objectInfo">Generator: <a href="{% url cursivedata:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>, last updated: {{ pipeline.generator.last_used}}</div>
             <div>Endpoint: <a href="{% url cursivedata:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
@@ -100,28 +100,21 @@
             <h2>Current drawing</h2>
                 <!-- svg -->
                 <div style="background:#fff">
-                    <a href="/{{pipeline.full_svg_file}}"><embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /></a>
+                    <embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" />
+                </div>
+
+
                 <!-- controls -->
-                <div>
-		<input type="submit" id="play-animation" onclick="SVGAnimation.playFromStart()" value="Play" style="width:50px;">
-		<input id="frame" type="range" min="0" max="0" step="1" onchange="SVGAnimation.setFrame()" oninput="SVGAnimation.setFrame()" style="width:450px;">
-		<input id="rangeVal" type="text" style="width:100px;display:inline;"/>
-        <input type="hidden" id="speed" value="500">
-        </div>
-		<!-- <input type="submit" id="play-animation" onclick="SVGAnimation.play()" value="Play from current position"> -->
-		<!-- <input type="submit" id="stop-animation" onclick="SVGAnimation.stop()" value="Stop"> -->
-        <!--
-		<label>Playback speed:</label>
-		<input id="speed" type="range" min="0" max="0" step="1" onchange="SVGAnimation.changeSpeed()" title="Choose speed (up to a factor of ten)"> -->
-	</div>
-
-
-    <div>
+                <div style="width:600px">
+                    {% include "animation_controls.html" %}
                     <!-- links -->
                     <a href="/{{pipeline.full_svg_file}}">image link</a><br/>
                     <a href="{% url cursivedata:embed_pipeline pipeline.id%}">embeddable svg</a>
+                </div>
+	</div>
+
+
                     
-    </div>
         <!--
 		<div class="mainOutput">
 			<h3> Last Update <h3>
