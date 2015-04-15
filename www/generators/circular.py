@@ -40,7 +40,7 @@ def process(drawing,data,params,internal_state) :
     if internal_state["start"] == 1:
         log.info("circles starting with new data")
         internal_state["start"] = 0
-        last_val = float(data.get_current()[0].data["value"])
+        last_val = float(data.get_current()[0].getValue())
         log.debug("init last_val to: %s" % last_val)
 
     circle_r = params.get("circle_r")
@@ -78,8 +78,8 @@ def process(drawing,data,params,internal_state) :
 ##all this stuff needs a bit of work, been hacked at mfuk
 def begin(drawing,params,internal_state) :
     log.info("Starting circular with params: %s" % params)
-    drawing.circle(drawing.width/2,drawing.height/2,params.get("circle_r")-5)
-    divs = int(params.get('divide'))
+    drawing.circle(drawing.width/2,drawing.height/2,params.get("circle_r",5)-5)
+    divs = int(params.get('divide',1))
     internal_state["last_length"]= [0 for i in range(divs)]
     internal_state["last_div"]= 0
     internal_state["last_val"] = 0
