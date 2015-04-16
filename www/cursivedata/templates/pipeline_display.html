@@ -121,13 +121,12 @@
 			<img class="bigPic latestImage" src="/{{pipeline.last_svg_file}}" />
 		</div>
         -->
-	</div>
     <div class="row">
 	<h2>Latest drawings</h2>
         <ul class="block-grid three-up">
             {% for output in pipeline.get_recent_output %}
                 <li>
-                <div class="outputContainer"/>
+                <div class="outputContainer"></div>
                 <img src="/{{output.filename}}" >
                 {{output.modified}}
                 </li>
