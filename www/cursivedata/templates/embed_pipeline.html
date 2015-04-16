@@ -16,10 +16,10 @@
     </style>
 </head>
 <body onload="start()">
-    <div style="background:#fff">
+    <div class="outputContainer" style="background:#fff">
         <embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" />
     </div>
-    <div style="width:600px">
+    <div class="animationControls" style="width:600px">
         {% include "animation_controls.html" %}
         <a href="{% url cursivedata:show_pipeline pipeline.id%}">Data</a>
     </div>
