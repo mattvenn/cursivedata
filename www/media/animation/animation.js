@@ -13,12 +13,17 @@ var SVGAnimation = {
 	/* Handler methods */
 	
 	setup : function() {
-		var frameEl = document.getElementById( 'frame' ),
-			speed = document.getElementById( 'speed' ),
+
+		var frameEl = document.getElementById( 'frame' );
+		var speed = document.getElementById( 'speed' );
 			//SVGDocument = document.getElementById( 'embed' ).getSVGDocument().children[0],
-			SVGDocument = document.getElementById( 'embed' ).getSVGDocument().documentElement,
-			elements = SVGDocument.getElementsByClassName( 'frame' );
-		
+		var SVGDocument = document.getElementById( 'embed' ).getSVGDocument().documentElement;
+
+		//SVGDocument = SVGDocument.;
+		var elements = SVGDocument.querySelectorAll( '.frame' );
+		//console.log(ele)
+		//alert(SVGDocument);
+			
 			frameEl.min = parseInt( elements[0].id );
 		frameEl.max = parseInt( elements[elements.length-1].id );
 		frameEl.value = parseInt( frameEl.max );
@@ -26,9 +31,9 @@ var SVGAnimation = {
 		speed.min = this.minSpeed;
 		speed.max = this.maxSpeed;
 		speed.value = this.currentSpeed;
-		//SVGDocument.children[0].setAttribute( 'id', 'background' );
-		this._reverseNodes( SVGDocument );
 
+		SVGDocument.firstElementChild.setAttribute( 'id', 'background' );
+		this._reverseNodes( SVGDocument );
 		this.setFrame( frameEl.max );
 	},
 	play : function() {
