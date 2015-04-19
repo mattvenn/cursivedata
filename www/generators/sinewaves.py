@@ -24,7 +24,7 @@ def process(drawing,data,params,internal_state) :
     return None
 
 def draw_wave(drawing,params,datapoint,index) :
-    res = params.get("Resolution",1000)
+    res = int(params.get("Resolution",1000))
     amp = ( params.get("Amplitude",0.1) * drawing.height ) * ( 1 + params.get("Amplitude Modulation",0) * datapoint ) 
     freq = ( params.get("Frequency") * 2 * math.pi ) * ( 1 + params.get("Frequency Modulation",0) * datapoint ) 
     phase = ( params.get("Phase",0) * 2 * math.pi ) * ( 1 + params.get("Phase Modulation") * datapoint ) 
