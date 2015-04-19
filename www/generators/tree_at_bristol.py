@@ -291,7 +291,7 @@ def can_run(data,params,internal_state):
     for point in data.get_current():
         current_minute = get_minute(point.date) 
         if point.getStreamName() == params.get('sun_name'):
-            log.info("found sun point")
+            log.debug("found sun point")
             log.debug("can run? %d > %d + %d" % (current_minute, sun_minute, interval))
             if current_minute > sun_minute + interval:
                 log.info("sun time out, running")
@@ -301,6 +301,5 @@ def can_run(data,params,internal_state):
             if current_minute > power_minute + interval:
                 log.info("power time out, running")
                 return True 
-    log.info("tree at bristol")
     return False
 
