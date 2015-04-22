@@ -28,6 +28,7 @@
 
               <!-- current -->
               <li>
+                <div class="outputContainer"></div>
                 <a href="{% url cursivedata:show_pipeline pipeline.id %}"><img class="imgforIE" style="height:auto;" src="/{{pipeline.full_svg_file}}" /></a>
                 <p><a href="{% url cursivedata:show_pipeline pipeline.id %}">{{ pipeline.last_updated }}</a></p>
               </li>
