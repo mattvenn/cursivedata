@@ -13,9 +13,18 @@
                 <!-- controls -->
                 <div style="width:600px">
                     {% include "animation_controls.html" %}
-                    <!-- links -->
-                    <a href="{% url cursivedata:show_pipeline pipeline.id%}">Data</a>
                 </div>
+
+    </div>
+    <div class="row">
+                    <!-- links -->
+                    <ul>
+                    <li>
+                    {{output.modified}}
+                    </li>
+                    <li> <a href="{% url cursivedata:show_pipeline pipeline.id%}">Pipeline</a>
+                    </li>
+                    </ul>
 	</div>
 
 
