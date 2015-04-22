@@ -3,7 +3,7 @@
 {% block content %}
 
   <div class="row">
-  <h2>Pattern generators</h2>
+  <h2>Recently updated visualisations</h2>
   </div>
 
 {% if pipeline_list %}
@@ -25,13 +25,20 @@
 
   <div class="row">
     <ul class="block-grid three-up">
-				{% for output in pipeline.get_recent_output %}
+
+              <!-- current -->
+              <li>
+                <a href="{% url cursivedata:show_pipeline pipeline.id %}"><img class="imgforIE" style="height:auto;" src="/{{pipeline.full_svg_file}}" /></a>
+                <p><a href="{% url cursivedata:show_pipeline pipeline.id %}">{{ pipeline.last_updated }}</a></p>
+              </li>
+                <!-- 2 most recent -->
+				{% for output in pipeline.get_recent_output|slice:":2" %}
                 <li>
-					<div class="outputContainer">
-						<img src="/{{output.filename}}" >
-						{{output.modified}}
-					</div>
+                <div class="outputContainer"></div>
+                <a href="{% url cursivedata:pipeline_previous pipeline.id output.id %}"><img class="imgforIE" style="height:auto;" src="/{{output.filename}}" >
+                {{output.modified}}</a>
                 </li>
+
 				{% endfor %}
     </ul>
     </div>

@@ -48,7 +48,7 @@ class DrawingState( models.Model ):
 
     @property
     def is_live(self):
-        live_date = timezone.now()-timezone.timedelta(hours=1)
+        live_date = timezone.now()-timezone.timedelta(hours=12)
         if self.last_updated > live_date:
             return True
         return False

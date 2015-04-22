@@ -59,15 +59,24 @@ def list_sources(request):
     return render(request,"sources_list.html",context)
 
 def embed_pipeline(request,pipelineID):
-    pipeline = Pipeline.objects.get(pk=pipelineID)
-    context = {"pipeline":pipeline}
-    return render(request,"embed_pipeline.html",context)
+    try:
+        pipeline = Pipeline.objects.get(pk=pipelineID)
+        context = {"pipeline":pipeline}
+        return render(request,"embed_pipeline.html",context)
+    except Pipeline.DoesNotExist as e:
+        raise Http404
 
 def pipeline_previous(request,pipelineID,outputID):
-    pipeline = Pipeline.objects.get(pk=pipelineID)
-    output = StoredOutput.objects.get(pk=outputID)
-    context = {"pipeline":pipeline, "output":output}
-    return render(request,"pipeline_previous.html",context)
+    try:
+        pipeline = Pipeline.objects.get(pk=pipelineID)
+        output = StoredOutput.objects.get(pk=outputID)
+        context = {"pipeline":pipeline, "output":output}
+        return render(request,"pipeline_previous.html",context)
+    except Pipeline.DoesNotExist as e:
+        raise Http404
+    except StoredOutput.DoesNotExist as e:
+        raise Http404
+        
 
 def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
