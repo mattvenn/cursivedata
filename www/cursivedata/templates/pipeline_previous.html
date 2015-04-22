@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Pipeline{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <h2>{{pipeline.name}}</h2>
+                <!-- svg -->
+                <div style="background:#fff">
+                    <embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{output.filename}}" type="image/svg+xml" id="embed" />
+                </div>
+
+
+                <!-- controls -->
+                <div style="width:600px">
+                    {% include "animation_controls.html" %}
+                    <!-- links -->
+                    <a href="{% url cursivedata:show_pipeline pipeline.id%}">Data</a>
+                </div>
+	</div>
+
+
+{% endblock %}

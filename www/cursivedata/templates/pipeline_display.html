@@ -127,7 +127,7 @@
             {% for output in pipeline.get_recent_output %}
                 <li>
                 <div class="outputContainer"></div>
-                <img src="/{{output.filename}}" >
+                <a href="{% url cursivedata:pipeline_previous pipeline.id output.id %}"><img src="/{{output.filename}}" ></a>
                 {{output.modified}}
                 </li>
 

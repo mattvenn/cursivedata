@@ -63,6 +63,12 @@ def embed_pipeline(request,pipelineID):
     context = {"pipeline":pipeline}
     return render(request,"embed_pipeline.html",context)
 
+def pipeline_previous(request,pipelineID,outputID):
+    pipeline = Pipeline.objects.get(pk=pipelineID)
+    output = StoredOutput.objects.get(pk=outputID)
+    context = {"pipeline":pipeline, "output":output}
+    return render(request,"pipeline_previous.html",context)
+
 def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
     context = {"pipeline_list":latest_pipelines}
