@@ -72,18 +72,7 @@
   ga('send', 'pageview');
 
 </script>   
-    <script>
-        function start()
-        {
-            SVGAnimation.currentSpeed = 1000;
-            SVGAnimation.setup();
-            SVGAnimation.playFromStart();
-        }
-    </script>
-    <!-- hide control elements -->
-    <style>
-    .hide{display:none}
-    </style>
+    {% include "animation_head.html" %}
 </head>
 
 

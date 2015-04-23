@@ -1,19 +1,7 @@
 <html>
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <script src="{{ MEDIA_URL }}/animation/animation.js"></script>
-    <script>
-        function start()
-        {
-            SVGAnimation.currentSpeed = 1000;
-            SVGAnimation.setup();
-            SVGAnimation.playFromStart();
-        }
-    </script>
-    <!-- hide control elements -->
-    <style>
-    .hide{display:none}
-    </style>
+    {% include "animation_head.html" %}
 </head>
 <body onload="start()">
     <div class="outputContainer" style="background:#fff">

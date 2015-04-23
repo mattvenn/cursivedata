@@ -48,6 +48,10 @@ class Pipeline( DrawingState ) :
     auto_begin_days = models.IntegerField( default=0 )
     next_auto_begin_date = models.DateTimeField( blank=True,null=True)
 
+    # animation controls
+    anim_autoplay = models.BooleanField(default=True)
+    anim_speed = models.IntegerField( default=1000 )
+
     def save(self, *args, **kwargs):
         if not self.pk:
             self.init_data(save=False)
@@ -56,6 +60,13 @@ class Pipeline( DrawingState ) :
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def anim_autoplay_js(self):
+        if self.anim_autoplay:
+            return 'true'
+        return 'false'
+
 
     def resume(self):
         self.paused = False

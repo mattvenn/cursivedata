@@ -1,0 +1,19 @@
+    <script src="{{ MEDIA_URL }}/animation/animation.js"></script>
+    <script>
+        function start()
+        {
+            // set speed to: {{ pipeline.anim_speed }}
+            // autoplay: {{ pipeline.anim_autoplay }}
+            SVGAnimation.currentSpeed = {{ pipeline.anim_speed|default:"1000" }};
+            SVGAnimation.setup();
+            if( {{ pipeline.anim_autoplay_js|default:"true" }} )
+            {
+                SVGAnimation.playFromStart();
+            }
+        }
+    </script>
+    <!-- hide control elements -->
+    <style>
+    .hide{display:none}
+    </style>
+
