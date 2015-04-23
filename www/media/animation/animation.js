@@ -6,7 +6,7 @@ var SVGAnimation = {
 	
 	refreshSpeed : 100, // Original method = 25% CPU usage, current = 35%
     minSpeed: 100,
-    maxSpeed: 1000,
+    maxSpeed: 1000000,
     currentSpeed: 500,
 	_playing : false,
 	
