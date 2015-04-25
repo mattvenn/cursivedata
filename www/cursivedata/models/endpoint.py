@@ -6,7 +6,7 @@ Created on 12 Jan 2013
 
 from django.db import models
 from django.utils import timezone
-import cursivedata.svg as svg
+import cursivelib.svg as svg
 from cursivedata.models.drawing_state import DrawingState,StoredOutput
 import pysvg.structure
 import pysvg.builders
@@ -15,6 +15,10 @@ import re
 import tempfile
 import subprocess
 import os
+from cursivelib.robot_spec import RobotSpec
+from cursivelib.svg_to_gcode import SVGPreparation,DrawingSpec,DrawingPosition
+from cursivelib.pycam_gcode import PyCAMGcode
+
 
 import logging
 log = logging.getLogger('endpoint')
@@ -61,18 +65,13 @@ class Endpoint( DrawingState ):
     robot_svg_file = models.CharField(max_length=200,blank=True)
     #when the status was last updated
     status_updated = models.DateTimeField("Last Updated",blank=True,null=True)
+    preparation = SVGPreparation()
 
     def __init__(self, *args, **kwargs):
         super(Endpoint, self).__init__(*args, **kwargs)
         #Set the actual size of the drawing area based on the size of the robot and the margins
         #Used to make the SVG images
-        self.img_width = self.width - self.side_margin * 2
-        self.img_height = self.height - self.top_margin
-        #Used by the GCode parser to check sizes
-        self.x_min = self.side_margin
-        self.y_min = self.top_margin
-        self.x_max = self.side_margin + self.img_width
-        self.y_max = self.top_margin + self.img_height
+        self.robot_spec = RobotSpec(width=self.width,height=self.height,top_margin = self.top_margin, side_margin = self.side_margin)
  
     #returns true if updated within last hour
     @property
@@ -82,159 +81,96 @@ class Endpoint( DrawingState ):
             return True
         return False
        
-    def load_external_svg(self,svg_file,width):
-        transform = Transform()
-        transform.build_from_endpoint(self,svg_file,width)
-        self._input_svg(svg_file,transform)
+    # Called to plonk an SVG file onto the robot with the given width
+    def load_external_svg(self,svg_filename,width):
+        self.draw_svg(svg_filename, self.pos_from_file(svg_filename,width))
 
-    def input_svg(self,svg_file, pipeline ):
-        transform = Transform()
-        transform.build_from_pipeline(pipeline)
-        self._input_svg(svg_file,transform)
+    # Called by a pipeline to add the next bit of SVG
+    def input_svg(self,svg_filename, pipeline ):
+        self.draw_svg(svg_filename, self.pos_from_pipeline(pipeline))
 
-    #how to name this?
-    def _input_svg(self,svg_file,transform):
-        current_drawing = self.transform_svg(svg_file,transform)
+
+
+    # "Draws" an SVG file by creating GCode which is then available
+    # for the robot to consume
+    # Returns the gcode filename
+    # Local can be set to not save intermediate files or databases
+    def draw_svg(self,svg_filename,drawing_position,localfile=None):
+        svg_data = parse(svg_filename)
+
+        # Transform the SVG to match the drawing position
+        page_svg = self.get_page_svg(svg_data,drawing_position)
 
         #this will save out the latest svg as a file
-        try:
-            self.add_svg(current_drawing)
-        except IOError as e: #  file is locked by another endpoint
-            log.warn("unable to update svg")
+        if localfile is None:
+            try:
+                self.add_svg(page_svg)
+            except IOError as e: #  file is locked by another endpoint
+                log.warn("unable to update svg")
 
-        #transform the current svg for the robot
-        current_drawing = self.transform_svg_for_robot(self.last_svg_file)
+        # transform the current svg for the robot coordinates
+        robot_svg = self.transform_svg_for_robot(page_svg)
 
         #write it out as an svg
         self.robot_svg_file = self.get_robot_svg_filename()
-        current_drawing.save(self.robot_svg_file)
-        self.save()
+        robot_svg.save(self.robot_svg_file)
+        if localfile is None:
+            self.save()
 
         #convert it to gcode
         if self.generate_gcode:
             try:
-                so = GCodeOutput(endpoint=self)
-                so.save()
+                if localfile is None:
+                    so = GCodeOutput(endpoint=self)
+                    so.save()
+                    output_filename = so.get_filename()
+                else:
+                    output_filename = localfile
+
                 log.info("creating gcode in %s from %s" % (so.get_filename(), self.robot_svg_file))
-                self.convert_svg_to_gcode(self.robot_svg_file,so.get_filename())
+                gcode_converter = PyCAMGcode()
+                gcode_converter.convert_svg(robot_svg,output_filename,self.robot_spec)
             except EndpointConversionError, e:
                 log.warning("problem converting svg: %s" % e)
                 so.delete()
                 raise EndpointConversionError(e)
             log.debug("gcode done")
 
-    #could do clipping? http://code.google.com/p/pysvg/source/browse/trunk/pySVG/src/tests/testClipPath.py?r=23
-    #returns an svg document (not a file)
-    def transform_svg_for_robot(self, svg_file): 
-        current_drawing = self.create_svg_doc(self.width,self.height)
-        svg_data = parse(svg_file)
-
+    def transform_svg_for_robot(self, svg_data): 
+        current_drawing = self.svg_complete()
         #setup our transform
-        tr = pysvg.builders.TransformBuilder()
-        tr.setScaling(x=1,y=-1)
-        trans = str(self.side_margin) + " " + str(self.img_height) 
-        tr.setTranslation( trans )
-        group = pysvg.structure.g()
-        group.set_transform(tr.getTransform())
-        #add the drawing
-        for element in svg_data.getAllElements():
-            group.addElement(element)
-
-        current_drawing.addElement(group)
+        tr = self.preparation.get_robot_transform(self.robot_spec)
+        self.preparation.apply_into_data(svg_data,current_drawing,tr)
         return current_drawing
 
     #returns an svg document (not a file)
-    def transform_svg(self, svg_file, transform): 
-        current_drawing = self.create_svg_doc()
-        xoffset = transform.xoffset
-        yoffset = transform.yoffset
-        scale = transform.scale
-        svg_data = parse(svg_file)
-
-        #set up transform
-        tr = pysvg.builders.TransformBuilder()
-        tr.setScaling(scale)
-        trans = str(xoffset) + " " + str(yoffset) 
-        tr.setTranslation( trans )
-        group = pysvg.structure.g()
-        group.set_transform(tr.getTransform())
-
-        for element in svg_data.getAllElements():
-            group.addElement(element)
-
-        current_drawing.addElement(group)
+    def get_page_svg(self, svg_data, drawing_position): 
+        current_drawing = self.svg_drawing()
+        tr = self.preparation.get_drawing_transform(drawing_position)
+        self.preparation.apply_into_data(svg_data,current_drawing,tr)
         return current_drawing
 
-    #use pycam and parse_gcode to turn svg into robot style files
-    def convert_svg_to_gcode(self, svgfile, polarfile ):
-        fd, tmp_gcode = tempfile.mkstemp()
-        pycam="/usr/bin/pycam"
-        #pycam="/Users/dmrust/.virtualenvs/polarsite/lib/python2.7/site-packages/pycam-0.5.1/pycam"
-        pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave"]
-        log.debug("pycam args %s" % pycam_args)
-        p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
-        stdout,stderr = p.communicate()
-        log.debug("pycam done")
+    # Creates a DrawingPosition from the pipeline, according to its print area
+    def pos_from_pipeline(self,pipeline) :
+        return DrawingPosition(
+            pipeline.print_top_left_x,
+            pipeline.print_top_left_y,
+            pipeline.print_width / pipeline.img_width)
 
-        self.parse_gcode_to_polar(tmp_gcode,polarfile)
-        os.close(fd)
-        os.remove(tmp_gcode)
+    # Centers the given file in the print area
+    def pos_from_file(self,svg_filename,width):
+        return self.preparation.drawing_position_from_file(svg_filename,
+            DrawingSpec(width=width),self.robot_spec)
 
-    #this goes through a gcode file (*.ngc) and chucks out all comments and commands we don't use
-    #the output is validated to ensure it won't command the robot to move outside its drawing area
-    #then the output is saved to a polar file ready to be served
-    def parse_gcode_to_polar(self,infile,outfile):
-        gcode = open(infile)
 
-        gcodes = gcode.readlines()
-        gcode.close()
+    # Creates an SVG in drawing coordinates
+    def svg_drawing(self) :
+        return self.create_svg_doc()
 
-        startCode = re.compile( "^G([01])(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
-        contCode =  re.compile( "^(?: X(\S+))?(?: Y(\S+))?(?: Z(\S+))?$")
-        lastX = None
-        lastY = None
-        polar_code=[]
-        for line in gcodes:
-            s = startCode.match(line)
-            c = contCode.match(line)
-            gcode = 0
-            if s:
-                gcode = s.group(1)
-                x = s.group(2)
-                y = s.group(3)
-                z = float(s.group(4))
-                if z > 0 :
-                    #don't draw, but ensure previous gcode also wasn't d0
-                    if len(polar_code) and polar_code[-1] != 'd0':
-                        polar_code.append("d0")
-                else:
-                    #draw
-                    polar_code.append("d1")
-            elif c: 
-                x = float(c.group(1) or lastX)
-                y = float(c.group(2) or lastY)
+    # Creates an SVG the size of the final page
+    def svg_complete(self) :
+        return self.create_svg_doc(self.width,self.height)
 
-                outx = x
-                outy = y 
-
-                #validate, the +-1mm is to account for rounding errors
-                if outx > self.x_max:
-                    raise EndpointConversionError("gcode x too large %f > %f" % (outx,self.x_max))
-                if outy > self.y_max:
-                    raise EndpointConversionError("gcode y too large %f > %f" % (outy,self.y_max))
-                if outx < self.x_min:
-                    raise EndpointConversionError("gcode x too small %f < %f" % (outx,self.x_min))
-                if outy < self.y_min:
-                    raise EndpointConversionError("gcode y too small %f < %f" % (outy,self.y_min))
-
-                polar_code.append("g%.1f,%.1f" %  (outx,outy))
-                lastX = x
-                lastY = y
-
-        file = open(outfile,"w")
-        for line in polar_code:
-            file.write(line + "\n")
-        file.close()
                 
     def get_next_filename(self):
         n = self.get_next()
@@ -264,21 +200,13 @@ class Endpoint( DrawingState ):
     def movearea(self):
         so = GCodeOutput(endpoint=self)
         so.save()
-        f = open(so.get_filename(),'w')
-        f.write("g%.1f,%.1f\n" % ( self.side_margin, self.top_margin ))
-        f.write("g%.1f,%.1f\n" % ( self.width - self.side_margin , self.top_margin ))
-        f.write("g%.1f,%.1f\n" % ( self.width - self.side_margin , self.height ))
-        f.write("g%.1f,%.1f\n" % ( self.side_margin , self.height ))
-        f.write("g%.1f,%.1f\n" % ( self.side_margin, self.top_margin ))
-        f.close()
+        self.robot_spec.write_outline_gcode(so.get_filename() )
 
     def calibrate(self):
         so = GCodeOutput(endpoint=self)
         so.save()
         log.debug("creating gcode in %s" % so.get_filename())
-        f = open(so.get_filename(),'w')
-        f.write("c\n")
-        f.close()
+        self.robot_spec.write_calibration_gcode(so.get_filename() )
          
     def resume(self):
         self.paused = False
@@ -316,26 +244,6 @@ class Endpoint( DrawingState ):
     class Meta:
         app_label = 'cursivedata'
 
-class Transform( models.Model ):
-    def build_from_pipeline(self,pipeline):
-        self.xoffset = pipeline.print_top_left_x
-        self.yoffset = pipeline.print_top_left_y
-        self.scale = pipeline.print_width / pipeline.img_width
-
-    def build_from_endpoint(self,endpoint,svg_file,width):
-        (svgwidth,svgheight) = svg.get_dimensions(svg_file)
-        if width > endpoint.img_width:
-            log.info("not scaling larger than endpoint")
-            raise EndpointConversionError("width %d is too large for endpoint, max width is %d" % (width, endpoint.img_width))
-        if width == 0:
-            log.info("not using a 0 width")
-            width = endpoint.img_width
-        #put it in the middle of the page
-        self.xoffset = (endpoint.img_width - width ) / 2
-        self.yoffset = 0
-        self.scale = width / svgwidth
-
-        log.debug("width of svg=%s, desired width=%s, scale=%s" % (svgwidth, width, self.scale))
 
 class GCodeOutput( models.Model ):
     endpoint = models.ForeignKey(Endpoint)
@@ -356,3 +264,4 @@ class GCodeOutput( models.Model ):
     
     class Meta:
         app_label = 'cursivedata'
+

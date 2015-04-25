@@ -14,14 +14,14 @@ class PyCAMGcode() :
     def convert_svg(self,svg_data,gcode_filename,robot_spec) :
         fd, tmp_gcode = tempfile.mkstemp()
         svg_fg, tmp_svg = tempfile.mkstemp(".svg")
-        print "Saving SVG as ", tmp_svg
+        log.debug("Saving SVG as %s" % tmp_svg)
         svg_data.save(tmp_svg)
         pycam_args = [self.pycam, tmp_svg, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave"]
-        print "PYCAM: ", pycam_args
+        log.debug("pycam args %s" % pycam_args)
 
         p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
         stdout,stderr = p.communicate()
-        print "pycam done"
+        log.debug("pycam done")
 
         self.parse_gcode_to_polar(tmp_gcode,gcode_filename,robot_spec)
         os.close(fd)
@@ -88,8 +88,8 @@ class PyCAMGcode() :
                 nd += 1
 
         file = open(outfile,"w")
-        print "writing polar file to ", outfile
-        print "Discarded: ", nd, " Start: ", ns, " Continue: ",nc
+        log.debug("writing polar file to %s" % outfile)
+        log.debug("Discarded: %s Start: %s, Continue: %s" % ( nd,ns,nc))
         for line in polar_code:
             file.write(line + "\n")
         file.close()

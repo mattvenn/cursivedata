@@ -9,6 +9,10 @@ from xml.parsers.expat import ExpatError
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ParseError
 
+from django.utils import timezone
+
+import logging
+log = logging.getLogger('graphics')
 
 def get_dimensions(svg_file):
     parsed = parse(svg_file)
@@ -48,7 +52,7 @@ def get_dimensions(svg_file):
 
 #Append one svg file to another svg file
 #NOTE: currently just copies one file to the other
-def append_svg_to_file( fragment_file, main_file ):
+def append_svg_to_file(fragment_file, main_file):
 
     #locking
     import fcntl
@@ -58,22 +62,23 @@ def append_svg_to_file( fragment_file, main_file ):
         lockfile = "/tmp/%s.lock" % main_file.replace('/','.')
         fd = open(lockfile,'w')
 
-        print "checking lock:", lockfile
+        log.debug("checking lock: %s" % lockfile)
         fcntl.lockf(fd,fcntl.LOCK_EX | fcntl.LOCK_NB)
-        print "ok"
+        log.debug("ok")
     except IOError, e:
-        print "lock in use:", lockfile
+        log.warning("lock in use: %s" % lockfile)
         raise
 
     try:
-        print "parsing main file", main_file
+        log.debug("parsing main file %s" % main_file)
         svg_main = ET.parse(main_file)
-        print "parsing frag file", fragment_file
+        log.debug("parsing frag file %s" % fragment_file)
         svg_frag = ET.parse(fragment_file)
         svg_id = str(int(time.time()))
+        log.debug("using svg_id as %s" % svg_id)
         mainroot= svg_main.getroot()
         fragroot =svg_frag.getroot()
-        print "adding frags to main", main_file
+        log.debug("adding frags to main %s" % main_file)
         for child in fragroot:
             child.set('id',svg_id)
             child.set('class','frame')
@@ -81,11 +86,12 @@ def append_svg_to_file( fragment_file, main_file ):
             
         svg_main.write(main_file)
     except ParseError as e:
-        print "problem appending %s to %s: %s" % (fragment_file,main_file,e)
+        log.exception("problem appending %s to %s" % (fragment_file,main_file))
         raise
     #no need to do this with new parser
     #clear_blank_lines(main_file)
-    print "finished in %d secs" % (time.time() - start_time)
+    log.info("finished appending %s in %d secs" % (main_file, time.time() - start_time))
+
 
 def is_blank_line(line):
     if line == "\n":
@@ -93,7 +99,7 @@ def is_blank_line(line):
     return False
 
 def clear_blank_lines(main_file):
-    print "cleaning blank lines from ", main_file
+    log.debug("cleaning blank lines from %s" % main_file)
     f = open(main_file)
     lines = f.readlines()
     f.close()
