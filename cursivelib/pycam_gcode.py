@@ -3,6 +3,9 @@ import subprocess
 import os
 import re
 
+import logging
+log = logging.getLogger('pycam_conversion')
+
 # a fantastic error class!
 class PyCAMConversionError(Exception):
     pass
