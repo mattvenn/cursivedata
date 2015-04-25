@@ -22,22 +22,15 @@ from cursivelib.native_gcode import *
 import cursivelib.svg as svg
 from cursivedata.models.endpoint import *
 
+from cursivelib.robot_spec import add_botspec_arguments
+from cursivelib.robot_spec import get_botspec_from_args
+
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Convert SVG files to GCode for drawing")
-    parser.add_argument('--bot_width',
-        action='store', dest='bot_width', type=int, default='1000',
-        help="total overall width of the drawing area")
-    parser.add_argument('--bot_height',
-        action='store', dest='bot_height', type=int, default='1000',
-        help="total overall height of the drawing area")
-    parser.add_argument('--top_margin',
-        action='store', dest='top_margin', type=int, default='100',
-        help="top margin for the drawing area")
-    parser.add_argument('--side_margin',
-        action='store', dest='side_margin', type=int, default='100',
-        help="side margin for the drawing area")
+
+    add_botspec_arguments(parser)
     parser.add_argument('--direct',
         action='store', dest='direct', type=bool, default=True,
         help="Do the conversion directly (otherwise, make an Endpoint and use that (for testing...)")
@@ -56,6 +49,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # Specifications of the robot which will do the drawing
+    robot_spec = get_botspec_from_args(args)
+    print "Got bot spec: ",robot_spec.show()
+    sys.exit()
 
     # File to put gcode into
     output_gcode = args.output
@@ -74,12 +71,9 @@ if __name__ == '__main__':
     native = args.native
     print "Native ", native
 
+
     if direct :
         print "Direct conversion"
-        # Specifications of the robot which will do the drawing
-        robot_spec = RobotSpec(
-            width=args.bot_width, height=args.bot_height, 
-            top_margin=args.top_margin, side_margin=args.side_margin)
         preparation = SVGPreparation()
         
         # Create a drawing position this into a drawing position (x,y offsets and scale)
@@ -104,8 +98,8 @@ if __name__ == '__main__':
     else :
         print "Creating endpoint to process file"
         end_point = Endpoint(name="Local",device="Local",location="Local" ,
-            width=args.bot_width, height=args.bot_height, 
-            top_margin=args.top_margin, side_margin=args.side_margin, generate_gcode=True)
+            width=robot_spec.width, height=robot_spec.height, 
+            top_margin=robot_spec.top_margin, side_margin=robot_spec.side_margin, generate_gcode=True)
         pos = end_point.pos_from_file(svg_file,width)
         filename = end_point.draw_svg(svg_file,pos,localfile=output_gcode)
 
