@@ -4,3 +4,6 @@ testsite/db/testsite.sqlite
 .pydevproject
 testsite/tmp/*
 *.swp
+
+client/cursivelib/*
+www/cursivelib/*
