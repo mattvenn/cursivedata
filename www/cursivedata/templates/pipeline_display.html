@@ -5,6 +5,7 @@
 {% if pipeline %}
     <div class="row">
         <h2>{{pipeline.name}}</h2>
+            <p>{{pipeline.description}}</p>
                 <!-- svg -->
                 <div style="background:#fff">
                     <embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" />
