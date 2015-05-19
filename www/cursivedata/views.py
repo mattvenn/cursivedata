@@ -303,8 +303,17 @@ def show_generator(request, generatorID):
         #Get parameter values
         param_values = {}
         for (key, value) in request.POST.iteritems():
+            #if key.startswith("param"):
+            #    param_values[key.replace("param","")]= float(value)
+
             if key.startswith("param"):
-                param_values[key.replace("param","")]= float(value)
+                key = key.replace("param","")
+                data_type = generator.get_param(key).data_type
+
+                if data_type == 'float':
+                    value = float(value)
+                param_values[key] = value
+
         params = generator.get_param_dict(param_values)
         
         filename = None
