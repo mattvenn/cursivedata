@@ -17,6 +17,13 @@ def square(x,y,width,height,dwg):
     p.set_id(id)
     dwg.addElement(p)
 
+def begin(drawing,params,internal_state) :
+    drawing.rect(0,0,drawing.width,drawing.height) 
+    
+def end(drawing,params,internal_state) :
+    pass
+    
+
 def process(drawing,data,params,internal_state) :
     colour = internal_state.get("colour",0)
     rotate = internal_state.get("rotate",0)
