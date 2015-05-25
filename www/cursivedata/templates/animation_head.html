@@ -5,6 +5,7 @@
             // set speed to: {{ pipeline.anim_speed }}
             // autoplay: {{ pipeline.anim_autoplay }}
             SVGAnimation.currentSpeed = {{ pipeline.anim_speed|default:"1000" }};
+            SVGAnimation.loop = {{ pipeline.anim_loop_js }};
             SVGAnimation.setup();
             if( {{ pipeline.anim_autoplay_js|default:"true" }} )
             {

@@ -51,6 +51,7 @@ class Pipeline( DrawingState ) :
     # animation controls
     anim_autoplay = models.BooleanField(default=True)
     anim_speed = models.IntegerField( default=1000 )
+    anim_loop = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -60,6 +61,12 @@ class Pipeline( DrawingState ) :
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def anim_loop_js(self):
+        if self.anim_loop:
+            return 'true'
+        return 'false'
 
     @property
     def anim_autoplay_js(self):
