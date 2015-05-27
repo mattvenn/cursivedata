@@ -9,6 +9,7 @@ var SVGAnimation = {
     maxSpeed: 1000000,
     currentSpeed: 500,
 	_playing : false,
+    loop : false,
 	
 	/* Handler methods */
 	
@@ -50,8 +51,12 @@ var SVGAnimation = {
 		this.animationCounter = setInterval( function frameTimer() {
 			frameCount = frameCount + speed;
 			if ( frameCount >= frameEl.max ) {
-				me.stop();
-				return;
+                 if ( me.loop === true ) {
+                        frameCount = parseInt( frameEl.min );
+                } else {
+                        me.stop();
+                        return;
+                }
 			}
 			frameEl.value = frameCount;
 			me._moveNode( background, me._getNearestFrame( frameCount, frameEl.max ) );
@@ -61,7 +66,7 @@ var SVGAnimation = {
 	playFromStart : function() {
 		var frameEl = document.getElementById( 'frame' );
 		frameEl.value = frameEl.min;
-		this.play();
+        this.play();
 	},
 	stop : function() {
 		clearInterval( this.animationCounter );
