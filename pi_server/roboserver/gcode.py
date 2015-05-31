@@ -24,17 +24,14 @@ def postpone(function):
 # Handles a gcode file which has been uploaded
 @postpone
 def handle_gcode(f):
-    #setting.SERIAL_PORT
-    control = RobotController()
+    control = RobotController( port=settings.SERIAL_PORT)
     control.setup_serial()
-    data = str(f.read()).split('\n')
+    d_in = f.read()
+    print(d_in)
+    data = str(d_in).split('\n')
     print "Got ",len(data)," GCodes to send"
     control.send_robot_commands(data)
     control.finish_serial()
-
-    #with open('some/file/name.txt', 'wb+') as destination:
-        #for chunk in f.chunks():
-            #destination.write(chunk)
 
 # Ugly, but can't figure out the documentation
 @csrf_exempt
@@ -43,7 +40,7 @@ def upload_gcode(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             handle_gcode(request.FILES['file'])
-            return HttpResponseRedirect('/success/url/')
+            return HttpResponseRedirect('/upload_gcode')
     else:
         form = UploadFileForm()
     return render_to_response('upload_gcode.html', {'form': form})

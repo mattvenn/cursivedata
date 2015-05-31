@@ -2,7 +2,8 @@
 {% block title %}Robot: {{endpoint.name }}{% endblock %}
 {% block content %}
 Hello this is the form bit...
-<form action="{% url roboserver:upload_gcode %}"  enctype="multipart/form-data" method="post">
+{# <form action="{% url roboserver:upload_gcode %}"  enctype="multipart/form-data" method="post"> #}
+<form action="/upload_gcode"  enctype="multipart/form-data" method="post">
 	{% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit" />

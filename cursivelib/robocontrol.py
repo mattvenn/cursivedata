@@ -37,6 +37,7 @@ class RobotController:
 
     def setup_serial(self):
       try:
+	print "Starting serial on ",self.port
         serial_port=serial.Serial()
         serial_port.port=self.port
         serial_port.timeout=self.timeout
@@ -53,11 +54,30 @@ class RobotController:
         try:
             if self.verbose:
                 print "closing serial"
-            serial_port.close()
+            self.serial_port.close()
         except serial.SerialException:
             # We are explicitely silencing the error here.
             # TODO: Log the error message at least.
             pass
+
+    """
+    this requires the robot to respond in the expected way, where all responsed end with "ok"
+    """
+    def read_serial_response(self):
+      response = ""
+      all_lines = ""
+      #this needs to find a \r\nok\r\n I think, but don't know why
+      #just ok\r\n doesn't work
+      while string.find(response,"ok"):
+        response = self.serial_port.readline()
+        if response == "":
+          print >>sys.stderr, "timeout on serial read"
+          self.finish_serial()
+          exit(1)
+        if self.verbose:
+          print "<- %s" % response,
+        all_lines += response
+      return all_lines
 
     def send_robot_commands(self,gcodes):
       p = re.compile( "^#" )
@@ -66,10 +86,10 @@ class RobotController:
         if p.match(line):
           print "skipping line:", line
         elif not line == None:
-          if args.verbose:
+          if self.verbose:
             print "-> %s" % line,
-          serial_port.write(str(line)) #str added because we get unicode from the server
-          response += read_serial_response()
+          self.serial_port.write(str(line)) #str added because we get unicode from the server
+          response += self.read_serial_response()
       return response
 
 ############################################################
@@ -239,25 +259,6 @@ class RobotController:
 
 
 
-    """
-    this requires the robot to respond in the expected way, where all responsed end with "ok"
-    """
-    def read_serial_response():
-
-      response = ""
-      all_lines = ""
-      #this needs to find a \r\nok\r\n I think, but don't know why
-      #just ok\r\n doesn't work
-      while string.find(response,"ok"):
-        response = serial_port.readline()
-        if response == "":
-          print >>sys.stderr, "timeout on serial read"
-          finish_serial()
-          exit(1)
-        if args.verbose:
-          print "<- %s" % response,
-        all_lines += response
-      return all_lines
 
 
     def setup_robot():

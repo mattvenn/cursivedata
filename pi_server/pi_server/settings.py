@@ -150,3 +150,7 @@ LOGGING = {
         },
     }
 }
+
+
+# Serial port for the Cursive USB bot
+SERIAL_PORT="/dev/ttyACM0"
