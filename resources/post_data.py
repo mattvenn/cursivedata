@@ -84,6 +84,9 @@ if __name__ == '__main__':
     print url
 
     if args.file:
+        if not args.stream_id:
+            print('must provide at least one key using stream-id')
+            exit(1)
         if ',' in args.stream_id:
             keys = args.stream_id.split(',')
         else:
