@@ -2,6 +2,7 @@ from django.utils.datetime_safe import datetime
 from pysvg.builders import *
 import pysvg.structure
 import logging
+from cursivedata.mapping import mapping
 log = logging.getLogger('generator')
 
 
@@ -57,7 +58,9 @@ def draw_shape_on_grid(drawing, cell_index, aggregate, params):
     cx, cy = cell.cent()
     shape_size = float(params.get("Shape Size", 1))
     unit_size = drawing.width / (shape_size * float(params.get("Xdiv")))
-    size = unit_size + float(params.get("Amplitude Modulation")) * aggregate
+    #map the aggregate to the scale
+    m = mapping(params.get("In Min"), params.get("In Max"), params.get("Out Min"), params.get("Out Max"))
+    size = unit_size * m.map(aggregate)
     svg_file = params.get("Shape")
     flip = params.get("Flip", False)
     log.debug("drawing shape %s at x:%d y:%d scale %f flipped %s" % (svg_file, cx, cy, size, flip))
@@ -104,7 +107,10 @@ def get_params() :
         {"name":"Xdiv", "default": 12, "description":"divide paper into x divs" },
         {"name":"Total_time", "default": 1440, "description":"time it takes to complete the drawing once" },
         {"name":"Flip", "default":0, "description":"flip every other shape" },
-        { "name":"Amplitude Modulation", "default": 1, "description":"How much does the incoming data affect Amplitude of shapes" }, 
+        { "name":"In Min", "default": 1, "description":"Expected input minimum" }, 
+        { "name":"In Max", "default": 100, "description":"Expected input maximum" }, 
+        { "name":"Out Min", "default": 0.5, "description":"Scaling when input is minimum" }, 
+        { "name":"Out Max", "default": 2, "description":"Scaling when input is maximum" }, 
         { "name":"Shape Size", "default": 100, "description":"width of svg shape (px)" }, 
         {"name":"Shape", "default": 'blob.svg', "description":"which svg to use for repeating pattern", 'data_type':"text" }, 
             ]
