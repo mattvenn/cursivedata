@@ -119,7 +119,7 @@ class Generator( models.Model ) :
         #TODO this just filters out the old parameters - doesn't remove them
         for param in self.parameter_set.all():
             if not [p for p in mod.get_params() if p['name'] == param.name]:
-                log.info("old param %s" % param.name)
+                log.debug("old param %s" % param.name)
             else:
                 params.append({"name":param.name,
                                "description":param.description,

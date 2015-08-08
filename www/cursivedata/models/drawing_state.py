@@ -48,7 +48,7 @@ class DrawingState( models.Model ):
 
     @property
     def is_live(self):
-        live_date = timezone.now()-timezone.timedelta(hours=1)
+        live_date = timezone.now()-timezone.timedelta(hours=12)
         if self.last_updated > live_date:
             return True
         return False
@@ -78,8 +78,13 @@ class DrawingState( models.Model ):
         doc = pysvg.structure.svg(width=widthmm,height=heightmm)
         doc.set_viewBox("0 0 %s %s" % (width, height))
         if createRect:
+            # this should use the drawing functions
             build = pysvg.builders.ShapeBuilder()
-            doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)"))
+            #doc.addElement(build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)", id="background"))
+            rect = build.createRect(0, 0, width="100%", height="100%", fill = "rgb(255, 255, 255)")
+            rect.set_id('background')
+            doc.addElement(rect)
+
         return doc
         
     #Updates the full image, by creating a PNG from the full SVG, and storing the SVG and PNG in the history

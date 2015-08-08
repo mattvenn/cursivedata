@@ -51,7 +51,7 @@
     <ul class="block-grid three-up">
     {% for pipeline in latest_pipelines %}
       <li>
-        <a href="{% url cursivedata:show_pipeline pipeline.id %}"><img src="/{{pipeline.full_svg_file}}" /></a>
+        <a href="{% url cursivedata:show_pipeline pipeline.id %}"><img class="imgforIE" style="height:auto;" src="/{{pipeline.full_svg_file}}" /></a>
         <p><a href="{% url cursivedata:show_pipeline pipeline.id %}">{{ pipeline.name }}</a></p>
       </li>
     {% endfor %}
@@ -71,7 +71,5 @@
         {% endif %}
         <!-- <a href="http://www.mattvenn.net/tag/rtdv/">View older stories >>></a> -->
 
-</div>
-<!-- Section to explain process of how people can create own drawings highlighting all the ways people can get involved e.g. pattern making, adding a data source, digital drawing making even if they don't own a bot themselves yet.-->
 	</div>
 {% endblock %}

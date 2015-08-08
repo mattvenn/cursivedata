@@ -16,7 +16,7 @@ def process(drawing,data,params,internal_state) :
 
     aggregate = internal_state.get("aggregate",0)
     square_num = int(internal_state.get("square_num",0))
-    grid = drawing.get_grid(nx=params.get("Xdiv"),ny=params.get("Ydiv"))
+    grid = drawing.get_grid(nx=params.get("Xdiv",12),ny=params.get("Ydiv",12))
     circle = int(params.get("Circle",0))
 
     for point in data.get_current():
@@ -29,7 +29,7 @@ def process(drawing,data,params,internal_state) :
             aggregate = 0
             square_num = 0
 
-        aggregate += float(point.data['value'])
+        aggregate += float(point.getValue())
 
         #work out where to draw
         cell = grid.cell(cell_index)
@@ -63,7 +63,7 @@ def process(drawing,data,params,internal_state) :
 
 def begin(drawing,params,internal_state) :
     log.info("Starting drawing squares with params: %s" % map(str,params))
-    drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
+    #drawing.tl_text("Started at " + str(datetime.now()),size=15,stroke="blue")
     
 def end(drawing,params,internal_state) :
     log.info("Ending drawing")

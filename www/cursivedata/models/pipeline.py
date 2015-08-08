@@ -48,6 +48,11 @@ class Pipeline( DrawingState ) :
     auto_begin_days = models.IntegerField( default=0 )
     next_auto_begin_date = models.DateTimeField( blank=True,null=True)
 
+    # animation controls
+    anim_autoplay = models.BooleanField(default=True)
+    anim_speed = models.IntegerField( default=1000 )
+    anim_loop = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         if not self.pk:
             self.init_data(save=False)
@@ -56,6 +61,19 @@ class Pipeline( DrawingState ) :
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def anim_loop_js(self):
+        if self.anim_loop:
+            return 'true'
+        return 'false'
+
+    @property
+    def anim_autoplay_js(self):
+        if self.anim_autoplay:
+            return 'true'
+        return 'false'
+
 
     def resume(self):
         self.paused = False
@@ -95,7 +113,7 @@ class Pipeline( DrawingState ) :
         data = data or self.data_store
         params = self.state.params
         internal_state = self.state.state
-        log.debug("Asking generator if it can run")
+        log.debug("asking generator if it can run")
         if self.generator.can_run( data, params, internal_state ):
             #Create a new document to write to
             svg_document = self.create_svg_doc()
@@ -106,9 +124,9 @@ class Pipeline( DrawingState ) :
                 log.warning("found empty XML")
             self.add_svg( svg_document )
             self.generator.update_last_used()
-            log.info("Generator run OK!")
+            log.info("generator %s run ok for pipeline %s" % (self.generator.name, self.name))
         else:
-            log.debug("Generator not ready to run")
+            log.debug("generator not ready to run")
     
     def begin(self):
         self.reset();

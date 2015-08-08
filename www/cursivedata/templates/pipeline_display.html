@@ -3,15 +3,32 @@
 {% block content %}
 
 {% if pipeline %}
-      <div class="row">
+    <div class="row">
         <h2>{{pipeline.name}}</h2>
+            <p>{{pipeline.description}}</p>
+                <!-- svg -->
+                <div style="background:#fff">
+                    <embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" />
+                </div>
+
+
+                <!-- controls -->
+                <div style="width:600px">
+                    {% include "animation_controls.html" %}
+                    <!-- links -->
+                    <a href="/{{pipeline.full_svg_file}}">image link</a><br/>
+                    <a href="{% url cursivedata:embed_pipeline pipeline.id%}">embeddable svg</a>
+                </div>
+	</div>
+      <div class="row">
+            <h2>Details</h2>
             {% if pipeline.is_live %}
                 <div class="online"><img src="{{MEDIA_URL}}online.jpg"></div>
             {% else %}
                 <div class="offline"><img src="{{MEDIA_URL}}offline.jpg"></div>
             {% endif %}
             <h4 class="subheader">
-            <div class="objectInfo">Sources<ul>{%for source in pipeline.sources.all%}<li><a href="{% url cursivedata:show_source source.id%}">{{source.name}}</a> last updated {{source.last_updated}}</li>{%endfor%}</ul></div>
+            <div class="objectInfo">Data Sources<ul>{%for source in pipeline.sources.all%}<li><a href="{% url cursivedata:show_source source.id%}">{{source.name}}</a> last updated {{source.last_updated}}</li>{%endfor%}</ul></div>
             <div class="objectInfo">Datastore id: {{pipeline.data_store_id}}</div>
             <div class="objectInfo">Generator: <a href="{% url cursivedata:show_generator pipeline.generator.id%}">{{pipeline.generator.name}}</a>, last updated: {{ pipeline.generator.last_used}}</div>
             <div>Endpoint: <a href="{% url cursivedata:show_endpoint pipeline.endpoint.id%}">{{pipeline.endpoint.name}}</a>
@@ -96,34 +113,23 @@
 		</div>
     {% endif %}
     
-    <div class="row">
-            <h2>Current drawing</h2>
-                <!--<img class="bigPic currentImage" src="/{{pipeline.full_svg_file}}" />-->
-                <!-- someone please fix this terrible shit -->
-                <div style="background:#fff">
-                    <a href="/{{pipeline.full_svg_file}}"><embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{pipeline.full_svg_file}}" type="image/svg+xml" id="embed" /></a><br/>
-                    </div>
-                    <input id="slider" width="600px" type="range" min="0" max="0" step="1" onchange="toggleVis()">
-                    <input id="rangeVal" type="text" size="8" /><br>
-                    <a href="/{{pipeline.full_svg_file}}">image link</a><br/>
-                    <a href="{% url cursivedata:embed_pipeline pipeline.id%}">embeddable svg</a></div>
+
+
                     
-                </div>
         <!--
 		<div class="mainOutput">
 			<h3> Last Update <h3>
 			<img class="bigPic latestImage" src="/{{pipeline.last_svg_file}}" />
 		</div>
         -->
-	</div>
     <div class="row">
 	<h2>Latest drawings</h2>
         <ul class="block-grid three-up">
             {% for output in pipeline.get_recent_output %}
                 <li>
-                <div class="outputContainer">
-                <img src="/{{output.filename}}" >
-                {{output.modified}}
+                <div class="outputContainer"></div>
+                <a href="{% url cursivedata:pipeline_previous pipeline.id output.id %}"><img class="imgforIE" style="height:auto;" src="/{{output.filename}}" ></a>
+                <p><a href="{% url cursivedata:pipeline_previous pipeline.id output.id %}">{{output.modified}}</a></p>
                 </li>
 
 		{% endfor %}

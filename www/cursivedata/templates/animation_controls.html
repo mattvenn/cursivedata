@@ -1,0 +1,7 @@
+    <!-- animation controls -->
+		<input type="image" border="0" src="{{MEDIA_URL}}play.svg" id="play-animation-from-start" onclick="SVGAnimation.playFromStart()" value="Play from start" style="height:20px">
+		<input id="frame" type="range" min="0" max="0" step="1" onchange="SVGAnimation.setFrame()" oninput="SVGAnimation.setFrame()" style="width:470px" >
+		<input id="rangeVal" type="text" style="width:70px;display:inline"/>
+		<input type="submit" id="play-animation" onclick="SVGAnimation.play()" value="Play from current position" class="hide">
+		<input type="submit" id="stop-animation" onclick="SVGAnimation.stop()" value="Stop" class="hide">
+		<input id="speed" type="range" min="0" max="0" step="1" onchange="SVGAnimation.changeSpeed()" title="Choose speed (up to a factor of ten)" class="hide"> 

@@ -87,7 +87,7 @@ def append_svg_to_file(fragment_file, main_file):
         raise
     #no need to do this with new parser
     #clear_blank_lines(main_file)
-    log.info("finished in %d secs" % (time.time() - start_time))
+    log.info("finished appending %s in %d secs" % (main_file, time.time() - start_time))
 
 def is_blank_line(line):
     if line == "\n":

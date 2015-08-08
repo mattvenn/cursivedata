@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.forms.extras.widgets import SelectDateWidget
-from django.http import HttpResponse, Http404, Http204, HttpResponseRedirect
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
@@ -59,9 +59,24 @@ def list_sources(request):
     return render(request,"sources_list.html",context)
 
 def embed_pipeline(request,pipelineID):
-    pipeline = Pipeline.objects.get(pk=pipelineID)
-    context = {"pipeline":pipeline}
-    return render(request,"embed_pipeline.html",context)
+    try:
+        pipeline = Pipeline.objects.get(pk=pipelineID)
+        context = {"pipeline":pipeline}
+        return render(request,"embed_pipeline.html",context)
+    except Pipeline.DoesNotExist as e:
+        raise Http404
+
+def pipeline_previous(request,pipelineID,outputID):
+    try:
+        pipeline = Pipeline.objects.get(pk=pipelineID)
+        output = StoredOutput.objects.get(pk=outputID)
+        context = {"pipeline":pipeline, "output":output}
+        return render(request,"pipeline_previous.html",context)
+    except Pipeline.DoesNotExist as e:
+        raise Http404
+    except StoredOutput.DoesNotExist as e:
+        raise Http404
+        
 
 def list_pipelines(request):
     latest_pipelines = Pipeline.objects.order_by('-last_updated')[:50]
@@ -288,8 +303,17 @@ def show_generator(request, generatorID):
         #Get parameter values
         param_values = {}
         for (key, value) in request.POST.iteritems():
+            #if key.startswith("param"):
+            #    param_values[key.replace("param","")]= float(value)
+
             if key.startswith("param"):
-                param_values[key.replace("param","")]= float(value)
+                key = key.replace("param","")
+                data_type = generator.get_param(key).data_type
+
+                if data_type == 'float':
+                    value = float(value)
+                param_values[key] = value
+
         params = generator.get_param_dict(param_values)
         
         filename = None
@@ -394,7 +418,7 @@ def get_gcode(request, endpointID ):
         raise Http404
     if not filename:
         log.info("no gcodes waiting to be served")
-        raise Http204
+        return HttpResponse(status=204)
 
     log.debug("filename = %s" % filename)
     consume = request.REQUEST.get('consume', False)
@@ -461,7 +485,7 @@ class EndpointCreation(ModelForm):
 class PipelineModify(ModelForm):
     class Meta:
         model = Pipeline
-        fields = ( 'name', 'sources', 'generator', 'endpoint', 'auto_begin_days' )
+        fields = ( 'name', 'description',  'sources', 'generator', 'endpoint', 'auto_begin_days' , 'anim_speed', 'anim_autoplay', 'anim_loop')
 
 class PipelineCreation(ModelForm):
     class Meta:

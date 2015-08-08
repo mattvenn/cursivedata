@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Previous drawings{% endblock %}
+{% block content %}
+
+{% if pipeline %}
+    <div class="row">
+        <h2>{{pipeline.name}}</h2>
+                <!-- svg -->
+                <div style="background:#fff">
+                    <embed style="border: 1px solid; #555 " height="600px" width="600px" src="/{{output.filename}}" type="image/svg+xml" id="embed" />
+                </div>
+
+
+                <!-- controls -->
+                <div style="width:600px">
+                    {% include "animation_controls.html" %}
+                </div>
+
+    </div>
+    <div class="row">
+                    <!-- links -->
+                    <p>
+                    Finished on {{output.modified}} by the <a href="{% url cursivedata:show_pipeline pipeline.id%}">{{pipeline.name}}</a> pipeline
+                    </p>
+	</div>
+{% else %}
+    <div class="row">
+	<h2>Pipeline not found</h2>
+    </div>
+{% endif %}
+
+{% endblock %}

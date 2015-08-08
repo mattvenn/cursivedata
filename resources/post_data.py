@@ -60,6 +60,9 @@ if __name__ == '__main__':
     parser.add_argument('--value',
         action='store', dest='value', type=float, default='1',
         help="value")
+    parser.add_argument('--pause',
+        action='store', dest='pause', type=int, default='0',
+        help="specify num seconds to wait between each post")
     parser.add_argument('--minute',
         action='store', dest='minute', type=int, default='0',
         help="specify a minute of the day to set date to")
@@ -95,6 +98,7 @@ if __name__ == '__main__':
                     for field in keys:
                         index = fields.index(field)
                         push_data([{"data": '{"%s":%f}' % (field,float(row[index])),"date":row[0]}],)
+                        time.sleep(args.pause)
 
                     records += 1
                     if args.length and records >= args.length:

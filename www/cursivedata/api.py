@@ -41,7 +41,7 @@ class DataStoreResource(ModelResource):
     #Special update - only allows adding data in the "input data" field
     def obj_update(self, bundle, request=None, **kwargs):
         store = bundle.obj
-        log.debug("Adding data to:%s" % store.name)
+        log.info("Adding data to: %s" % store.name)
         store.add_data(bundle.data["input_data"])
         store.save()
         return store
