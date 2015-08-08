@@ -175,11 +175,11 @@ def fetch_data():
                 print("try refreshing URL by hand to clear bad gcode files")
             else:
                 print "unexpected server response ", r.status_code 
-                return None
+                return gcodes
 
         except requests.exceptions.ConnectionError, e:
             print >>sys.stderr, e
-            return None
+            return gcodes
 
 
 def finish_serial():
