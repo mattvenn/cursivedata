@@ -4,6 +4,7 @@ log = logging.getLogger(__name__)
 
 RED = (255,0,0)
 BLUE = (0,0,255)
+GREEN = (0,255,0)
 
 class Canvas():
 
@@ -17,7 +18,7 @@ class Canvas():
         self.draw = ImageDraw.Draw(self.im)
         self.last_xy = None
 
-    def update(self, pen, xy):
+    def draw_line(self, pen, xy):
         # validation here later
         if self.last_xy is None:
             self.last_xy = xy
@@ -34,6 +35,12 @@ class Canvas():
             colour = BLUE
         self.draw.line((x1,y1,x2,y2), fill=colour, width=3)
         self.last_xy = xy
-    
+   
+    def show_move(self, xy):
+        rad = 3
+        x = xy[0] * self.scaling
+        y = xy[1] * self.scaling
+        self.draw.ellipse((x-rad, y-rad, x+rad, y+rad), fill=GREEN)
+
     def save(self):
         self.im.save("test.png", "PNG")
