@@ -1,9 +1,8 @@
 import time
 import logging
 from servo import Servo
+from planner import Planner
 from canvas import Canvas
-import threading
-import math
 
 
 class Robot():
@@ -12,7 +11,11 @@ class Robot():
         self.width = width
 
         # setup servos with init string lengths
-        (l, r) = self.rect_to_polar(width/2, height/4)
+        self.x = width/2
+        self.y = height/4
+        self.planner = Planner(width, height)
+        (l, r) = self.planner.rect_to_polar(self.x, self.y)
+
         self.left_servo = Servo(l)
         self.right_servo = Servo(r)
         self.pen_up()
@@ -24,35 +27,24 @@ class Robot():
         self.pen = False
 
     def move_to(self, x, y):
-        # do some validation later
-        (l, r) = self.rect_to_polar(x, y)
+        # get the moves from the planner
+        moves = self.planner.plan(self.x, self.y, x, y)
 
-        self.left_servo.set_len(l)
-        self.right_servo.set_len(r)
+        # run the moves
+        for move in moves:
+            self.left_servo.set_len(move['l'], move['ls'])
+            self.right_servo.set_len(move['r'], move['rs'])
 
-        while self.left_servo.is_running() or self.right_servo.is_running():
-            self.left_servo.update()
-            self.right_servo.update()
-            xy = self.polar_to_rect(self.left_servo.get_len(),
-                self.right_servo.get_len())
-            self.canvas.update(self.pen, xy)
-        
-    def polar_to_rect(self, a, c):
-        b = self.width
-        i = (a*a+b*b-c*c)/(2.0*a*b)
-        x = i * a
-        try:
-            y = math.sqrt(1.0 - i*i)*a
-        except ValueError:
-            print("value error")
-            y = 0
+            while self.left_servo.is_running() or self.right_servo.is_running():
+                self.left_servo.update()
+                self.right_servo.update()
+                xy = self.planner.polar_to_rect(self.left_servo.get_len(),
+                    self.right_servo.get_len())
+                self.canvas.update(self.pen, xy)
+        # update x & y
+        self.x = xy[0] 
+        self.y = xy[1] 
 
-        return(x,y)
-
-    def rect_to_polar(self,x,y):
-        l = math.sqrt(pow(x,2)+pow(y,2))
-        r = math.sqrt(pow((self.width-x),2)+pow(y,2))
-        return(l,r)
 
     def finish(self):
         self.canvas.save()
@@ -60,7 +52,7 @@ class Robot():
 if __name__ == '__main__':
 
     log = logging.getLogger('')
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.INFO)
     ch = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)

@@ -7,7 +7,7 @@ BLUE = (0,0,255)
 
 class Canvas():
 
-    def __init__(self, width, height, scaling=5):
+    def __init__(self, width, height, scaling=8):
         self.scaling = scaling
         self.w = width * scaling
         self.h = height * scaling
