@@ -1,19 +1,24 @@
 import time
+import random
 import logging
 from servo import Servo
 from planner import Planner
 from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
 
-seg_len = 20
-max_speed = 3.0
-error = max_speed
-width = 200
-height = 200
+conf = {
+'seg_len' : 5,    # cm
+'max_spd' : 1.0,
+'spd_err' : 0.1,  # % error in speed measurement of servo
+'len_err' : 2,   # random length err up to this in cm
+'width' : 200,
+'height' : 200,
+'scaling' : 8, # how much bigger to make the png than the robot
+}
 
 class Robot():
     def __init__(self, width, height, x_init, y_init):
-        self.canvas = Canvas(width=width, height=height)
+        self.canvas = Canvas(conf)
         self.doubles = 0
         self.width = width
 
@@ -21,12 +26,11 @@ class Robot():
         self.x = x_init
         self.y = y_init
         (l, r) = rect_to_polar(width, self.x, self.y)
-        self.left_servo = Servo(l, name='l', max_speed = max_speed, error=error)
-        self.right_servo = Servo(r, name='r', max_speed = max_speed, error=error)
 
-        servo_max = self.left_servo.max_speed
+        self.left_servo = Servo(conf, l, name='l')
+        self.right_servo = Servo(conf, r, name='r')
 
-        self.planner = Planner(width, height, servo_max, seg_len=seg_len)
+        self.planner = Planner(conf)
         self.pen_up()
        
     def pen_down(self):
@@ -37,6 +41,11 @@ class Robot():
 
     def move_to(self, x, y):
         log.info("robot moving to xy %.2f, %.2f" % (x, y))
+        # random error to simulate what happens when length is not measured
+        # should be done in servo, but hard to do because path is split
+        x += random.random() * conf['len_err']
+        y += random.random() * conf['len_err']
+
         # get the moves from the planner
         (l, r) = self.left_servo.get_len(), self.right_servo.get_len()
         moves = self.planner.plan(self.x, self.y, x, y, l, r)
@@ -82,6 +91,8 @@ if __name__ == '__main__':
     ch.setLevel(logging.DEBUG)
     log.addHandler(ch)
 
+    width = conf['width']
+    height = conf['height']
     r = Robot(width, height, width/2, height/2)
     r.move_to(width/4,height/4)
     r.pen_down()

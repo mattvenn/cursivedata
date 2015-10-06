@@ -8,11 +8,11 @@ log = logging.getLogger(__name__)
 class Planner():
     
     # seg_len is how far we go in between calculations, so lower numbers is better
-    def __init__(self, width, height, servo_max, seg_len=2.0):
-        self.servo_max = servo_max
-        self.seg_len = seg_len
-        self.width = width
-        self.height = height
+    def __init__(self, conf):
+        self.servo_max = conf['max_spd']
+        self.seg_len = conf['seg_len']
+        self.width = conf['width']
+        self.height = conf['height']
 
     # given starting xy and ending xy, plan a set of moves
     def plan(self, x, y, newx, newy, l, r): 
