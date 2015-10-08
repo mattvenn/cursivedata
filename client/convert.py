@@ -32,10 +32,10 @@ if __name__ == '__main__':
 
     add_botspec_arguments(parser)
     parser.add_argument('--direct',
-        action='store', dest='direct', type=bool, default=True,
+        action='store_const', const='True', dest='direct', 
         help="Do the conversion directly (otherwise, make an Endpoint and use that (for testing...)")
     parser.add_argument('--native',
-        action='store', dest='native', type=bool, default=False,
+        action='store_const', dest='native', const='True',
         help="Use the native conversion instead of PyCam")
     parser.add_argument('--width',
         action='store', dest='width', type=int, default='500',
@@ -77,8 +77,8 @@ if __name__ == '__main__':
         preparation = SVGPreparation()
         
         # Create a drawing position this into a drawing position (x,y offsets and scale)
-        drawing_position = preparation.drawing_position_from_file( svg_file, DrawingSpec(width=args.width)
-    , robot_spec) 
+        drawing_position = preparation.drawing_position_from_file( svg_file, DrawingSpec(width=args.width),
+                                                                    robot_spec) 
 
         # Setup the transforms from drawing to page and page to robot
         print "Making SVG transforms"
