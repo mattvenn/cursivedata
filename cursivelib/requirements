@@ -1,0 +1,5 @@
+after install all requirements in the main pip file:
+in the virtual env site-packages:
+
+mv svg/path to svgpath #idiots!!
+ln -s cairocffi cairo
