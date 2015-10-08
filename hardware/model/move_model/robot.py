@@ -7,15 +7,15 @@ from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
 
 conf = {
-    'seg_len' : 10,    # cm
+    'seg_len' : 20,    # cm
     'max_spd' : 10.0,
     'min_spd' : 0.1,
-    'spd_err' : 0.00,  # % error in speed measurement of servo
+    'spd_err' : 0.0,  # % error in speed measurement of servo
     'acc' : 5.0,
     'len_err' : 0,   # random length err up to this in cm
-    'width' : 200,
-    'height' : 200,
-    'scaling' : 5, # how much bigger to make the png than the robot
+    'width' : 800,
+    'height' : 800,
+    'scaling' : 1, # how much bigger to make the png than the robot
 }
 
 class Robot():
@@ -54,7 +54,7 @@ class Robot():
         (l, r) = self.left_servo.get_len(), self.right_servo.get_len()
         (target_l, target_r) = rect_to_polar(self.width, x, y)
         moves = self.planner.plan(self.x, self.y, x, y, l, r)
-        # accellerate if possible
+        # accelerate if possible
         moves = self.planner.accel(moves)
 
         # run the moves
@@ -108,19 +108,35 @@ if __name__ == '__main__':
 
     width = conf['width']
     height = conf['height']
-    r = Robot(width, height, width/2, height/2)
-#    r.move_to(width/4,height/4)
-#    r.pen_down()
-#    r.move_to(3*width/4,height/4)
-#    r.move_to(3*width/4,3*height/4)
-#    r.move_to(width/4,3*height/4)
-#    r.move_to(width/4,height/4)
-#    r.move_to(3*width/4,height/4)
+    rob = Robot(width, height, width/2, height/2)
+
+    with open("lines.polar") as fh:
+        for line in fh.readlines():
+            if line.startswith('d'):
+                if '0' in line:
+                    rob.pen_up()
+                else:
+                    rob.pen_down()
+            elif line.startswith('g'):
+                line = line.lstrip('g')
+                l, r = line.split(',')
+                rob.move_to(int(l),int(r))
+
+    """
+    r.move_to(width/4,height/4)
+    r.pen_down()
+    r.move_to(3*width/4,height/4)
+    r.move_to(3*width/4,3*height/4)
+    r.move_to(width/4,3*height/4)
+    r.move_to(width/4,height/4)
+    """
+    """
     steps = 5 
     step = width/2 / steps
     for i in range(steps+1):
         r.move_to(width/4+step*i,height/4)
         r.move_to(width/4+step*i,3*height/4)
-    r.finish()
-    log.info("doubles = %d" % r.doubles)
+    """
+    rob.finish()
+    log.info("doubles = %d" % rob.doubles)
 
