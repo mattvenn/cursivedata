@@ -40,7 +40,7 @@ class Planner():
             log.debug("x = %.2f, y = %.2f" % (xstep, ystep))
             # calculate new string lengths
             (newl, newr) = rect_to_polar(self.width, xstep, ystep)
-            # work out the speeds
+            # work out the speeds, TODO work out how to ls&rs remain lower than max speed
             if abs(newl-l) > abs(newr-r):
                 ls = self.conf['min_spd'] * abs(newl-l)/abs(newr-r)
                 rs = self.conf['min_spd']
@@ -81,10 +81,10 @@ class Planner():
             # accellerate phase
             if step < steps/2:
                 new_acc = acc + self.conf['acc']
-                # only use new acc if result is less than max servo speed
-                if new_acc <= max_mult:
-                    acc = new_acc
-                acc_hist.append(acc)
+                # limit speed
+                if new_acc >= max_mult:
+                    new_acc = max_mult
+                acc_hist.append(new_acc)
             # decellerate with same profile
             else:
                 acc = acc_hist.pop()

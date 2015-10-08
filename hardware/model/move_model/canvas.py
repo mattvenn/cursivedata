@@ -23,7 +23,7 @@ class Canvas():
         # write some info
         font_path = '/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf'
 
-        font_size = conf['scaling'] * 5
+        font_size = 20 / conf['scaling']
         font = ImageFont.truetype(font_path, font_size)
         y = 0
         size_str = "%dx%dcm" % (conf['width'], conf['height'])
