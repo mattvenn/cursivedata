@@ -22,25 +22,21 @@ from cursivelib.native_gcode import *
 import cursivelib.svg as svg
 from cursivedata.models.endpoint import *
 
+from cursivelib.robot_spec import add_botspec_arguments
+from cursivelib.robot_spec import get_botspec_from_args
+
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Convert SVG files to GCode for drawing")
-    parser.add_argument('--bot_width',
-        action='store', dest='bot_width', type=int, default='1000',
-        help="total overall width of the drawing area")
-    parser.add_argument('--bot_height',
-        action='store', dest='bot_height', type=int, default='1000',
-        help="total overall height of the drawing area")
-    parser.add_argument('--top_margin',
-        action='store', dest='top_margin', type=int, default='100',
-        help="top margin for the drawing area")
-    parser.add_argument('--side_margin',
-        action='store', dest='side_margin', type=int, default='100',
-        help="side margin for the drawing area")
+
+    add_botspec_arguments(parser)
     parser.add_argument('--direct',
-        action='store', dest='direct', type=bool, default=True,
+        action='store_const', dest='direct', type=bool, default=True,
         help="Do the conversion directly (otherwise, make an Endpoint and use that (for testing...)")
+    parser.add_argument('--native',
+        action='store_const', dest='native', type=bool, default=False,
+        help="Use the native conversion instead of PyCam")
     parser.add_argument('--width',
         action='store', dest='width', type=int, default='500',
         help="Desired drawing width")
@@ -53,6 +49,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # Specifications of the robot which will do the drawing
+    robot_spec = get_botspec_from_args(args)
+    print "Got bot spec: ",robot_spec.show()
+    print "Converting ",args.input, " to ", args.output
 
     # File to put gcode into
     output_gcode = args.output
@@ -68,13 +68,12 @@ if __name__ == '__main__':
     print "Args.direct: ", args.direct
     direct = True
     print "Direct: ", direct
+    native = args.native
+    print "Native ", native
+
 
     if direct :
         print "Direct conversion"
-        # Specifications of the robot which will do the drawing
-        robot_spec = RobotSpec(
-            width=args.bot_width, height=args.bot_height, 
-            top_margin=args.top_margin, side_margin=args.side_margin)
         preparation = SVGPreparation()
         
         # Create a drawing position this into a drawing position (x,y offsets and scale)
@@ -90,15 +89,17 @@ if __name__ == '__main__':
         page_svg = preparation.apply_into_data(svg_data,robot_spec.svg_drawing(),drawing_to_page)
         robot_svg = preparation.apply_into_data(page_svg,robot_spec.svg_total(),page_to_robot)
 
-        #gcode_converter = PyCAMGcode()
-        gcode_converter = NativeGCodeConversion()
+        if native:
+            gcode_converter = NativeGCodeConversion()
+        else:
+            gcode_converter = PyCAMGcode()
         print "Convert to GCode into " + output_gcode
         gcode_converter.convert_svg(robot_svg,output_gcode,robot_spec)
     else :
         print "Creating endpoint to process file"
         end_point = Endpoint(name="Local",device="Local",location="Local" ,
-            width=args.bot_width, height=args.bot_height, 
-            top_margin=args.top_margin, side_margin=args.side_margin, generate_gcode=True)
+            width=robot_spec.width, height=robot_spec.height, 
+            top_margin=robot_spec.top_margin, side_margin=robot_spec.side_margin, generate_gcode=True)
         pos = end_point.pos_from_file(svg_file,width)
         filename = end_point.draw_svg(svg_file,pos,localfile=output_gcode)
 
