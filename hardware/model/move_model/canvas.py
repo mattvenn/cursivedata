@@ -23,7 +23,7 @@ class Canvas():
         # write some info
         font_path = '/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf'
 
-        font_size = 80
+        font_size = conf['scaling'] * 5
         font = ImageFont.truetype(font_path, font_size)
         y = 0
         size_str = "%dx%dcm" % (conf['width'], conf['height'])
@@ -45,8 +45,7 @@ class Canvas():
         y1 = self.last_xy[1] * self.scaling
         x2 = xy[0] * self.scaling
         y2 = xy[1] * self.scaling
-        log.debug("plotting {pen} at {x2:.2f},{y2:.2f}".format(**locals()))
-        log.debug("{x1},{y1} -> {x2},{y2}".format(**locals()))
+        log.debug("{x1:4.2f},{y1:4.2f} -> {x2:4.2f},{y2:4.2f}".format(**locals()))
         if pen:
             colour = RED
         else:
@@ -58,6 +57,7 @@ class Canvas():
         rad = self.scaling
         x = xy[0] * self.scaling
         y = xy[1] * self.scaling
+        log.debug("plotting move at {x:4.2f},{y:4.2f}".format(**locals()))
         self.draw.ellipse((x-rad, y-rad, x+rad, y+rad), fill=GREEN)
 
     def save(self):

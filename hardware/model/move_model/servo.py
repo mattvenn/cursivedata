@@ -9,15 +9,21 @@ class Servo():
         self.len = len
         self.spd_err = conf['spd_err']
         self.name = name
+        self.updates = 0
         log.info("{self.name}: initial string length {self.len:.2f}".format(**locals()))
-        self.max_spd = conf['max_spd']
+        self.max_spd_lmt = conf['max_spd']
+        self.max_spd = 0
         self.run = False
     
     def set_len(self, target_len, speed=1):
-        # ensure our ending condition is met
+        # store top speed for stats
         if speed > self.max_spd:
-            speed = self.max_spd
-        log.info("%s: cur = %.2f target = %.2f speed = %.4f" % (self.name, self.len, target_len, speed))
+            self.max_spd = speed
+        # ensure our ending condition is met
+        if speed > self.max_spd_lmt:
+            log.error("%s: limiting speed from %.2f to %.2f!" % (self.name, speed, self.max_spd_lmt))
+            speed = self.max_spd_lmt
+        log.debug("%s: cur = %.2f target = %.2f speed = %.4f" % (self.name, self.len, target_len, speed))
         self.target_len = target_len
         if self.target_len > self.len:
             self.step = speed
@@ -32,6 +38,10 @@ class Servo():
         return self.len
 
     def update(self):
+        if self.run == False:
+            return
+        self.updates += 1
+
         # add a random speed error
         speed_error = 2 * (1.0 - random.random()) * self.spd_err * self.step
 
@@ -40,8 +50,12 @@ class Servo():
 
         # getting longer
         if self.step > 0 and self.len >= self.target_len:
+            #these mean lengths are always accurate
+            #figure out a more accurate way of modelling this?
+            #self.len = self.target_len
             self.run = False
         # getting shorter
         if self.step < 0 and self.len <= self.target_len:
+            #self.len = self.target_len
             self.run = False
             
