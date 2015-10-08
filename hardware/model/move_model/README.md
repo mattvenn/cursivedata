@@ -93,3 +93,12 @@ Previous PID test for the servo I made used 200hz sampling.
 * 5cm r encoder wheels
 * 4cm r motor drive wheels
 * 20hz PID loop and velocity sampling
+
+# Notes from Jon
+
+* servos don't need a minimum speed
+* use end spd and end pos as aims, allow servo control loop to solve problem
+* buffer timestamped pos&spd data, then trigger that with controller time stamps
+* encoder peripherals exist for higher b/w
+* control loop should be running 10x faster than the movement bandwidth (do an fft of the position vs time graph of each servo)
+* each servo controller will have 2 errors, pos and vel. So basic PID won't suffice.

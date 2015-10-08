@@ -7,15 +7,15 @@ from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
 
 conf = {
-    'seg_len' : 20,    # cm
+    'seg_len' : 5,    # cm
     'max_spd' : 10.0,
     'min_spd' : 0.1,
     'spd_err' : 0.0,  # % error in speed measurement of servo
     'acc' : 5.0,
     'len_err' : 0,   # random length err up to this in cm
-    'width' : 800,
-    'height' : 800,
-    'scaling' : 1, # how much bigger to make the png than the robot
+    'width' : 700,
+    'height' : 700,
+    'scaling' : 5, # how much bigger to make the png than the robot
 }
 
 class Robot():
@@ -68,9 +68,6 @@ class Robot():
                 self.left_servo.update()
                 self.right_servo.update()
                 count += 1
-                xy = polar_to_rect(self.width, self.left_servo.get_len(),
-                    self.right_servo.get_len())
-                self.canvas.draw_line(self.pen, xy)
                 if not self.left_servo.is_running() and not self.right_servo.is_running():
                     break
                 elif self.left_servo.is_running() and not self.right_servo.is_running():
@@ -80,7 +77,12 @@ class Robot():
                     log.debug("r double move")
                     self.doubles += 1
 
+            speed = self.calculate_speed(move)
+            log.info("speed = %.2f" % speed)
+            xy = polar_to_rect(self.width, self.left_servo.get_len(), self.right_servo.get_len())
+            self.canvas.draw_line(self.pen, xy, speed)
             self.canvas.show_move(xy)
+
         # update x & y
         self.x = xy[0] 
         self.y = xy[1] 
@@ -91,7 +93,12 @@ class Robot():
         log.info("len errors l=%.2f, r=%.2f" % (self.l_error, self.r_error))
         log.info("servos top speed l=%.2f, r=%.2f" % (self.left_servo.max_spd, self.right_servo.max_spd))
 
-
+    def calculate_speed(self, move):
+        ls = move['ls']
+        rs = move['rs']
+        speed = ls + rs
+        # nieve?
+        return speed / (conf['max_spd'] * 2)
 
     def finish(self):
         self.canvas.save()
@@ -110,6 +117,7 @@ if __name__ == '__main__':
     height = conf['height']
     rob = Robot(width, height, width/2, height/2)
 
+    """
     with open("lines.polar") as fh:
         for line in fh.readlines():
             if line.startswith('d'):
@@ -120,16 +128,15 @@ if __name__ == '__main__':
             elif line.startswith('g'):
                 line = line.lstrip('g')
                 l, r = line.split(',')
-                rob.move_to(int(l),int(r))
+                rob.move_to(float(l),float(r))
 
     """
-    r.move_to(width/4,height/4)
-    r.pen_down()
-    r.move_to(3*width/4,height/4)
-    r.move_to(3*width/4,3*height/4)
-    r.move_to(width/4,3*height/4)
-    r.move_to(width/4,height/4)
-    """
+    rob.move_to(width/4,height/4)
+    rob.pen_down()
+    rob.move_to(3*width/4,height/4)
+    rob.move_to(3*width/4,3*height/4)
+    rob.move_to(width/4,3*height/4)
+    rob.move_to(width/4,height/4)
     """
     steps = 5 
     step = width/2 / steps

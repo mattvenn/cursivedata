@@ -36,7 +36,7 @@ class Canvas():
         self.draw.text([0,y], err_str, font=font, fill="black")
 
 
-    def draw_line(self, pen, xy):
+    def draw_line(self, pen, xy, speed):
         # validation here later
         if self.last_xy is None:
             self.last_xy = xy
@@ -47,9 +47,9 @@ class Canvas():
         y2 = xy[1] * self.scaling
         log.debug("{x1:4.2f},{y1:4.2f} -> {x2:4.2f},{y2:4.2f}".format(**locals()))
         if pen:
-            colour = RED
+            colour = (0,255-int(speed*255),0)
         else:
-            colour = BLUE
+            colour = (0,0,255-int(speed*255))
         self.draw.line((x1,y1,x2,y2), fill=colour, width=self.scaling)
         self.last_xy = xy
    

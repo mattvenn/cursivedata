@@ -26,6 +26,8 @@ class Planner():
         # keep steps even to make accelleration easier
         if steps % 2 != 0:
             steps += 1
+        if steps == 0:
+            steps = 2
         log.info("covering distance %.2f in %d steps" % (len, steps))
 
         # unit vector: amount change per step
@@ -85,6 +87,7 @@ class Planner():
                 if new_acc >= max_mult:
                     new_acc = max_mult
                 acc_hist.append(new_acc)
+                acc = new_acc
             # decellerate with same profile
             else:
                 acc = acc_hist.pop()
