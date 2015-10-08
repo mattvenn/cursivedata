@@ -8,7 +8,6 @@ import cursivelib.svg as svg
 class SVGPreparation() :
 
 
-
     # Returns an SVG transform which puts the SVG at the given 
     # place on the page
     def get_drawing_transform(self, drawing_position) :
@@ -64,8 +63,8 @@ class SVGPreparation() :
         if robot_spec is not None :
             if width > robot_spec.img_width:
                 print "not scaling larger than endpoint"
-                raise EndpointConversionError(
-                    "width %d is too large for endpoint, max width is %d" % (width, robot_spec.img_width))
+                err = "width %d is too large for endpoint, max width is %d" % (width, robot_spec.img_width)
+                raise Exception(err )
             if width == 0:
                 print "not using a 0 width"
                 width = robot_spec.img_width
