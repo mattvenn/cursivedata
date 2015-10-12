@@ -23,7 +23,7 @@ class Canvas():
         # write some info
         font_path = '/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf'
 
-        font_size = 20 / conf['scaling']
+        font_size = conf['width'] / conf['scaling'] 
         font = ImageFont.truetype(font_path, font_size)
         y = 0
         size_str = "%dx%dcm" % (conf['width'], conf['height'])
@@ -34,6 +34,11 @@ class Canvas():
         y += font_size
         err_str = "planner: seg len = %dcm" % (conf['seg_len'])
         self.draw.text([0,y], err_str, font=font, fill="black")
+    
+        #grid
+        line_width = self.w / 500
+        self.draw.line((self.w/2,0,self.w/2,self.h), fill=0, width=line_width)
+        self.draw.line((0,self.h/2,self.w,self.h/2), fill=0, width=line_width)
 
 
     def draw_line(self, pen, xy, speed):
@@ -47,18 +52,23 @@ class Canvas():
         y2 = xy[1] * self.scaling
         log.debug("{x1:4.2f},{y1:4.2f} -> {x2:4.2f},{y2:4.2f}".format(**locals()))
         if pen:
-            colour = (0,255-int(speed*255),0)
+            colour = (0,255-int(speed*500),0)
         else:
-            colour = (0,0,255-int(speed*255))
-        self.draw.line((x1,y1,x2,y2), fill=colour, width=self.scaling)
+            colour = (0,0,255-int(speed*500))
+        line_width = self.w / 200
+        self.draw.line((x1,y1,x2,y2), fill=colour, width=line_width)
         self.last_xy = xy
    
-    def show_move(self, xy):
-        rad = self.scaling
+    def show_move(self, xy, type='sub'):
+        rad = self.w / 200
+        if type == 'sub':
+            fill=GREEN
+        elif type == 'seg':
+            fill=RED
         x = xy[0] * self.scaling
         y = xy[1] * self.scaling
         log.debug("plotting move at {x:4.2f},{y:4.2f}".format(**locals()))
-        self.draw.ellipse((x-rad, y-rad, x+rad, y+rad), fill=GREEN)
+        self.draw.ellipse((x-rad, y-rad, x+rad, y+rad), fill=fill)
 
     def save(self):
         self.im.save("test.png", "PNG")

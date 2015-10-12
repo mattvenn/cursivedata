@@ -52,10 +52,10 @@ class Servo():
         if self.step > 0 and self.len >= self.target_len:
             #these mean lengths are always accurate
             #figure out a more accurate way of modelling this?
-            #self.len = self.target_len
+            self.len = self.target_len
             self.run = False
         # getting shorter
         if self.step < 0 and self.len <= self.target_len:
-            #self.len = self.target_len
+            self.len = self.target_len
             self.run = False
             

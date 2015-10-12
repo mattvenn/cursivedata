@@ -7,15 +7,15 @@ from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
 
 conf = {
-    'seg_len' : 5,    # cm
-    'max_spd' : 10.0,
+    'seg_len' : 25,    # cm
+    'max_spd' : 20.0,
     'min_spd' : 0.1,
     'spd_err' : 0.0,  # % error in speed measurement of servo
     'acc' : 5.0,
     'len_err' : 0,   # random length err up to this in cm
     'width' : 700,
-    'height' : 700,
-    'scaling' : 5, # how much bigger to make the png than the robot
+    'height' : 500,
+    'scaling' : 8, # how much bigger to make the png than the robot
 }
 
 class Robot():
@@ -27,6 +27,7 @@ class Robot():
         # setup servos with init string lengths
         self.x = x_init
         self.y = y_init
+        log.info("robot starting at x=%.2f y=%.2f" % (x_init, y_init))
         (l, r) = rect_to_polar(width, self.x, self.y)
 
         self.left_servo = Servo(conf, l, name='l')
@@ -84,6 +85,7 @@ class Robot():
             self.canvas.show_move(xy)
 
         # update x & y
+        self.canvas.show_move(xy,type='seg')
         self.x = xy[0] 
         self.y = xy[1] 
         log.info("robot new xy %.2f, %.2f" % (self.x, self.y))
@@ -117,7 +119,6 @@ if __name__ == '__main__':
     height = conf['height']
     rob = Robot(width, height, width/2, height/2)
 
-    """
     with open("lines.polar") as fh:
         for line in fh.readlines():
             if line.startswith('d'):
@@ -134,10 +135,12 @@ if __name__ == '__main__':
     rob.move_to(width/4,height/4)
     rob.pen_down()
     rob.move_to(3*width/4,height/4)
-    rob.move_to(3*width/4,3*height/4)
-    rob.move_to(width/4,3*height/4)
-    rob.move_to(width/4,height/4)
-    """
+#    rob.move_to(3*width/4,3*height/4)
+#    rob.move_to(width/4,3*height/4)
+#    rob.move_to(width/4,height/4)
+
+
+
     steps = 5 
     step = width/2 / steps
     for i in range(steps+1):

@@ -13,6 +13,9 @@ def rect_to_polar(width,x,y):
     return(l,r)
 
 def calculate_distance(x1,y1,x2,y2):
-     dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-     return dist
+    dist = math.hypot((x2 - x1), (y2 - y1))
+    # angle of 0 is pointing along positive x axis
+    # angle of 90 is pointing down negative y axis
+    angle = math.degrees(math.atan2(y2-y1, x2-x1))
+    return dist, angle
 

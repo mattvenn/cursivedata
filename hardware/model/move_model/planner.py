@@ -19,7 +19,7 @@ class Planner():
         log.info("l = %.2f r = %.2f" % (l,r))
         log.info("newl = %.2f newr = %.2f" % rect_to_polar(self.width, newx, newy))
         moves = []
-        len = calculate_distance(x,y,newx,newy)
+        len, angle = calculate_distance(x,y,newx,newy)
 
         # work out steps
         steps = int(len / self.seg_len)
@@ -33,13 +33,13 @@ class Planner():
         # unit vector: amount change per step
         unitvect = (float(newx-x)/steps , float(newy - y)/steps)
         log.info("unitvector = %f,%f" % (unitvect))
+        log.info("len,angle = %f,%f" % (len, angle))
 
         # for each step
         for step in range(1,steps+1):
             # calculate new target
             xstep = x + unitvect[0] * step
             ystep = y + unitvect[1] * step
-            log.debug("x = %.2f, y = %.2f" % (xstep, ystep))
             # calculate new string lengths
             (newl, newr) = rect_to_polar(self.width, xstep, ystep)
             # work out the speeds, TODO work out how to ls&rs remain lower than max speed
@@ -53,7 +53,7 @@ class Planner():
                 rs = self.conf['min_spd']
                 ls = self.conf['min_spd']
 
-            log.info("l %03.2f r %03.2f newl %03.2f newr %03.2f ls %.2f rs %.2f" % (l, r, newl, newr, ls, rs))
+            log.info("x=%.2f y=%.2f l=%03.2f r=%03.2f ls=%.2f rs=%.2f" % (x, y, l, r, ls, rs))
 
             moves.append({ 'l': newl, 'ls': ls, 'r': newr, 'rs': rs})
 
