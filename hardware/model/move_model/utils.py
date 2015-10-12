@@ -12,10 +12,26 @@ def rect_to_polar(width,x,y):
     r = math.sqrt(pow((width-x),2)+pow(y,2))
     return(l,r)
 
-def calculate_distance(x1,y1,x2,y2):
-    dist = math.hypot((x2 - x1), (y2 - y1))
-    # angle of 0 is pointing along positive x axis
-    # angle of 90 is pointing down negative y axis
-    angle = math.degrees(math.atan2(y2-y1, x2-x1))
-    return dist, angle
+def vect_to_rect(len, angle):
+    x = len * math.cos(math.radians(angle))
+    y = len * math.sin(math.radians(angle))
+    return x, y
+    
+# nieve calculation for now
+# returns 1 for full speed, 0 for stop
+def calculate_speed(diff):
+    if diff > 90:
+        diff = 90
+    speed = 1 - (diff / 90.0)
+    speed *= 0.8
+    return speed
+
+def dotproduct(v1, v2):
+  return sum((a*b) for a, b in zip(v1, v2))
+
+def length(v):
+  return math.sqrt(dotproduct(v, v))
+
+def angle(v1, v2):
+  return math.degrees(math.acos(dotproduct(v1, v2) / (length(v1) * length(v2))))
 

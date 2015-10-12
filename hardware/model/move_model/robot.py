@@ -23,6 +23,7 @@ class Robot():
         self.canvas = Canvas(conf)
         self.doubles = 0
         self.width = width
+        self.moves = []
 
         # setup servos with init string lengths
         self.x = x_init
@@ -44,7 +45,23 @@ class Robot():
     def pen_up(self):
         self.pen = False
 
+    # add the moves to the list
     def move_to(self, x, y):
+        move = { 'x1': x, 'y1': y, 'pen' : self.pen }
+        self.moves.append(move)
+    
+    # do the drawing
+    def start(self):
+        log.info("lookahead speed planning")
+        self.planner.profile(self.moves)
+        for move, count in zip(self.moves,range(len(self.moves))):
+            self.canvas.show_move(move,type='seg')
+            self.canvas.show_speed(move)
+            log.info("len=%.2f angle=%.2f speed=%.2f" % (move['len'], move['diff_angle'], move['speed']))
+
+            self.planner.calculate_lengths(move)
+        
+        """
         log.info("robot moving to xy %.2f, %.2f" % (x, y))
         # random error to simulate what happens when length is not measured
         # should be done in servo, but hard to do because path is split
@@ -94,6 +111,7 @@ class Robot():
         self.r_error += abs(self.right_servo.get_len() - target_r)
         log.info("len errors l=%.2f, r=%.2f" % (self.l_error, self.r_error))
         log.info("servos top speed l=%.2f, r=%.2f" % (self.left_servo.max_spd, self.right_servo.max_spd))
+        """
 
     def calculate_speed(self, move):
         ls = move['ls']
@@ -147,6 +165,7 @@ if __name__ == '__main__':
         r.move_to(width/4+step*i,height/4)
         r.move_to(width/4+step*i,3*height/4)
     """
-    rob.finish()
+    rob.start()
+#    rob.finish()
     log.info("doubles = %d" % rob.doubles)
 

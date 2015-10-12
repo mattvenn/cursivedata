@@ -1,6 +1,6 @@
 import math
 import logging
-from utils import rect_to_polar, polar_to_rect, calculate_distance
+from utils import *
 
 log = logging.getLogger(__name__)
 
@@ -14,53 +14,80 @@ class Planner():
         self.width = conf['width']
         self.height = conf['height']
 
-    # given starting xy and ending xy, plan a set of moves
-    def plan(self, x, y, newx, newy, l, r): 
-        log.info("l = %.2f r = %.2f" % (l,r))
-        log.info("newl = %.2f newr = %.2f" % rect_to_polar(self.width, newx, newy))
-        moves = []
-        len, angle = calculate_distance(x,y,newx,newy)
+    # work through all the moves to look at speeds & angles
+    def profile(self, moves):
+        l_m = None
+        # first pass, calculate all angles and lengths
+        for m in moves:
+            if l_m is None:
+                l_m = m
+                continue
+  
+            l_m['x2'] = m['x1']
+            l_m['y2'] = m['y1']
+
+            l_m = m
+
+        # get rid of last move
+        del(moves[-1])
+
+        # then calculate speeds
+        l_m = None
+
+        for m in moves:
+            m['vect'] = m['x2'] - m['x1'], m['y2'] - m['y1']
+            m['len' ] = length(m['vect'])
+            m['speed'] = 0 
+            m['diff_angle'] = 0
+
+            if l_m is None:
+                l_m = m
+                continue
+
+            # difference between vectors
+            m['diff_angle'] = angle(m['vect'],l_m['vect'])
+            m['speed'] = calculate_speed(m['diff_angle'])
+
+            l_m = m
+          
+
+    # given a move, break down into segments and calculate string lengths and servo speed ratios
+    def calculate_lengths(self, move): 
 
         # work out steps
-        steps = int(len / self.seg_len)
-        # keep steps even to make accelleration easier
+        steps = int(move['len'] / self.seg_len)
+        # keep steps even to make acceleration easier
         if steps % 2 != 0:
             steps += 1
         if steps == 0:
             steps = 2
-        log.info("covering distance %.2f in %d steps" % (len, steps))
+        log.info("planning %.2f,%.2f -> %.2f,%.2f" % (move['x1'],move['y1'],move['x2'],move['y2']))
+        log.info("covering distance %.2f in %d steps" % (move['len'], steps))
+        # step vector: amount change per step
+        move['step_vect'] = move['vect'][0] / steps, move['vect'][1] / steps
+        log.info("step vector = %.2f,%.2f" % (move['step_vect']))
 
-        # unit vector: amount change per step
-        unitvect = (float(newx-x)/steps , float(newy - y)/steps)
-        log.info("unitvector = %f,%f" % (unitvect))
-        log.info("len,angle = %f,%f" % (len, angle))
+        # store all the steps
+        move['steps'] = []
+
+        x = move['x1']
+        y = move['y1']
+        (l, r) = rect_to_polar(self.width, x, y)
 
         # for each step
         for step in range(1,steps+1):
             # calculate new target
-            xstep = x + unitvect[0] * step
-            ystep = y + unitvect[1] * step
+            xstep = x + move['step_vect'][0] * step
+            ystep = y + move['step_vect'][1] * step
             # calculate new string lengths
             (newl, newr) = rect_to_polar(self.width, xstep, ystep)
-            # work out the speeds, TODO work out how to ls&rs remain lower than max speed
-            if abs(newl-l) > abs(newr-r):
-                ls = self.conf['min_spd'] * abs(newl-l)/abs(newr-r)
-                rs = self.conf['min_spd']
-            elif abs(newl-l) < abs(newr-r):
-                rs = self.conf['min_spd'] * abs(newr-r)/abs(newl-l)
-                ls = self.conf['min_spd']
-            else:
-                rs = self.conf['min_spd']
-                ls = self.conf['min_spd']
+            ratio = (newl-l)/(newr-r)
+            move['steps'].append({ 'l': newl, 'r': newr, 'ratio': ratio})
+            log.info("ldiff=%.2f rdiff=%.2f ratio=%.2f" % (newl-l, newr-r, ratio) )
 
-            log.info("x=%.2f y=%.2f l=%03.2f r=%03.2f ls=%.2f rs=%.2f" % (x, y, l, r, ls, rs))
-
-            moves.append({ 'l': newl, 'ls': ls, 'r': newr, 'rs': rs})
-
-            # set the new left and right string lengths
+            # set the new x and y
             l = newl
             r = newr
-        return moves
 
     def accel(self, moves):
         steps = len(moves)
@@ -74,13 +101,13 @@ class Planner():
             if move['rs'] > max_spd:
                 max_spd = move['rs']
 
-        # can't accellerate so much we go over the top speed of servo
+        # can't accelerate so much we go over the top speed of servo
         max_mult = self.conf['max_spd'] / max_spd
         log.info("max speed = %.2f so max mult = %.2f" % (max_spd, max_mult))
 
         slow_down_step = steps
         for move in moves:
-            # accellerate phase
+            # accelerate phase
             if step < steps/2:
                 new_acc = acc + self.conf['acc']
                 # limit speed
