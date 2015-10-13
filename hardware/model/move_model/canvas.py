@@ -33,7 +33,7 @@ class Canvas():
         err_str = "servo: max spd = %s, spd err = %s%%, len err = %dcm" % (conf['max_spd'], conf['spd_err']*100, conf['len_err'])
         self.draw.text([0,y], err_str, font=font, fill="black")
         y += font_size
-        err_str = "planner: seg len = %dcm" % (conf['seg_len'])
+        err_str = "planner: plan len = %dcm" % (conf['plan_len'])
         self.draw.text([0,y], err_str, font=font, fill="black")
     
         #grid

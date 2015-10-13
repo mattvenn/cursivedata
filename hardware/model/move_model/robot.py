@@ -2,16 +2,17 @@ import time
 import random
 import logging
 from servo import Servo
-from planner import Planner, Segment, Path, Moves
+from ppath import Moves
 from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
+import argparse
 
 conf = {
-    'seg_len' : 25,    # cm
+    'plan_len' : 25,    # cm
     'max_spd' : 20.0,
-    'min_spd' : 0.1,
+    'min_spd' : 1.0,
     'spd_err' : 0.0,  # % error in speed measurement of servo
-    'acc' : 5.0,
+    'acc' : 0.1,
     'len_err' : 0,   # random length err up to this in cm
     'width' : 700,
     'height' : 500,
@@ -37,7 +38,6 @@ class Robot():
         self.l_error = 0
         self.r_error = 0
 
-        self.planner = Planner(conf)
         self.pen_up()
         
        
@@ -48,30 +48,15 @@ class Robot():
         self.pen = False
 
     # add the moves to the list
-    def move_to(self, x, y):
+    def add_point(self, x, y):
         #move = { 'x1': x, 'y1': y, 'pen' : self.pen }
         self.moves.add_point(x,y)
     
     # do the drawing
     def start(self):
         self.moves.process()
+        self.moves.output()
 
-        log.info("lookahead speed planning")
-        self.planner.profile(self.moves)
-        for move, count in zip(self.moves,range(len(self.moves))):
-            self.canvas.show_move(move,type='seg')
-            self.canvas.show_speed(move)
-            log.info("len=%.2f angle=%.2f speed=%.2f" % (move['len'], move['diff_angle'], move['speed']))
-
-
-        sub_moves = self.planner.break_paths(self.moves)
-        for sub_move in sub_moves:
-            import ipdb; ipdb.set_trace()
-
-            # this naming makes no sense
-            for move in sub_move:
-                self.planner.calculate_lengths(move)
-        #self.planner.calculate_string_speeds(moves)
         
         """
         log.info("robot moving to xy %.2f, %.2f" % (x, y))
@@ -142,7 +127,13 @@ if __name__ == '__main__':
     height = conf['height']
     rob = Robot(width, height, width/2, height/2)
 
-    with open("lines.polar") as fh:
+    parser = argparse.ArgumentParser(description="feed polar files to polargraph robot")
+    parser.add_argument('--file', required=True, action='store', dest='file', help="file to open")
+    args = parser.parse_args()
+
+
+    with open(args.file) as fh:
+    #with open("circle.polar") as fh:
         for line in fh.readlines():
             if line.startswith('d'):
                 if '0' in line:
@@ -152,7 +143,7 @@ if __name__ == '__main__':
             elif line.startswith('g'):
                 line = line.lstrip('g')
                 l, r = line.split(',')
-                rob.move_to(float(l),float(r))
+                rob.add_point(float(l),float(r))
 
     """
     rob.move_to(width/4,height/4)
