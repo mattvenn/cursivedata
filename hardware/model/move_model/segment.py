@@ -36,10 +36,8 @@ class Segment():
         return "%.2f,%.2f -> %.2f,%.2f" % (self.x1,self.y1,self.x2,self.y2)
 
 
-    def log_steps(self):
-        return
-        for step in self.step_list:
-            log.info("l=%.2f at %.2f, r=%.2f at %.2f" % (step['l'], step['ls'], step['r'], step['rs']))
+    def get_steps(self):
+        return self.step_list
 
     # break down into small chunks and calculate string lengths and servo speed ratios
     def calculate_lengths(self): 
@@ -47,17 +45,16 @@ class Segment():
         # work out steps
         steps = int(self.length() / self.conf['plan_len'])
         
-        # keep steps even to make acceleration easier
-        if steps % 2 != 0:
-            steps += 1
+        # ensure we have at least one step
         if steps == 0:
-            steps = 2
+            steps = 1
+
         log.info("planning %s" % self)
         log.info("covering distance %.2f in %d steps" % (self.length(), steps))
         # step vector: amount change per step
-        step_vect = self.v[0] / steps, self.v[1] / steps
+        self.step_vect = self.v[0] / steps, self.v[1] / steps
         speed_step = (self.e_spd - self.s_spd) / steps
-        log.info("step vector=%.2f,%.2f speed step=%.2f" % (step_vect[0], step_vect[1], speed_step))
+        log.info("step vector=%.2f,%.2f speed step=%.2f" % (self.step_vect[0], self.step_vect[1], speed_step))
 
         # store all the steps
         self.step_list = []
@@ -68,15 +65,15 @@ class Segment():
         # for each step
         for step in range(1,steps+1):
             # calculate new target
-            xstep = self.x1 + step_vect[0] * step
-            ystep = self.y1 + step_vect[1] * step
+            xstep = self.x1 + self.step_vect[0] * step
+            ystep = self.y1 + self.step_vect[1] * step
             speed = self.s_spd + speed_step * step
 
             # calculate new string lengths
             (newl, newr) = rect_to_polar(self.conf['width'], xstep, ystep)
             ratio = (newl-l)/(newr-r)
             log.info("ldiff=%.2f rdiff=%.2f ratio=%.2f" % (newl-l, newr-r, ratio) )
-            self.step_list.append({ 'l': newl, 'r': newr})
+            self.step_list.append({ 'l': newl, 'r': newr })
 
             # set the new x and y
             l = newl
@@ -89,20 +86,30 @@ class Segment():
     * creates a speed profile over the steps that is in keeping with defined start, stop and max speeds
     """
     def calculate_speeds(self):
-        steps = len(self.step_list)
-        step = 0
-        spd = 
-        spd_hist = []
+        # http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Simple_Tp_Notes
+        steps = len(self.step_list) - 1
+        # y = mx + c
+        m_end = -self.conf['acc']
+        m_start = self.conf['acc']
+        c_end = self.e_spd + steps * self.conf['acc']
+        c_start = self.s_spd
+        count = 0
 
         for step in self.step_list:
-            if step < steps/2:
-                acc = acc + self.conf['acc']
-                # limit speed
-                if acc >= 1
-                    acc = 1
-                acc_hist.append(acc)
-                acc = new_acc
+            # start with highest velocity that can satisfy end
+            v_suggest = m_end * count + c_end
 
-            step += 1
+            # clamp to max speed
+            if v_suggest > self.conf['max_spd']:
+                v_suggest = self.conf['max_spd']
 
-        return moves
+            # check satisfies acceleration at start
+            v_max = m_start * count + c_start
+            if v_suggest > v_max:
+                v_suggest = v_max
+
+            step['speed'] = v_suggest
+            log.info("step=%d speed=%d" % (count, step['speed']))
+            count += 1
+
+        
