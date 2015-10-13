@@ -2,7 +2,7 @@ import time
 import random
 import logging
 from servo import Servo
-from planner import Planner
+from planner import Planner, Segment, Path, Moves
 from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
 
@@ -23,11 +23,12 @@ class Robot():
         self.canvas = Canvas(conf)
         self.doubles = 0
         self.width = width
-        self.moves = []
+        self.moves = Moves(conf, x_init, y_init)
 
         # setup servos with init string lengths
         self.x = x_init
         self.y = y_init
+        
         log.info("robot starting at x=%.2f y=%.2f" % (x_init, y_init))
         (l, r) = rect_to_polar(width, self.x, self.y)
 
@@ -38,6 +39,7 @@ class Robot():
 
         self.planner = Planner(conf)
         self.pen_up()
+        
        
     def pen_down(self):
         self.pen = True
@@ -47,11 +49,13 @@ class Robot():
 
     # add the moves to the list
     def move_to(self, x, y):
-        move = { 'x1': x, 'y1': y, 'pen' : self.pen }
-        self.moves.append(move)
+        #move = { 'x1': x, 'y1': y, 'pen' : self.pen }
+        self.moves.add_point(x,y)
     
     # do the drawing
     def start(self):
+        self.moves.process()
+
         log.info("lookahead speed planning")
         self.planner.profile(self.moves)
         for move, count in zip(self.moves,range(len(self.moves))):
@@ -59,7 +63,15 @@ class Robot():
             self.canvas.show_speed(move)
             log.info("len=%.2f angle=%.2f speed=%.2f" % (move['len'], move['diff_angle'], move['speed']))
 
-            self.planner.calculate_lengths(move)
+
+        sub_moves = self.planner.break_paths(self.moves)
+        for sub_move in sub_moves:
+            import ipdb; ipdb.set_trace()
+
+            # this naming makes no sense
+            for move in sub_move:
+                self.planner.calculate_lengths(move)
+        #self.planner.calculate_string_speeds(moves)
         
         """
         log.info("robot moving to xy %.2f, %.2f" % (x, y))
@@ -113,13 +125,6 @@ class Robot():
         log.info("servos top speed l=%.2f, r=%.2f" % (self.left_servo.max_spd, self.right_servo.max_spd))
         """
 
-    def calculate_speed(self, move):
-        ls = move['ls']
-        rs = move['rs']
-        speed = ls + rs
-        # nieve?
-        return speed / (conf['max_spd'] * 2)
-
     def finish(self):
         self.canvas.save()
 
@@ -166,6 +171,6 @@ if __name__ == '__main__':
         r.move_to(width/4+step*i,3*height/4)
     """
     rob.start()
-#    rob.finish()
+    rob.finish()
     log.info("doubles = %d" % rob.doubles)
 
