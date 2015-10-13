@@ -84,9 +84,13 @@ class Segment():
     """
     * iterates over all steps
     * creates a speed profile over the steps that is in keeping with defined start, stop and max speeds
+    * speed is rectangular, NOT string speeds
+
+    informed by linux cnc: http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Simple_Tp_Notes
+
+    probably need to make not dependent on number of steps, or at least ensure that segments don't have 0 speeds all the way through
     """
     def calculate_speeds(self):
-        # http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Simple_Tp_Notes
         steps = len(self.step_list) - 1
         # y = mx + c
         m_end = -self.conf['acc']
@@ -94,7 +98,6 @@ class Segment():
         c_end = self.e_spd + steps * self.conf['acc']
         c_start = self.s_spd
         count = 0
-
         for step in self.step_list:
             # start with highest velocity that can satisfy end
             v_suggest = m_end * count + c_end
@@ -109,7 +112,25 @@ class Segment():
                 v_suggest = v_max
 
             step['speed'] = v_suggest
-            log.info("step=%d speed=%d" % (count, step['speed']))
+            log.info("step=%d speed=%.2f" % (count, step['speed']))
             count += 1
 
+    """
+    * iterates over all steps
+    * follows rectangular speed profiles
+    * calculates string speeds
+    """ 
+    def calculate_string_speeds(self):
+        import ipdb; ipdb.set_trace()
+        last_step = None
+        for step in self.step_list:
+            if last_step is None:
+                last_step = step
+                next
+            
+            speed = self.
+            x_speed = self.step_vect[0] * step['speed']
+            y_speed = self.step_vect[1] * step['speed']
+            last_step = step
+            
         

@@ -3,7 +3,6 @@ import logging
 from segment import Segment
 
 logging.basicConfig(level=logging.DEBUG)
-
 conf = {
     'plan_len' : 5,    # cm
     'max_spd' : 20.0,

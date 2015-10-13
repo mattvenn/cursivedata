@@ -102,3 +102,9 @@ Previous PID test for the servo I made used 200hz sampling.
 * encoder peripherals exist for higher b/w
 * control loop should be running 10x faster than the movement bandwidth (do an fft of the position vs time graph of each servo)
 * each servo controller will have 2 errors, pos and vel. So basic PID won't suffice.
+
+# Notes from Joe
+
+* 2upu controlloer
+* inner outer loop cascade controllers
+* differentiate kinematic equations to get velocity of a and b from xy

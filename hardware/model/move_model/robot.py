@@ -8,8 +8,8 @@ from utils import rect_to_polar, polar_to_rect
 import argparse
 
 conf = {
-    'plan_len' : 25,    # cm
-    'max_spd' : 20.0,
+    'plan_len' : 10,    # cm
+    'max_spd' : 1.0,
     'min_spd' : 1.0,
     'spd_err' : 0.0,  # % error in speed measurement of servo
     'acc' : 0.1,

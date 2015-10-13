@@ -25,13 +25,16 @@ class Moves():
         for s in self.path.segments:
             s.calculate_lengths()
 
+        # rectangular velocity planning
         for s in self.path.segments:
             s.calculate_speeds()
 
+        # convert to string velocity
+        for s in self.path.segments:
+            s.calculate_string_speeds()
+
     def output(self):
         log.info("dumping commands")
-        for s in self.path.segments:
-            s.log_steps()
 
 # paths start and stop at 0 speed
 class Path():
@@ -50,8 +53,15 @@ class Path():
 
         self.segments.append(segment)
 
-    # nieve calculation for now
-    # returns 1 for full speed, 0 for stop
+    """
+    nieve calculation for now
+    returns 1 for full speed, 0 for stop
+
+    should be based on a model that takes into account :
+
+    * weight of gondola in y 
+    * minimise swing in x
+    """
     def calculate_speed(self, angle):
         if angle > 90:
             angle = 90
