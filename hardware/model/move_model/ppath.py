@@ -24,7 +24,7 @@ class Moves():
         log.info("split segments")
         count = 0
         for s in self.path.segments:
-            log.info("segment %d" % count)
+            log.debug("segment %d" % count)
             count += 1
             s.calculate_lengths()
 
@@ -32,7 +32,7 @@ class Moves():
         log.info("velocity planning")
         count = 0
         for s in self.path.segments:
-            log.info("segment %d" % count)
+            log.debug("segment %d" % count)
             count += 1
             s.calculate_speeds()
 
@@ -86,7 +86,7 @@ class Moves():
         log.info("dumping commands")
         count = 0
         for step in self.steps:
-            log.info("step %03d: x=%.2f, y=%.2f, len=%.2f @ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['length'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
+            log.info("step %03d: moveto x=%.2f, y=%.2f, targ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
             count += 1
         # open a file and dump the steps
 

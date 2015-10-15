@@ -48,12 +48,12 @@ class Segment():
         if steps == 0:
             steps = 1
 
-        log.info("planning %s" % self)
-        log.info("covering distance %.2f in %d steps" % (self.length(), steps))
+        log.debug("planning %s" % self)
+        log.debug("covering distance %.2f in %d steps" % (self.length(), steps))
 
         # step vector: amount change per step
         self.step_vect = self.v[0] / steps, self.v[1] / steps
-        log.info("step vector=%.2f,%.2f" % (self.step_vect[0], self.step_vect[1]))
+        log.debug("step vector=%.2f,%.2f" % (self.step_vect[0], self.step_vect[1]))
 
         # store all the steps
         self.step_list = []
@@ -98,7 +98,7 @@ class Segment():
 
             # the rect speed we aim to achieve at the end of the segment
             step['targ_spd'] = v_suggest
-            log.info("step=%d speed=%.2f" % (count, step['targ_spd']))
+            log.debug("step=%d speed=%.2f" % (count, step['targ_spd']))
             count += 1
 
         
