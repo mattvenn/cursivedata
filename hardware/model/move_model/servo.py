@@ -11,20 +11,22 @@ class Servo():
         self.name = name
         self.updates = 0
         log.info("{self.name}: initial string length {self.len:.2f}".format(**locals()))
-        self.speed = 0
+        self.spd = 0
         self.targ_spd = 0
         self.finish = True
     
-    def set_len(self, target_len, targ_spd=0):
+    def set_len(self, targ_len, targ_spd=0):
+        self.updates = 0
         self.finish = False
         self.targ_spd = targ_spd
-        # limit speeds
+        # limit speeds - needs to work for -ve too
+        """
         if targ_spd > conf['max_spd']:
-            log.error("%s: limiting speed from %.2f to %.2f!" % (self.name, speed, self.max_spd_lmt))
+            log.error("%s: limiting speed from %.2f to %.2f!" % (self.name, self.targ_spd, conf['max_spd']))
             self.targ_spd = conf['max_spd']
+        """
 
-
-        self.target_len = target_len
+        self.targ_len = targ_len
 
     def finished(self):
         return self.finish
@@ -32,21 +34,6 @@ class Servo():
     def get_len(self):
         return self.len
 
-    def update(self):
-        self.updates += 1
+    def log_error(self):
+        log.info("%s: len err=%.2f, spd err=%.2f" % (self.name, self.len - self.targ_len, self.spd - self.targ_spd))
 
-        # add a random speed error
-        #speed_error = 2 * (1.0 - random.random()) * self.spd_err * self.step
-
-        log.debug("{self.name}: len={self.len:.2f}, target={self.target_len:.2f} spd={self.speed:.3f} targ_spd={self.targ_spd:.3f}".format(**locals()))
-        #self.len += self.step + speed_error
-
-        self.len += self.speed
-        #PI control
-        P = 0.1
-        error = self.speed - self.targ_spd
-        self.speed += error * P
-
-        if abs(self.len - self.target_len) < 1:
-            self.finish = True
-            

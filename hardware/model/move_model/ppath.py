@@ -76,7 +76,7 @@ class Moves():
             dr = step['r'] - last_step['r']
             last_step['l_targ_spd'] = last_step['targ_spd'] * dl
             last_step['r_targ_spd'] = last_step['targ_spd'] * dr
-            log.debug("step %d: l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
+            log.debug("step %d: l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['l'], last_step['l_targ_spd'], step['r'], last_step['r_targ_spd']))
 
             last_step = step
             count += 1
