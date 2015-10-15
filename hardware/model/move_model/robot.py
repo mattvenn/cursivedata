@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import time
 import random
 import logging
@@ -5,33 +6,23 @@ from servo import Servo
 from ppath import Moves
 from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
+from conf import conf
 import argparse
 
-conf = {
-    'plan_len' : 10,    # cm
-    'max_spd' : 1.0,
-    'min_spd' : 1.0,
-    'spd_err' : 0.0,  # % error in speed measurement of servo
-    'acc' : 0.1,
-    'len_err' : 0,   # random length err up to this in cm
-    'width' : 700,
-    'height' : 500,
-    'scaling' : 8, # how much bigger to make the png than the robot
-}
 
 class Robot():
     def __init__(self, width, height, x_init, y_init):
         self.canvas = Canvas(conf)
         self.doubles = 0
         self.width = width
-        self.moves = Moves(conf, x_init, y_init)
+        self.moves = Moves(x_init, y_init)
 
         # setup servos with init string lengths
         self.x = x_init
         self.y = y_init
         
         log.info("robot starting at x=%.2f y=%.2f" % (x_init, y_init))
-        (l, r) = rect_to_polar(width, self.x, self.y)
+        (l, r) = rect_to_polar(self.x, self.y)
 
         self.left_servo = Servo(conf, l, name='l')
         self.right_servo = Servo(conf, r, name='r')
