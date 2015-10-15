@@ -60,23 +60,15 @@ class Canvas():
         self.draw.line((x1,y1,x2,y2), fill=colour, width=line_width)
         self.last_xy = xy
   
-    def show_speed(self, move):
-        colour = GREEN
-        x1 = move['x1'] * self.scaling
-        y1 = move['y1'] * self.scaling
-        x2 = x1 + move['speed'] * move['vect'][0] * self.scaling
-        y2 = y1 + move['speed'] * move['vect'][1] * self.scaling
-        line_width = self.w / 200
-        self.draw.line((x1,y1,x2,y2), fill=colour, width=line_width)
         
-    def show_move(self, move, type='sub'):
+    def show_move(self, xy, type='sub'):
         rad = self.w / 200
         if type == 'sub':
             fill=GREEN
         elif type == 'seg':
             fill=RED
-        x = move['x1'] * self.scaling
-        y = move['y1'] * self.scaling
+        x = xy[0] * self.scaling
+        y = xy[1] * self.scaling
         log.debug("plotting move at {x:4.2f},{y:4.2f}".format(**locals()))
         self.draw.ellipse((x-rad, y-rad, x+rad, y+rad), fill=fill)
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import time
 import random
 import logging
@@ -46,47 +47,26 @@ class Robot():
     # do the drawing
     def start(self):
         self.moves.process()
-        self.moves.output()
+        moves = self.moves.output()
 
+        log.info("drawing")
         
-        """
-        log.info("robot moving to xy %.2f, %.2f" % (x, y))
-        # random error to simulate what happens when length is not measured
-        # should be done in servo, but hard to do because path is split
-        x += random.random() * conf['len_err']
-        y += random.random() * conf['len_err']
-
-        # get the moves from the planner
-        (l, r) = self.left_servo.get_len(), self.right_servo.get_len()
-        (target_l, target_r) = rect_to_polar(self.width, x, y)
-        moves = self.planner.plan(self.x, self.y, x, y, l, r)
-        # accelerate if possible
-        moves = self.planner.accel(moves)
-
         # run the moves
         count = 0
         for move, count in zip(moves,range(len(moves))):
             log.debug("move %d" % count)
-            self.left_servo.set_len(move['l'], move['ls'])
-            self.right_servo.set_len(move['r'], move['rs'])
+            self.left_servo.set_len(move['l'], move['l_targ_spd'])
+            self.right_servo.set_len(move['r'], move['r_targ_spd'])
 
             while True:
                 self.left_servo.update()
                 self.right_servo.update()
                 count += 1
-                if not self.left_servo.is_running() and not self.right_servo.is_running():
+                if self.left_servo.finished() and self.right_servo.finished():
                     break
-                elif self.left_servo.is_running() and not self.right_servo.is_running():
-                    log.debug("l double move")
-                    self.doubles += 1
-                elif self.right_servo.is_running() and not self.left_servo.is_running():
-                    log.debug("r double move")
-                    self.doubles += 1
 
-            speed = self.calculate_speed(move)
-            log.info("speed = %.2f" % speed)
-            xy = polar_to_rect(self.width, self.left_servo.get_len(), self.right_servo.get_len())
-            self.canvas.draw_line(self.pen, xy, speed)
+            xy = polar_to_rect(self.left_servo.get_len(), self.right_servo.get_len())
+            self.canvas.draw_line(self.pen, xy, move['targ_spd'])
             self.canvas.show_move(xy)
 
         # update x & y
@@ -95,11 +75,6 @@ class Robot():
         self.y = xy[1] 
         log.info("robot new xy %.2f, %.2f" % (self.x, self.y))
         log.info("servos updated l=%d, r=%d" % (self.left_servo.updates, self.right_servo.updates))
-        self.l_error += abs(self.left_servo.get_len() - target_l)
-        self.r_error += abs(self.right_servo.get_len() - target_r)
-        log.info("len errors l=%.2f, r=%.2f" % (self.l_error, self.r_error))
-        log.info("servos top speed l=%.2f, r=%.2f" % (self.left_servo.max_spd, self.right_servo.max_spd))
-        """
 
     def finish(self):
         self.canvas.save()
@@ -107,8 +82,8 @@ class Robot():
 if __name__ == '__main__':
 
     log = logging.getLogger('')
-    log.setLevel(logging.INFO)
-    ch = logging.StreamHandler()
+    log.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter('%(name)-10s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
     ch.setLevel(logging.DEBUG)
@@ -153,6 +128,6 @@ if __name__ == '__main__':
         r.move_to(width/4+step*i,3*height/4)
     """
     rob.start()
-#    rob.finish()
+    rob.finish()
     log.info("doubles = %d" % rob.doubles)
 

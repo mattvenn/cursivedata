@@ -82,13 +82,15 @@ class Moves():
             count += 1
             
         
+    # open a file and dump the steps
     def output(self):
         log.info("dumping commands")
         count = 0
+        # just log for now
         for step in self.steps:
             log.info("step %03d: moveto x=%.2f, y=%.2f, targ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
             count += 1
-        # open a file and dump the steps
+        return self.steps
 
 # paths start and stop at 0 speed
 class Path():

@@ -1,6 +1,6 @@
 conf = {
     'plan_len' : 10,    # cm
-    'max_spd' : 1.0,
+    'max_spd' : 10.0,
     'min_spd' : 0.1,
     'spd_err' : 0.0,  # % error in speed measurement of servo
     'acc' : 0.1,
