@@ -5,6 +5,7 @@ from segment import Segment
 
 log = logging.getLogger(__name__)
 
+# TODO merge moves and path
 # contains all the paths
 class Moves():
     def __init__(self, x, y):
@@ -49,31 +50,45 @@ class Moves():
     * iterates over all steps
     * follows rectangular speed profiles
     * calculates string speeds
+
+    #TODO, probably needs to take into acount:
+        * max servo speeds
+        * max servo acc/dec
+    #TODO
+        still got an out by one bug somewhere, polar speeds are off in relation to linear speeds
     """ 
     def calculate_string_speeds(self):
         last_step = None
-#        import ipdb; ipdb.set_trace()
         count = 0
+        timestamp = 0
         for step in self.steps:
+            step['l'],step['r'] = rect_to_polar(step['x'], step['y'])
+            step['l_targ_spd'] = 0
+            step['r_targ_spd'] = 0
+
             if last_step is None:
                 last_step = step
                 continue
+#            if count == 106:
+#                import ipdb; ipdb.set_trace()
             
-            dx = step['x'] - last_step['x']
-            dy = step['y'] - last_step['y']
-            # where are we using the calculated speed?
-            step['dl'], step['dr'] = rect_speed_to_polar_speed(
-                step['x'], step['y'],
-                last_step['x'], last_step['y'])
-            log.info("step %d: dl=%.2f, dr=%.2f, end speed %.2f" % (count, step['dl'], step['dr'], step['speed']))
+            dl = step['l'] - last_step['l']
+            dr = step['r'] - last_step['r']
+            last_step['l_targ_spd'] = last_step['targ_spd'] * dl
+            last_step['r_targ_spd'] = last_step['targ_spd'] * dr
+            log.debug("step %d: l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
 
             last_step = step
             count += 1
             
         
-
     def output(self):
         log.info("dumping commands")
+        count = 0
+        for step in self.steps:
+            log.info("step %03d: x=%.2f, y=%.2f, len=%.2f @ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['length'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
+            count += 1
+        # open a file and dump the steps
 
 # paths start and stop at 0 speed
 class Path():

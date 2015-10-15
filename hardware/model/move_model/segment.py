@@ -1,6 +1,7 @@
 from utils import *
 import logging
 log = logging.getLogger(__name__)
+from conf import conf
 
 # segments are each straight line in a path
 class Segment():
@@ -62,7 +63,7 @@ class Segment():
             # calculate new target
             xstep = self.x1 + self.step_vect[0] * step
             ystep = self.y1 + self.step_vect[1] * step
-            self.step_list.append({'x': xstep, 'y': ystep })
+            self.step_list.append({'x': xstep, 'y': ystep, 'length': self.length() / steps })
 
 
     """
@@ -75,13 +76,13 @@ class Segment():
     probably need to make not dependent on number of steps, or at least ensure that segments don't have 0 speeds all the way through
     """
     def calculate_speeds(self):
-        steps = len(self.step_list) - 1
+        steps = len(self.step_list)
         # y = mx + c
         m_end = -conf['acc']
         m_start = conf['acc']
         c_end = self.e_spd + steps * conf['acc']
         c_start = self.s_spd
-        count = 0
+        count = 1
         for step in self.step_list:
             # start with highest velocity that can satisfy end
             v_suggest = m_end * count + c_end
@@ -95,30 +96,9 @@ class Segment():
             if v_suggest > v_max:
                 v_suggest = v_max
 
-            step['speed'] = v_suggest
-            log.info("step=%d speed=%.2f" % (count, step['speed']))
+            # the rect speed we aim to achieve at the end of the segment
+            step['targ_spd'] = v_suggest
+            log.info("step=%d speed=%.2f" % (count, step['targ_spd']))
             count += 1
 
-    """
-    * iterates over all steps
-    * follows rectangular speed profiles
-    * calculates string speeds
-    """ 
-    def calculate_string_speeds(self):
-        last_step = None
-        for step in self.step_list:
-            if last_step is None:
-                last_step = step
-                continue
-            
-            dx = step['x'] - last_step['x']
-            dy = step['y'] - last_step['y']
-            # where are we using the calculated speed?
-            step['dl'], step['dr'] = rect_speed_to_polar_speed(
-                step['x'], step['y'],
-                last_step['x'], last_step['y'])
-            log.info("dl=%.2f, dr=%.2f" % (step['dl'], step['dr']))
-
-            last_step = step
-            
         

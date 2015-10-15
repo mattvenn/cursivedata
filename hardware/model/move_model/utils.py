@@ -14,7 +14,3 @@ def rect_to_polar(x,y):
     r = math.sqrt(pow((width-x),2)+pow(y,2))
     return(l,r)
 
-def rect_speed_to_polar_speed(x,y,last_x,last_y):
-    l,r = rect_to_polar(x,y)
-    l_last, r_last = rect_to_polar(last_x,last_y)
-    return l - l_last, r - r_last

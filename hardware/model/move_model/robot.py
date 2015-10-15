@@ -153,6 +153,6 @@ if __name__ == '__main__':
         r.move_to(width/4+step*i,3*height/4)
     """
     rob.start()
-    rob.finish()
+#    rob.finish()
     log.info("doubles = %d" % rob.doubles)
 

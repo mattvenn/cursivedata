@@ -28,8 +28,6 @@ class TestSegment(unittest.TestCase):
     def test_calc_lengths(self):
         s = Segment(0,0,0,100)
         s.calculate_lengths()
-        self.assertEqual(s.s_spd, 0)
-        self.assertEqual(s.e_spd, 0)
         self.assertEqual(len(s.get_steps()), 100/conf['plan_len'])
 
     def test_init_speeds(self):
@@ -38,7 +36,7 @@ class TestSegment(unittest.TestCase):
         self.assertEqual(s.e_spd, 0)
 
     def test_velocity_plan_minmax(self):
-        # choose vals so we should get 0 start, 0 end and max in the middle
+        # choose vals so we should get non 0 start, 0 end and max in the middle
         s = Segment(0,0,0,1000)
         s.calculate_lengths()
 
@@ -46,11 +44,11 @@ class TestSegment(unittest.TestCase):
         steps = s.get_steps()
         num_steps = len(steps)
         # middle
-        self.assertEqual(steps[num_steps/2]['speed'], conf['max_spd'])
+        self.assertEqual(steps[num_steps/2]['targ_spd'], conf['max_spd'])
         # begin
-        self.assertEqual(steps[0]['speed'], 0)
+        self.assertNotEqual(steps[0]['targ_spd'], 0)
         # end
-        self.assertEqual(steps[-1]['speed'], 0)
+        self.assertEqual(steps[-1]['targ_spd'], 0)
 
     def test_velocity_plan_nomax(self):
         # choose vals so not enough time to accelerate all the way to top speed
@@ -61,11 +59,11 @@ class TestSegment(unittest.TestCase):
         steps = s.get_steps()
         num_steps = len(steps)
         # middle
-        self.assertEqual(steps[num_steps/2]['speed'], conf['max_spd']/2)
+        self.assertEqual(steps[num_steps/2]['targ_spd'], conf['max_spd']/2)
         # begin
-        self.assertEqual(steps[0]['speed'], 0)
+        self.assertNotEqual(steps[0]['targ_spd'], 0)
         # end
-        self.assertEqual(steps[-1]['speed'], 0)
+        self.assertEqual(steps[-1]['targ_spd'], 0)
 
     def test_velocity_plan_starthigh(self):
         # choose vals so start at half velocity and end low
@@ -77,9 +75,10 @@ class TestSegment(unittest.TestCase):
         steps = s.get_steps()
         num_steps = len(steps)
         # begin
-        self.assertEqual(steps[0]['speed'], conf['max_spd']/2)
+        # speeds are at END of a step, that's why it's not exactly half speed
+        self.assertAlmostEqual(steps[0]['targ_spd'], conf['max_spd']/10*(num_steps/2+1))
         # end
-        self.assertEqual(steps[-1]['speed'], 0)
+        self.assertEqual(steps[-1]['targ_spd'], 0)
 
 if __name__ == '__main__':
     unittest.main()
