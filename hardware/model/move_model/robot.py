@@ -53,10 +53,11 @@ class Robot():
         
         # run the moves
         count = 0
-        for move, count in zip(moves,range(len(moves))):
-            log.debug("move %d" % count)
-            self.left_servo.set_len(move['l'], move['l_targ_spd'])
-            self.right_servo.set_len(move['r'], move['r_targ_spd'])
+        for step, count in zip(moves,range(len(moves))):
+            log.info("step %03d: moveto x=%.2f, y=%.2f, targ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
+
+            self.left_servo.set_len(step['l'], step['l_targ_spd'])
+            self.right_servo.set_len(step['r'], step['r_targ_spd'])
 
             while True:
                 self.left_servo.update()
@@ -66,8 +67,10 @@ class Robot():
                     break
 
             xy = polar_to_rect(self.left_servo.get_len(), self.right_servo.get_len())
-            self.canvas.draw_line(self.pen, xy, move['targ_spd'])
+            self.canvas.draw_line(self.pen, xy, step['targ_spd'])
             self.canvas.show_move(xy)
+            self.left_servo.log_error()
+            self.right_servo.log_error()
 
         # update x & y
         self.canvas.show_move(xy,type='seg')
