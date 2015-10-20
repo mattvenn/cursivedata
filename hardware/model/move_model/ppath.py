@@ -5,11 +5,10 @@ from segment import Segment
 
 log = logging.getLogger(__name__)
 
-# TODO merge moves and path
 # contains all the paths
 class Moves():
     def __init__(self, x, y):
-        self.path = Path()
+        self.segments = []
         self.x = x
         self.y = y
    
@@ -18,12 +17,12 @@ class Moves():
         self.x = x
         self.y = y
         log.info("appended segment %s" % s)
-        self.path.add_segment(s)
+        self.add_segment(s)
        
     def process(self):
         log.info("split segments")
         count = 0
-        for s in self.path.segments:
+        for s in self.segments:
             log.debug("segment %d" % count)
             count += 1
             s.calculate_lengths()
@@ -31,14 +30,14 @@ class Moves():
         # rectangular velocity planning
         log.info("velocity planning")
         count = 0
-        for s in self.path.segments:
+        for s in self.segments:
             log.debug("segment %d" % count)
             count += 1
             s.calculate_speeds()
 
         # build list of all steps
         self.steps = []
-        for s in self.path.segments:
+        for s in self.segments:
             self.steps += s.get_steps()
         log.info("route planned in %d steps" % len(self.steps))
 
@@ -92,10 +91,6 @@ class Moves():
             count += 1
         return self.steps
 
-# paths start and stop at 0 speed
-class Path():
-    def __init__(self):
-        self.segments = []
 
     def add_segment(self, segment):
         # work out speeds

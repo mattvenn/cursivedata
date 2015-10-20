@@ -5,8 +5,9 @@ log = logging.getLogger(__name__)
 
 
 class Servo():
-    def __init__(self, conf, len=100, name=''):
+    def __init__(self, len=100, name=''):
         self.len = len
+        self.target_len = len
         self.spd_err = conf['spd_err']
         self.name = name
         self.updates = 0
