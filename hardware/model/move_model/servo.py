@@ -17,20 +17,13 @@ class Servo():
     
     def set_len(self, targ_len, targ_spd):
         self.finish = False
+
+        self.start_len = self.len
         self.start_spd = self.spd
+
         self.targ_spd = targ_spd
-        # limit speeds
-        #if targ_spd > conf['max_spd']:
-        #    log.error("%s: limiting speed from %.2f to %.2f!" % (self.name, speed, self.max_spd_lmt))
-        #    self.targ_spd = conf['max_spd']
-
-
         self.targ_len = targ_len
-
-        # how long it should roughly take
-        t = self.len_error() / self.spd_error()
-        self.spd_change_time = self.calculate_acc_time(t)
-        log.debug(self.spd_change_time)
+        log.info("%.2f @ %.2f going to %.2f @ %.2f" % (self.len, self.spd, targ_len, targ_spd))
 
     def finished(self):
         return self.finish
@@ -41,24 +34,13 @@ class Servo():
     def update(self):
         self.updates += 1
 
-        log.debug("{self.name}: len={self.len:.2f}, target={self.targ_len:.2f} spd={self.spd:.3f} targ_spd={self.targ_spd:.3f}".format(**locals()))
-        #self.len += self.step + speed_error
-
-        if self.updates > self.spd_change_time:
-            self.spd += self.targ_spd - self.conf['servo_acc']
-
-        if self.targ_len < self.len:
-            self.spd += conf['servo_acc']
-
-        if self.spd > conf['max_spd']:
-            self.spd = conf['max_spd']
-        if self.spd < - conf['max_spd']:
-            self.spd = - conf['max_spd']
-
         self.len += self.spd
 
+        # end conditions
         if self.len_error() < conf['len_err']:
             self.finish = True
+        
+        log.debug("{self.name}: len={self.len:.2f}, target={self.targ_len:.2f} spd={self.spd:.3f} targ_spd={self.targ_spd:.3f}".format(**locals()))
        
     def len_error(self):
         return abs(self.len - self.targ_len)
@@ -66,21 +48,21 @@ class Servo():
     def spd_error(self):
         return abs(self.spd - self.targ_spd)
 
-    def calculate_acc_time(self, t):
+    def calculate_acc_dist(self):
         
-        s_s = float(self.spd)
+        s_1 = float(self.spd)
         l = self.len_error()
-        s_t = float(self.targ_spd)
+        s_2 = float(self.targ_spd)
 
-        # check values first
-        if (abs(s_s - s_t) / t) > conf['servo_acc']:
-            raise Exception("impossible to acc/dec in time")
+        # distance convered while changing speed
+        # v1^2 - v0^2 = 2 * a * s
+        acc_l = (s_2 * s_2 - s_1 * s_1 ) / ( 2 * conf['servo_acc'])
+        if acc_l > l: 
+            raise Exception("l is too short given speeds and acc")
+        log.info("cover distance %.2f during acc" % acc_l)
+        return acc_l
 
-        td = ( 2 * l - t * abs(s_t - s_s)) / abs(s_t - s_s) 
-        if s_t > s_s:
-            td = t - td 
-        if td < 0:
-            raise Exception("impossible to acheive length in time")
+        
         return td
 
         

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+from pprint import pprint
 import sys
+import numpy as np
 import time
 import random
 import logging
-from servo import Servo
 from ppath import Moves
 from canvas import Canvas
 from utils import rect_to_polar, polar_to_rect
@@ -16,7 +17,7 @@ class Robot():
         self.canvas = Canvas(conf)
         self.doubles = 0
         self.width = width
-        self.moves = Moves(x_init, y_init)
+        self.moves = Moves()
 
         # setup servos with init string lengths
         self.x = x_init
@@ -25,8 +26,8 @@ class Robot():
         log.info("robot starting at x=%.2f y=%.2f" % (x_init, y_init))
         (l, r) = rect_to_polar(self.x, self.y)
 
-        self.left_servo = Servo(conf, l, name='l')
-        self.right_servo = Servo(conf, r, name='r')
+#        self.left_servo = Servo(len=l, name='l')
+#        self.right_servo = Servo(len=r, name='r')
         self.l_error = 0
         self.r_error = 0
 
@@ -41,12 +42,18 @@ class Robot():
 
     # add the moves to the list
     def add_point(self, x, y):
+        point = np.array([x,y],dtype=np.float)
         #move = { 'x1': x, 'y1': y, 'pen' : self.pen }
-        self.moves.add_point(x,y)
-    
+        self.moves.add_point(point)
+   
+    def process(self):
+        self.moves.break_segments()
+        self.moves.calc_max_velocity()
+        #self.moves.plan_velocity()
+        self.moves.dump()
+
     # do the drawing
     def start(self):
-        self.moves.process()
         moves = self.moves.output()
 
         log.info("drawing")
@@ -54,23 +61,15 @@ class Robot():
         # run the moves
         count = 0
         for step, count in zip(moves,range(len(moves))):
-            log.info("step %03d: moveto x=%.2f, y=%.2f, targ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
+            #log.info("step %03d: moveto x=%.2f, y=%.2f, targ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
+            log.info("step %03d: l=%.2f r=%.2f" % (count, step['l'], step['r']))
 
-            self.left_servo.set_len(step['l'], step['l_targ_spd'])
-            self.right_servo.set_len(step['r'], step['r_targ_spd'])
+            #self.left_servo.set_len(step['l'])
+            #self.right_servo.set_len(step['r'])
 
-            while True:
-                self.left_servo.update()
-                self.right_servo.update()
-                count += 1
-                if self.left_servo.finished() and self.right_servo.finished():
-                    break
-
-            xy = polar_to_rect(self.left_servo.get_len(), self.right_servo.get_len())
-            self.canvas.draw_line(self.pen, xy, step['targ_spd'])
+            xy = polar_to_rect(step['l'], step['r'])
+            self.canvas.draw_line(self.pen, xy)
             self.canvas.show_move(xy)
-            self.left_servo.log_error()
-            self.right_servo.log_error()
 
         # update x & y
         self.canvas.show_move(xy,type='seg')
@@ -130,7 +129,8 @@ if __name__ == '__main__':
         r.move_to(width/4+step*i,height/4)
         r.move_to(width/4+step*i,3*height/4)
     """
-    rob.start()
-    rob.finish()
+    rob.process()
+#    rob.start()
+#    rob.finish()
     log.info("doubles = %d" % rob.doubles)
 

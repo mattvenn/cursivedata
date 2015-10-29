@@ -30,8 +30,8 @@ class Canvas():
         size_str = "%dx%dcm" % (conf['width'], conf['height'])
         self.draw.text([0,y], size_str, font=font, fill="black")
         y += font_size
-        err_str = "servo: max spd = %s, spd err = %s%%, len err = %dcm" % (conf['max_spd'], conf['spd_err']*100, conf['len_err'])
-        self.draw.text([0,y], err_str, font=font, fill="black")
+#        err_str = "servo: max spd = %s, spd err = %s%%, len err = %dcm" % (conf['max_spd'], conf['spd_err']*100, conf['len_err'])
+#        self.draw.text([0,y], err_str, font=font, fill="black")
         y += font_size
         err_str = "planner: plan len = %dcm" % (conf['plan_len'])
         self.draw.text([0,y], err_str, font=font, fill="black")
@@ -42,7 +42,7 @@ class Canvas():
         self.draw.line((0,self.h/2,self.w,self.h/2), fill=0, width=line_width)
 
 
-    def draw_line(self, pen, xy, speed):
+    def draw_line(self, pen, xy):
         # validation here later
         if self.last_xy is None:
             self.last_xy = xy
@@ -53,16 +53,16 @@ class Canvas():
         y2 = xy[1] * self.scaling
         log.debug("{x1:4.2f},{y1:4.2f} -> {x2:4.2f},{y2:4.2f}".format(**locals()))
         if pen:
-            colour = (0,255-int(speed*500),0)
+            colour = GREEN
         else:
-            colour = (0,0,255-int(speed*500))
+            colour = BLUE
         line_width = self.w / 200
         self.draw.line((x1,y1,x2,y2), fill=colour, width=line_width)
         self.last_xy = xy
   
         
     def show_move(self, xy, type='sub'):
-        rad = self.w / 200
+        rad = self.w / 400
         if type == 'sub':
             fill=GREEN
         elif type == 'seg':

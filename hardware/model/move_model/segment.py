@@ -23,15 +23,6 @@ class Segment():
     def set_end_speed(self, speed):
         self.e_spd = speed
 
-    def dotproduct(self, vect):
-        return sum((a*b) for a, b in zip(self.v, vect.v))
-
-    def length(self):
-        return math.sqrt(self.dotproduct(self))
-
-    def angle(self, vect):
-        return math.degrees(math.acos(self.dotproduct(vect) / (self.length() * vect.length())))
-
     def __str__(self):
         return "%.2f,%.2f -> %.2f,%.2f" % (self.x1,self.y1,self.x2,self.y2)
 
