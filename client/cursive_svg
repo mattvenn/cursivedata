@@ -1,0 +1,26 @@
+#!/bin/bash
+
+CURSIVE_HOME=~/work/python/cursivedata/client
+DATA_HOME=~/work/python/cursivedata/data
+WIDTH=760
+HEIGHT=580
+SIDE=185
+TOP=180
+DRAW=180
+
+#INFILE=moire1-lines.svg
+BASE=$1
+
+INPUT_SVG=$DATA_HOME/originals/$BASE.svg 
+GENERATED_GCODE=$DATA_HOME/gcodes/$BASE.gcode 
+CHECK_SVG=$DATA_HOME/checks/$BASE.check.svg
+
+SPEC="$WIDTH,$HEIGHT,$TOP,$SIDE" 
+
+echo "Drawing width:$DRAW, Bot Spec:'$SPEC'"
+echo "Converting $INPUT_SVG to $GENERATED_GCODE (width:$DRAW, spec:'$SPEC')"
+python $CURSIVE_HOME/convert.py --bot_spec=$SPEC --width=$DRAW --input $INPUT_SVG --output $GENERATED_GCODE
+
+
+echo "Converting $INPUT_SVG to $GENERATED_GCODE"
+python gcode_to_svg.py --bot_spec=$SPEC --input $GENERATED_GCODE --output $CHECK_SVG
