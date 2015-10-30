@@ -42,14 +42,12 @@ class Robot():
 
     # add the moves to the list
     def add_point(self, x, y):
-        point = np.array([x,y],dtype=np.float)
-        #move = { 'x1': x, 'y1': y, 'pen' : self.pen }
-        self.moves.add_point(point)
+        self.moves.add_point(x, y)
    
     def process(self):
         self.moves.break_segments()
         self.moves.calc_max_velocity()
-        #self.moves.plan_velocity()
+        self.moves.plan_velocity()
         self.moves.dump()
 
     # do the drawing

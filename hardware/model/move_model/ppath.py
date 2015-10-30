@@ -1,4 +1,4 @@
-import math
+from math import sqrt, pow
 import numpy as np
 import logging
 from utils import *
@@ -16,7 +16,8 @@ class Moves():
         with open('points.d', 'w') as fh:
             pickle.dump({'p' : self.points, 'bp': self.broken_points }, fh)
         
-    def add_point(self, point):
+    def add_point(self, x, y):
+        point = np.array([x,y],dtype=np.float)
         log.info("appending point %s" % (point))
         self.points.append({'point': point})
      
@@ -51,35 +52,87 @@ class Moves():
             # calculate new target
             self.broken_points.append({'point': prev_point + step_vect * step })
 
-    # go backwards through all the points and plan a velocity based on acc
-    # and the point's max speed
+
+    def check_next(self, n):
+        # calc velocity acheived from previous point
+        log.debug("check next n=%d" % n)
+        point = self.broken_points[n]
+        prev = self.broken_points[n-1]
+        length = np.linalg.norm(point['point'] - prev['point'])
+
+        a = conf['acc']
+        u = prev['ltd_spd']
+
+        v_calc_max = sqrt(pow(u,2) + 2 * a * length)
+        try:
+            v_calc_min = sqrt(pow(u,2) - 2 * a * length)
+        except ValueError:
+            v_calc_min = 0
+
+        log.debug("v_calc_max=%.2f v_calc_min=%.2f max_spd=%.2f" % (v_calc_max, v_calc_min, point['max_spd']))
+        # if we're within limits, continue
+        if v_calc_max < point['max_spd']:
+            log.debug('v_calc_max spd < max_spd')
+            # set limited speed to max speed
+            point['ltd_spd'] = v_calc_max
+            # keep going forwards
+            self.check_next(n+1)
+
+        # we can't slow down in time
+        elif v_calc_min > point['max_spd']:
+            log.debug('max spd < v calc min')
+            point['ltd_spd'] = point['max_spd']
+            # then go backwards to recalculate
+            self.check_prev(n-1)
+            self.check_next(n+1)
+
+        elif v_calc_max > point['max_spd']:
+            log.debug('v calc max > max spd')
+            # limit speed
+            point['ltd_spd'] = point['max_spd']
+            # keep going
+            self.check_next(n+1)
+        
+        else:
+            log.warning("shouldn't get here")
+
+    def check_prev(self, n):
+        log.debug("check prev n=%d" % n)
+        point = self.broken_points[n]
+        next = self.broken_points[n+1]
+
+        length = np.linalg.norm(point['point'] - next['point'])
+
+        a = conf['acc']
+        u = next['ltd_spd']
+
+        v_calc_max = sqrt(pow(u,2) + 2 * a * length)
+        try:
+            v_calc_min = sqrt(pow(u,2) - 2 * a * length)
+        except ValueError:
+            v_calc_min = 0
+        log.debug("v_calc_max=%.2f ltd_spd=%.2f" % (v_calc_max, point['ltd_spd']))
+        # do we need to limit the speed?
+        if point['ltd_spd'] > v_calc_max:
+            log.debug('lowered speed, go back')
+            point['ltd_spd'] = v_calc_max
+            self.check_prev(n-1)
+        # or is the speed ok now?
+        elif point['ltd_spd'] <= v_calc_max:
+            log.debug('speed low enough, quit')
+
+        log.debug("finished looking back")
+        return
+            
+
     def plan_velocity(self):
-        steps = len(self.broken_points)
-        # y = mx + c
-        m_end = -conf['acc']
-        m_start = conf['acc']
-        c_end = self.e_spd + steps * conf['acc']
-        c_start = self.s_spd
-        count = 1
-        for point in self.broken_points:
-            # start with highest velocity that can satisfy end
-            v_suggest = m_end * count + c_end
-
-            # clamp to max speed
-            if v_suggest > conf['max_spd']:
-                v_suggest = conf['max_spd']
-
-            # check satisfies acceleration at start
-            v_max = m_start * count + c_start
-            if v_suggest > v_max:
-                v_suggest = v_max
-
-            # the rect speed we aim to achieve at the end of the segment
-            step['targ_spd'] = v_suggest
-            log.debug("step=%d speed=%.2f" % (count, step['targ_spd']))
-            count += 1
-
-    
+        for p in self.broken_points:
+            p['ltd_spd'] = 0
+        #start recursive function
+        try:
+            self.check_next(1)
+        except IndexError:
+            log.debug("plan ended")
     # for each point, calculate max rectangular velocity
     def calc_max_velocity(self):
         log.info("velocity planning %d points" % len(self.broken_points))
