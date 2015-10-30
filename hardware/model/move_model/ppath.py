@@ -133,13 +133,14 @@ class Moves():
             self.check_next(1)
         except IndexError:
             log.debug("plan ended")
+
     # for each point, calculate max rectangular velocity
     def calc_max_velocity(self):
         log.info("velocity planning %d points" % len(self.broken_points))
         for i in range(len(self.broken_points)):
             self.broken_points[i]['max_spd'] = 0
             if i > 0 and i < len(self.broken_points) - 1:
-                self.broken_points[i]['max_spd'] = self.calc_speed(i)
+                self.broken_points[i]['max_spd'] = self.calc_speed2(i)
             log.debug("max spd for point %d = %.2f" % (i, self.broken_points[i]['max_spd']))
 
     def calc_speed(self, i):
@@ -150,6 +151,54 @@ class Moves():
         if spd > conf['max_spd']:
             spd = conf['max_spd']
         return spd
+
+    """
+    nieve calculation for now
+    returns 1 for full speed, 0 for stop
+
+    should be based on a model that takes into account :
+
+    * weight of gondola in y 
+    * minimise swing in x
+    """
+    def calc_speed2(self, i):
+        A = self.broken_points[i-1]['point']
+        B = self.broken_points[i]['point']
+        C = self.broken_points[i+1]['point']
+        v1 = B-A
+        v2 = C-B
+        angle = self.angle_between(v1,v2)
+        angle = np.degrees(angle)
+        log.debug("angle at %d = %.2f" % (i,angle))
+        if angle > 90:
+            angle = 90
+        speed = 1 - (angle / 90.0)
+        speed *= conf['max_spd']
+        return speed
+
+    def unit_vector(self, vector):
+        """ Returns the unit vector of the vector.  """
+        return vector / np.linalg.norm(vector)
+
+    def angle_between(self, v1, v2):
+        """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+                >>> angle_between((1, 0, 0), (0, 1, 0))
+                1.5707963267948966
+                >>> angle_between((1, 0, 0), (1, 0, 0))
+                0.0
+                >>> angle_between((1, 0, 0), (-1, 0, 0))
+                3.141592653589793
+        """
+        v1_u = self.unit_vector(v1)
+        v2_u = self.unit_vector(v2)
+        angle = np.arccos(np.dot(v1_u, v2_u))
+        if np.isnan(angle):
+            if (v1_u == v2_u).all():
+                return 0.0
+            else:
+                return np.pi
+        return angle
 
     def calc_rad(self, i):
         A = self.broken_points[i-1]['point']
@@ -271,19 +320,4 @@ class Moves():
             self.segments[-1].set_end_speed(speed)
 
         self.segments.append(segment)
-
-    """
-    nieve calculation for now
-    returns 1 for full speed, 0 for stop
-
-    should be based on a model that takes into account :
-
-    * weight of gondola in y 
-    * minimise swing in x
-    """
-    def calculate_speed(self, angle):
-        if angle > 90:
-            angle = 90
-        speed = 1 - 0.8 * (angle / 90.0)
-        return speed
 
