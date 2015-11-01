@@ -68,7 +68,7 @@ p1 = figure(plot_width=600, plot_height=600, title="points", tools=TOOLS)
 p1.line('x', 'y', line_width=2, source=init_source)
 p1.square('x', 'y', source=init_source)
 
-p2 = figure(plot_width=600, plot_height=600, title="segments with max speeds", tools=TOOLS)
+p2 = figure(plot_width=600, plot_height=600, title="segments with max speeds", tools=TOOLS, x_range=(0,600), y_range=(0,600))
 p2.line('x', 'y', line_width=2, source=p_source)
 p2.square('x', 'y', size=max_spd, source=p_source)
 
@@ -76,7 +76,7 @@ p3 = figure(plot_width=600, plot_height=600, title="max spd & ltd spd against po
 p3.line('points', 'max_spd', line_width=2, source=p_source)
 p3.line('points', 'ltd_spd', line_width=2, line_color="red", source=p_source)
 
-p4 = figure(plot_width=600, plot_height=600, title="interpolated points at fixed freq", tools=TOOLS)
+p4 = figure(plot_width=600, plot_height=600, title="interpolated points at fixed freq", tools=TOOLS, x_range=(0,600), y_range=(0,600))
 p4.line('x','y', line_width=2, source=i_source)
 p4.square('x','y', size=4, source=i_source)
 # show the results
