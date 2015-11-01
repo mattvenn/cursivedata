@@ -1,7 +1,7 @@
 conf = {
-    'plan_len' : 5,    # cm
+    'plan_len' : 50,    # cm
     'max_spd' : 10.0,
-    'acc' : 0.10,
+    'acc' : 0.1,
     'width' : 700,
     'height' : 500,
     'scaling' : 8, # how much bigger to make the png than the robot

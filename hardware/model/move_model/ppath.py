@@ -248,14 +248,21 @@ class Moves():
             t = m - self.broken_points[p]['t']
             
             # interpolate between x(n),y(n) -> x(n+1),y(n+1)
-            # s = ut + 0.5 (v-u)t
             u = self.broken_points[p]['ltd_spd']
             v = self.broken_points[p+1]['ltd_spd']
             l = np.linalg.norm(self.broken_points[p]['point'] - self.broken_points[p+1]['point'])
-
-            s = 0.5 * (v+u) * t
             unit_vect =  self.broken_points[p+1]['point'] - self.broken_points[p]['point']
+            a = (v-u) / (self.broken_points[p+1]['t'] - self.broken_points[p]['t'] )
+
+            # s = ut + 0.5 (v-u)t
+            #s = 0.5 * (v+u) * t
+            #interp = self.broken_points[p]['point'] + (unit_vect / l) * s
+
+            # s = ut + 0.5 * a * t^2
+            s = u * t + 0.5 * a * pow(t,2)
             interp = self.broken_points[p]['point'] + (unit_vect / l) * s
+
+
             self.interp.append(interp)
             log.debug("m=%.2f t=%.2f s=%.2f u=%.2f v=%.2f xy=%s" % (m, t, s, u, v, interp))
             m += 1.00
