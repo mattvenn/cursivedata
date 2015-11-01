@@ -39,6 +39,20 @@ p_source = ColumnDataSource(
             ltd_spd=ltd_spd,
         )
     )
+
+x = []
+y = []
+for i in data['i']:
+    x.append(i[0])
+    y.append(i[1])
+
+i_source = ColumnDataSource(
+        data=dict(
+            x=x,
+            y=y,
+        )
+    )
+
 """
 hover = HoverTool(
         tooltips=[
@@ -62,6 +76,9 @@ p3 = figure(plot_width=600, plot_height=600, title="max spd & ltd spd against po
 p3.line('points', 'max_spd', line_width=2, source=p_source)
 p3.line('points', 'ltd_spd', line_width=2, line_color="red", source=p_source)
 
+p4 = figure(plot_width=600, plot_height=600, title="interpolated points at fixed freq", tools=TOOLS)
+p4.line('x','y', line_width=2, source=i_source)
+p4.square('x','y', size=4, source=i_source)
 # show the results
-p = gridplot([[p1, p2],[p3]])
+p = gridplot([[p1, p2],[p3, p4]])
 show(p)

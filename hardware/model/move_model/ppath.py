@@ -11,10 +11,11 @@ log = logging.getLogger(__name__)
 class Moves():
     def __init__(self):
         self.points = []
+        self.interp = []
   
     def dump(self):
         with open('points.d', 'w') as fh:
-            pickle.dump({'p' : self.points, 'bp': self.broken_points }, fh)
+            pickle.dump({'i' : self.interp, 'p' : self.points, 'bp': self.broken_points }, fh)
         
     def add_point(self, x, y):
         point = np.array([x,y],dtype=np.float)
@@ -35,6 +36,7 @@ class Moves():
         # work out steps
         prev_point = self.points[p-1]['point']
         point = self.points[p]['point']
+        # calculate length
         length = np.linalg.norm(point - prev_point)
         steps = int(length / conf['plan_len'])
 
@@ -133,6 +135,8 @@ class Moves():
             self.check_next(1)
         except IndexError:
             log.debug("plan ended")
+        for p in range(len(self.broken_points)):
+            log.debug("p=%d ltd_spd=%.2f" % (p, self.broken_points[p]['ltd_spd']))
 
     # for each point, calculate max rectangular velocity
     def calc_max_velocity(self):
@@ -141,7 +145,7 @@ class Moves():
             self.broken_points[i]['max_spd'] = 0
             if i > 0 and i < len(self.broken_points) - 1:
                 self.broken_points[i]['max_spd'] = self.calc_speed2(i)
-            log.debug("max spd for point %d = %.2f" % (i, self.broken_points[i]['max_spd']))
+#            log.debug("max spd for point %d = %.2f" % (i, self.broken_points[i]['max_spd']))
 
     def calc_speed(self, i):
         rad = self.calc_rad(i)
@@ -168,12 +172,10 @@ class Moves():
         v1 = B-A
         v2 = C-B
         angle = self.angle_between(v1,v2)
-        angle = np.degrees(angle)
-        log.debug("angle at %d = %.2f" % (i,angle))
-        if angle > 90:
-            angle = 90
-        speed = 1 - (angle / 90.0)
+#        angle = np.degrees(angle)
+        speed = 1 - math.sin(angle)
         speed *= conf['max_spd']
+        log.debug("angle at %d = %.2f, max_spd=%.2f" % (i,angle,speed))
         return speed
 
     def unit_vector(self, vector):
@@ -215,109 +217,46 @@ class Moves():
             return np.inf
         R = a*b*c / 4 / area
         return R
-        """
-        b1 = a*a * (b*b + c*c - a*a)
-        b2 = b*b * (a*a + c*c - b*b)
-        b3 = c*c * (a*a + b*b - c*c)
-        P = np.column_stack((A, B, C)).dot(np.hstack((b1, b2, b3)))
-        P /= b1 + b2 + b3
-        R
-        """
 
 
-    def resample(self):
-        self.time = []
-        last_step = None
-        last_step = {   'l_targ_spd' : 0,
-                        'r_targ_spd' : 0,
-                        'l' : 430,
-                        'r' : 430,
-                        }
-        for step in self.steps:
+    # go through all points and work out when they are visited.
+    def calc_point_times(self):
+        # assign first time as 0
+        self.broken_points[0]['t'] = 0
+        for p in range(1,len(self.broken_points)):
+            prev_point = self.broken_points[p-1]
+            point = self.broken_points[p]
+            length = np.linalg.norm(point['point'] - prev_point['point'])
 
-            l_spd_1 = last_step['l_targ_spd']
-            r_spd_1 = last_step['r_targ_spd']
+            t = 2 *length / (point['ltd_spd']+prev_point['ltd_spd'])
+            point['t'] = prev_point['t'] + t
+            log.debug("visit point %d at t=%.2f" % (p, point['t']))
+
+
+    # interpolate new positions from points with constant time interval
+    def interpolate_pos_by_time(self):
+        m = 0
+        p = 0
+        last_t = self.broken_points[-1]['t']
+        self.interp = []
+        while m <= last_t:
+            # find highest point <= t
+            while self.broken_points[p+1]['t'] <= m:
+                p += 1
+                log.debug('incrementing p = %d' % p)
             
-            l_spd_2 = step['l_targ_spd']
-            r_spd_2 = step['r_targ_spd']
-
-            l_t = 2 * (step['l'] - last_step['l']) / ( l_spd_1 + l_spd_2 )
-            r_t = 2 * (step['r'] - last_step['r']) / ( r_spd_1 + r_spd_2 )
-
-            log.info("lt=%.2f rt=%.2f" % (l_t, r_t))
-
-            log.info("%.2f -> %.2f" % (l_spd_1, l_spd_2))
-            t = 0
-            while t <= l_t:
-                l_spd = l_spd_1 + t * ((l_spd_2 - l_spd_1) / l_t)
-                r_spd = r_spd_1 + t * ((r_spd_2 - r_spd_1) / r_t)
-                log.info("t=%.2f l_spd=%.2f" % (t, l_spd))
-                self.time.append({
-                    'l': step['l'] + l_spd * t,
-                    'r': step['r'] + r_spd * t,
-                    })
-                t += 0.10
-            last_step = step
-
-    """
-    * iterates over all steps
-    * follows rectangular speed profiles
-    * calculates string speeds
-
-    #TODO, probably needs to take into acount:
-        * max servo speeds
-        * max servo acc/dec
-    #TODO
-        still got an out by one bug somewhere, polar speeds are off in relation to linear speeds
-    """ 
-
-    def calculate_string_speeds(self):
-        last_step = None
-        count = 0
-        timestamp = 0
-        for step in self.steps:
-            step['l'],step['r'] = rect_to_polar(step['x'], step['y'])
-            step['l_targ_spd'] = 0
-            step['r_targ_spd'] = 0
-
-            if last_step is None:
-                last_step = step
-                continue
-#            if count == 106:
-#                import ipdb; ipdb.set_trace()
+            t = m - self.broken_points[p]['t']
             
-            dl = step['l'] - last_step['l']
-            dr = step['r'] - last_step['r']
-            last_step['l_targ_spd'] = last_step['targ_spd'] * dl
-            last_step['r_targ_spd'] = last_step['targ_spd'] * dr
-            log.debug("step %d: l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['l'], last_step['l_targ_spd'], step['r'], last_step['r_targ_spd']))
+            # interpolate between x(n),y(n) -> x(n+1),y(n+1)
+            # s = ut + 0.5 (v-u)t
+            u = self.broken_points[p]['ltd_spd']
+            v = self.broken_points[p+1]['ltd_spd']
+            l = np.linalg.norm(self.broken_points[p]['point'] - self.broken_points[p+1]['point'])
 
-            last_step = step
-            count += 1
-            
+            s = 0.5 * (v+u) * t
+            unit_vect =  self.broken_points[p+1]['point'] - self.broken_points[p]['point']
+            interp = self.broken_points[p]['point'] + (unit_vect / l) * s
+            self.interp.append(interp)
+            log.debug("m=%.2f t=%.2f s=%.2f u=%.2f v=%.2f xy=%s" % (m, t, s, u, v, interp))
+            m += 1.00
         
-    # open a file and dump the steps
-    def output(self):
-        log.info("dumping commands")
-        count = 0
-        # just log for now
-        """
-        for step in self.steps:
-            log.info("step %03d: moveto x=%.2f, y=%.2f, targ spd=%.2f, l=%.2f @ %.2f, r=%.2f @ %.2f" % (count, step['x'], step['y'], step['targ_spd'], step['l'], step['l_targ_spd'], step['r'], step['r_targ_spd']))
-            count += 1
-        return self.steps
-        """
-        return self.time
-
-
-    def add_segment(self, segment):
-        # work out speeds
-        # depends on difference angle between this segment & previous
-        if len(self.segments):
-            angle = self.segments[-1].angle(segment)
-            speed = self.calculate_speed(angle)
-            segment.set_start_speed(speed)
-            self.segments[-1].set_end_speed(speed)
-
-        self.segments.append(segment)
-

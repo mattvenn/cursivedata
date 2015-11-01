@@ -48,6 +48,8 @@ class Robot():
         self.moves.break_segments()
         self.moves.calc_max_velocity()
         self.moves.plan_velocity()
+        self.moves.calc_point_times()
+        self.moves.interpolate_pos_by_time()
         self.moves.dump()
 
     # do the drawing
