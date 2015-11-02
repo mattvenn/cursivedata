@@ -50,6 +50,7 @@ class Robot():
         self.moves.plan_velocity()
         self.moves.calc_point_times()
         self.moves.interpolate_pos_by_time()
+        self.moves.calc_string_lengths()
         self.moves.dump()
 
     # do the drawing

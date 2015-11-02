@@ -1,6 +1,6 @@
 conf = {
     'plan_len' : 50,    # cm
-    'max_spd' : 10.0,
+    'max_spd' : 5.0,
     'acc' : 0.1,
     'width' : 700,
     'height' : 500,

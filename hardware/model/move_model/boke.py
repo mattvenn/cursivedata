@@ -42,14 +42,22 @@ p_source = ColumnDataSource(
 
 x = []
 y = []
+a = []
+b = []
 for i in data['i']:
-    x.append(i[0])
-    y.append(i[1])
+    x.append(i['xy'][0])
+    y.append(i['xy'][1])
+    a.append(i['a'])
+    b.append(i['b'])
 
+points = range(len(data['i']))
 i_source = ColumnDataSource(
         data=dict(
             x=x,
             y=y,
+            a=a,
+            b=b,
+            points=points,
         )
     )
 
@@ -64,7 +72,7 @@ hover = HoverTool(
 TOOLS = 'wheel_zoom,hover,pan,tap,resize,reset'
 # output to static HTML file
 output_file("lines.html", title="line plot example")
-p1 = figure(plot_width=600, plot_height=600, title="points", tools=TOOLS)
+p1 = figure(plot_width=600, plot_height=600, title="points", tools=TOOLS, x_range=(0,600),y_range=(0,600))
 p1.line('x', 'y', line_width=2, source=init_source)
 p1.square('x', 'y', source=init_source)
 
@@ -79,6 +87,10 @@ p3.line('points', 'ltd_spd', line_width=2, line_color="red", source=p_source)
 p4 = figure(plot_width=600, plot_height=600, title="interpolated points at fixed freq", tools=TOOLS, x_range=(0,600), y_range=(0,600))
 p4.line('x','y', line_width=2, source=i_source)
 p4.square('x','y', size=4, source=i_source)
+
+p5 = figure(plot_width=600, plot_height=600, title="string lengths fixed freq", tools=TOOLS )
+p5.line('points', 'a', line_width=2, line_color="red", source=i_source)
+p5.line('points', 'b', line_width=2, source=i_source)
 # show the results
-p = gridplot([[p1, p2],[p3, p4]])
+p = gridplot([[p1, p2],[p3, p4], [p5]])
 show(p)

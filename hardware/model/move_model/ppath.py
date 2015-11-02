@@ -263,7 +263,13 @@ class Moves():
             interp = self.broken_points[p]['point'] + (unit_vect / l) * s
 
 
-            self.interp.append(interp)
+            self.interp.append({'xy' : interp})
             log.debug("m=%.2f t=%.2f s=%.2f u=%.2f v=%.2f xy=%s" % (m, t, s, u, v, interp))
             m += 1.00
-        
+    
+    def calc_string_lengths(self):
+        for i in self.interp:
+            a, b = rect_to_polar(i['xy'][0], i['xy'][1])
+            i['a'] = a
+            i['b'] = b
+
