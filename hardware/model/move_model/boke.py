@@ -91,6 +91,9 @@ p4.square('x','y', size=4, source=i_source)
 p5 = figure(plot_width=600, plot_height=600, title="string lengths fixed freq", tools=TOOLS )
 p5.line('points', 'a', line_width=2, line_color="red", source=i_source)
 p5.line('points', 'b', line_width=2, source=i_source)
+
+p6 = figure(plot_width=600, plot_height=600, title="a vs b", tools=TOOLS )
+p6.line('a', 'b', line_width=2, line_color="red", source=i_source)
 # show the results
-p = gridplot([[p1, p2],[p3, p4], [p5]])
+p = gridplot([[p1, p2],[p3, p4], [p5, p6]])
 show(p)
