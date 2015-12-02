@@ -2,12 +2,10 @@ from math import sqrt, pow
 import numpy as np
 import logging
 from utils import *
-from segment import Segment
 import pickle
 
 log = logging.getLogger(__name__)
 
-# contains all the paths
 class Moves():
     def __init__(self):
         self.points = []
@@ -265,7 +263,8 @@ class Moves():
 
             self.interp.append({'xy' : interp})
             log.debug("m=%.2f t=%.2f s=%.2f u=%.2f v=%.2f xy=%s" % (m, t, s, u, v, interp))
-            m += 1.00
+            m += 0.5
+
     
     def calc_string_lengths(self):
         for i in self.interp:
