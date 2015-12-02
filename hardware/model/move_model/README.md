@@ -88,6 +88,22 @@ Previous PID test for the servo I made used 200hz sampling.
 * To get 50cm per second, need 25cm per rotation
 * r = 25cm / 2 * pi = 3.98 cm radius.
 
+[42rpm at
+24v](http://uk.rs-online.com/web/p/products/440341/?cm_mmc=UK-PPC-_-google-_-3_RS_stock_codes-_-RS%7CPSF_421229%7CDC+Geared+Motors&mkwid=swEylgSmw_dc%7Cpcrid%7C83737117843%7Cpkw%7C440-341%7Cpmt%7Cp%7Cprd%7C&gclid=CM2drabqpMkCFYXNcgodqnoPTQ)
+
+* torque 60 N-cm = 6.1 kg-cm. So can do 1kg with a 6cm radius.
+* 42rpm = 0.7 rps
+* r = 2 * Pi * 6 = 37cm circumference
+* therefore 26cm per second.
+
+[cpc]()
+
+* torque 0.58N-m = 6kg-cm. Can do 1kg with 6cm radius
+* 160 RPM = 2.6 rps
+* r = 37cm
+* 96cm / sec
+
+
 # Testing
 
 * 5cm r encoder wheels
