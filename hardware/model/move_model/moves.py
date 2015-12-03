@@ -15,10 +15,10 @@ class Moves():
         with open('points.d', 'w') as fh:
             pickle.dump({'i' : self.interp, 'p' : self.points, 'bp': self.broken_points }, fh)
         
-    def add_point(self, x, y):
-        point = np.array([x,y],dtype=np.float)
+    def add_point(self, x, y, can):
+        point = np.array([x, y],dtype=np.float)
         log.info("appending point %s" % (point))
-        self.points.append({'point': point})
+        self.points.append({'point': point, 'can' : can})
      
     def break_segments(self):
         self.broken_points = []
@@ -34,6 +34,7 @@ class Moves():
         # work out steps
         prev_point = self.points[p-1]['point']
         point = self.points[p]['point']
+        can = self.points[p]['can']
         # calculate length
         length = np.linalg.norm(point - prev_point)
         steps = int(length / conf['plan_len'])
@@ -50,7 +51,10 @@ class Moves():
         # for each step
         for step in range(0, steps):
             # calculate new target
-            self.broken_points.append({'point': prev_point + step_vect * step })
+            self.broken_points.append({
+                'point': prev_point + step_vect * step,
+                'can': can,
+                })
 
 
     def check_next(self, n):
@@ -259,9 +263,10 @@ class Moves():
             # s = ut + 0.5 * a * t^2
             s = u * t + 0.5 * a * pow(t,2)
             interp = self.broken_points[p]['point'] + (unit_vect / l) * s
+            can = self.broken_points[p]['can']
 
 
-            self.interp.append({'xy' : interp})
+            self.interp.append({'xy' : interp, 'can' : can})
             log.debug("m=%.2f t=%.2f s=%.2f u=%.2f v=%.2f xy=%s" % (m, t, s, u, v, interp))
             m += 0.5
 
@@ -271,4 +276,6 @@ class Moves():
             a, b = rect_to_polar(i['xy'][0], i['xy'][1])
             i['a'] = a
             i['b'] = b
+            i['can'] = i['can']
+
 

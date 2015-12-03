@@ -10,7 +10,7 @@ if __name__ == '__main__':
     log = logging.getLogger('')
     log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter('%(name)-10s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(levelname)s - %(message)s')
     ch.setFormatter(formatter)
     ch.setLevel(logging.DEBUG)
     log.addHandler(ch)
@@ -21,20 +21,18 @@ if __name__ == '__main__':
     parser.add_argument('--file', required=True, action='store', dest='file', help="file to open")
     args = parser.parse_args()
 
+    can = 0
     with open(args.file) as fh:
         for line in fh.readlines():
             if line.startswith('d'):
-                pass
-                """
                 if '0' in line:
-                    rob.pen_up()
+                    can = 0
                 else:
-                    rob.pen_down()
-                """
+                    can = 1
             elif line.startswith('g'):
                 line = line.lstrip('g')
                 x, y = line.split(',')
-                moves.add_point(float(x), float(y))
+                moves.add_point(float(x), float(y), can)
 
     moves.break_segments()
     moves.calc_max_velocity()

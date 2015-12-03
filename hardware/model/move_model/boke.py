@@ -44,11 +44,13 @@ x = []
 y = []
 a = []
 b = []
+can = []
 for i in data['i']:
     x.append(i['xy'][0])
     y.append(i['xy'][1])
     a.append(i['a'])
     b.append(i['b'])
+    can.append(i['can'])
 
 points = range(len(data['i']))
 i_source = ColumnDataSource(
@@ -57,6 +59,7 @@ i_source = ColumnDataSource(
             y=y,
             a=a,
             b=b,
+            can=can,
             points=points,
         )
     )
@@ -91,6 +94,7 @@ p4.square('x','y', size=4, source=i_source)
 p5 = figure(plot_width=600, plot_height=600, title="string lengths fixed freq", tools=TOOLS )
 p5.line('points', 'a', line_width=2, line_color="red", source=i_source)
 p5.line('points', 'b', line_width=2, source=i_source)
+p5.line('points', 'can', line_width=2, line_color="green", source=i_source)
 # show the results
 p = gridplot([[p1, p2],[p3, p4], [p5]])
 show(p)
