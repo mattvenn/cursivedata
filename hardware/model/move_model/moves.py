@@ -175,6 +175,7 @@ class Moves():
         v2 = C-B
         angle = self.angle_between(v1,v2)
 #        angle = np.degrees(angle)
+        # has a bug with 180 degree changes
         speed = 1 - math.sin(angle)
         speed *= conf['max_spd']
         log.debug("angle at %d = %.2f, max_spd=%.2f" % (i,angle,speed))
