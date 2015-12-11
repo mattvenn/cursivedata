@@ -5,7 +5,7 @@ DATA_HOME=~/work/python/cursivedata/data
 WIDTH=1830
 HEIGHT=2000
 SIDE=300
-TOP=300
+TOP=400
 DRAW=800
 
 #INFILE=moire1-lines.svg
