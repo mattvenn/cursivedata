@@ -7,7 +7,7 @@ from bokeh.properties import Color
 
 logging.basicConfig(level=logging.INFO)
 
-file_name = 'big_circle.d'
+file_name = 'square.d'
 
 def polar_to_rect(a, c, b):
     gamma = math.acos((a*a+b*b-c*c)/(2.0*a*b))
