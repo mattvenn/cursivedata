@@ -106,9 +106,10 @@ if __name__ == '__main__':
                     records += 1
                     if args.length and records >= args.length:
                         break
-            except ValueError:
-                print("no such field [%s], choose from %s" % (field,fields))
+            except ValueError as e:
+                print("%s\nno such field [%s], choose from %s" % (e, field,fields))
                 exit(1)
+            print("posted %d records" % records)
     elif args.random:
         #generate random data
 
