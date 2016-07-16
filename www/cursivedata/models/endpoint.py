@@ -46,6 +46,7 @@ i.e. translate them by side_margin and top_margin
 class Endpoint( DrawingState ):
     name = models.CharField(max_length=200,default="default")
     generate_gcode = models.BooleanField(default=False)
+    postprocess_gcode = models.BooleanField(default=True)
     device = models.CharField(max_length=200,default="web")
     #Width of the robot - not width of the drawing, which is img_width
     width = models.FloatField(max_length=200,default=200)
@@ -170,13 +171,18 @@ class Endpoint( DrawingState ):
         fd, tmp_gcode = tempfile.mkstemp()
         pycam="/usr/bin/pycam"
         #pycam="/Users/dmrust/.virtualenvs/polarsite/lib/python2.7/site-packages/pycam-0.5.1/pycam"
-        pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave"]
+        pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave", "--safety-height=5"]
         log.debug("pycam args %s" % pycam_args)
         p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
         stdout,stderr = p.communicate()
         log.debug("pycam done")
 
-        self.parse_gcode_to_polar(tmp_gcode,polarfile)
+        if self.postprocess_gcode:
+            self.parse_gcode_to_polar(tmp_gcode,polarfile)
+        else:
+            #fixme
+            os.system("cp %s %s" % (tmp_gcode, polarfile))
+
         os.close(fd)
         os.remove(tmp_gcode)
 
