@@ -40,35 +40,38 @@ def draw_leaf(drawing,x,y,rotate,width):
 
 def get_minute(date):
     minute = int( date.strftime("%M") ) # minute 0 -59
-    hour = int(date.strftime("%H") ) # hour 0 -23
-    mins =  (minute + hour * 60)/10 # 0 - 143
-    return mins
+    return minute
 
 def process(drawing,data,params,internal_state) :
     log.debug("processing data with parameters %s" % params)
-    aggregate = internal_state.get("aggregate",0)
+#    aggregate = internal_state.get("aggregate",0)
+    aggregate = 0
+    points = 0
     
     #Run through all the data points
     for point in data.get_current():
+        points += 1
         aggregate += float(point.getValue())
 
+#        if get_minute(point.date) % 5 == 0:
+        if True:
+            if aggregate > params.get("value"):
+                log.debug("drawing...")
+                minute = get_minute(point.date)
+                size = aggregate/params.get("petal_scaling")
+                
+                div = get_division(point.date,params)
+                (x1,y1,angle) = get_xy_from_div(drawing,params,div)
+                angle -= math.pi / 4
+                log.debug("points %d size %f, xy=%d,%d a=%f" % (points, size,x1,y1,angle))
 
-        if aggregate > params.get("value"):
-            log.debug("drawing...")
-            minute = get_minute(point.date)
-            size = float(params.get("petal_scaling")) * (aggregate/params.get("value"))
-            startx = drawing.width / 2
-            starty = drawing.height / 2
-            rotate = 0
-            div = get_division(point.date,params)
-            (x1,y1,angle) = get_xy_from_div(drawing,params,div)
-            angle -= math.pi / 8
-            log.debug("%d, %d a=%f" % (x1,y1,angle))
-
-            draw_leaf(drawing,x1,y1,math.degrees(angle),size)
-            aggregate = 0
+                draw_leaf(drawing,x1,y1,math.degrees(angle),size)
+                aggregate = 0
+                points = 0
+            else:
+                aggregate = 0
         
-    internal_state["aggregate"]=aggregate
+#    internal_state["aggregate"]=aggregate
     return None
 
 def begin(drawing,params,internal_state) :
@@ -94,8 +97,10 @@ def can_run(data,params,internal_state):
     aggregate = internal_state.get("aggregate",0)
     for point in data.get_current():
         aggregate += float(point.getValue())
+        # if enough energy
         if aggregate > params.get("value"):
-            log.info("circles can run")
-            return True
-    log.info("aggregate %f < value %f so not running" % ( aggregate, params.get("value")))
+            log.info("can run")
+            # and 5 minute mark
+            if get_minute(point.date) % 5 == 0:
+                return True
     return False
