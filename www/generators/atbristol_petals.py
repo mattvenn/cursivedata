@@ -53,8 +53,7 @@ def process(drawing,data,params,internal_state) :
         points += 1
         aggregate += float(point.getValue())
 
-#        if get_minute(point.date) % 5 == 0:
-        if True:
+        if get_minute(point.date) % 5 == 0:
             if aggregate > params.get("value"):
                 log.debug("drawing...")
                 minute = get_minute(point.date)
