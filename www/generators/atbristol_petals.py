@@ -29,8 +29,9 @@ def get_xy_from_div(drawing,params,div):
     y = centre[1] - y
     return(x,y,angle)
 
-def draw_leaf(drawing,x,y,rotate,width):
-    leaf = drawing.get_first_group_from_file("media/petal.svg")
+def draw_leaf(drawing,x,y,rotate,width,num=1):
+    
+    leaf = drawing.get_first_group_from_file("media/atbristol-petals/petal-%d.svg" % num)
     th=TransformBuilder()
     th.setScaling( width ) 
     th.setRotation( rotate )
@@ -55,20 +56,24 @@ def process(drawing,data,params,internal_state) :
 
         if True:
             if aggregate > params.get("value"):
-                log.debug("drawing...")
+            #    log.debug("drawing...")
                 minute = get_minute(point.date)
                 size = aggregate/params.get("petal_scaling")
-                
+                petal_type = 1
+                if size > 0.5:
+                    petal_type = 3
+                elif size > 0.4:
+                    petal_type = 2
                 div = get_division(point.date,params)
                 (x1,y1,angle) = get_xy_from_div(drawing,params,div)
                 angle -= math.pi / 4
-                log.debug("points %d size %f, xy=%d,%d a=%f" % (points, size,x1,y1,angle))
+                log.debug("points %d size %f, xy=%d,%d a=%f, type=%d" % (points, size,x1,y1,angle,petal_type))
 
-                draw_leaf(drawing,x1,y1,math.degrees(angle),size)
+                draw_leaf(drawing,x1,y1,math.degrees(angle),size,petal_type)
                 aggregate = 0
                 points = 0
-            else:
-                aggregate = 0
+            #else:
+            #    aggregate = 0
         
 #    internal_state["aggregate"]=aggregate
     return None
