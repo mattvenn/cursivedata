@@ -8,11 +8,11 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="svg2"
-   height="70.866"
-   width="35.433"
+   height="54"
+   width="29.586445"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="petal.svg">
+   sodipodi:docname="petal-3.svg">
   <metadata
      id="metadata8">
     <rdf:RDF>
@@ -40,14 +40,19 @@
      id="namedview4"
      showgrid="false"
      inkscape:zoom="9.4193101"
-     inkscape:cx="22.764215"
-     inkscape:cy="37.154202"
+     inkscape:cx="19.318623"
+     inkscape:cy="28.339604"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2" />
+     inkscape:current-layer="svg2"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
   <g
-     id="g3775">
+     id="g3775"
+     transform="translate(-3.4455918,-8.0513986)">
     <path
        sodipodi:nodetypes="cccccc"
        inkscape:connector-curvature="0"
