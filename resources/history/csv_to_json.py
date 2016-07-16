@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import json
 import csv
-name = "testhist.csv"
+import sys
+name = sys.argv[1]
 with open(name) as fh:
     reader = csv.reader(fh)
     header = reader.next()
