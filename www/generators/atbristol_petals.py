@@ -45,24 +45,35 @@ def get_minute(date):
 
 def process(drawing,data,params,internal_state) :
     log.debug("processing data with parameters %s" % params)
+#    aggregate = internal_state.get("aggregate",0)
+    aggregate = 0
+    points = 0
     
     #Run through all the data points
     for point in data.get_current():
-            if point.getValue() > params.get("value"):
+        points += 1
+        aggregate += float(point.getValue())
+
+        if True:
+            if aggregate > params.get("value"):
             #    log.debug("drawing...")
                 minute = get_minute(point.date)
-                size = float(point.getValue())/params.get("petal_scaling")
+                size = aggregate/params.get("petal_scaling")
                 petal_type = 1
-                if size > 0.4:
+                if size > 0.3:
                     petal_type = 3
-                elif size > 0.2:
+                elif size > 0.15:
                     petal_type = 2
                 div = get_division(point.date,params)
                 (x1,y1,angle) = get_xy_from_div(drawing,params,div)
-                angle += math.pi /10
-                log.debug("size %f, xy=%d,%d a=%f, type=%d" % (size,x1,y1,angle,petal_type))
+                angle -= math.pi / 16
+                log.debug("points %d size %f, xy=%d,%d a=%f, type=%d" % (points, size,x1,y1,angle,petal_type))
 
                 draw_leaf(drawing,x1,y1,math.degrees(angle),size,petal_type)
+                aggregate = 0
+                points = 0
+            #else:
+            #    aggregate = 0
         
 #    internal_state["aggregate"]=aggregate
     return None
@@ -87,7 +98,14 @@ def get_name() : return "atbristol petals"
 def get_description() : return "draws petals around a spiral"
 
 def can_run(data,params,internal_state):
+    
+    aggregate = internal_state.get("aggregate",0)
     for point in data.get_current():
-        if point.getValue() > params.get("value"):
-            return True
+        aggregate += float(point.getValue())
+        # if enough energy
+        if aggregate > params.get("value"):
+            log.info("can run")
+            # and 5 minute mark
+            if get_minute(point.date) % 2 == 0:
+                return True
     return False
