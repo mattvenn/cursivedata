@@ -219,6 +219,12 @@ def show_endpoint(request, endpointID):
             endpoint.movearea()
         elif act == "Reset":
             endpoint.reset()
+        elif act == "no post-process":
+            endpoint.postprocess_gcode = False;
+            endpoint.save()
+        elif act == "post-process":
+            endpoint.postprocess_gcode = True;
+            endpoint.save()
         elif act == "Start Gcode":
             endpoint.generate_gcode = True;
             endpoint.save()

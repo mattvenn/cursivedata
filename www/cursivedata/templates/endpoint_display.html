@@ -46,6 +46,11 @@
 	                    {% else %}
 						<input class="button" type="submit" value="Start Gcode" name="action"/>
 	                    {% endif %}
+	                    {% if endpoint.postprocess_gcode %}
+						<input class="button" type="submit" value="no post-process" name="action"/>
+	                    {% else %}
+						<input class="button" type="submit" value="post-process" name="action"/>
+	                    {% endif %}
 	                    {% if endpoint.paused %}
 						<input class="button" type="submit" value="Resume" name="action"/>
 	                    {% else %}

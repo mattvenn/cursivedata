@@ -16,6 +16,11 @@
    </div> 
 
   <div class="row">
+      <h2>Graphic Output</h2>
+        <img class="bigPic" src="/{% if output %}{{output}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/> 
+    </div>
+
+  <div class="row">
     <h2>Datastore</h2>
     <ul class="block-grid three-up">
         <li>
@@ -72,10 +77,6 @@
 	</div>
   </div>
 
-  <div class="row">
-      <h2>Graphic Output</h2>
-        <img class="bigPic" src="/{% if output %}{{output}}{% else %}media/resources/nothing_drawn.svg{% endif %}"/> 
-    </div>
 
   <div class="row">
       <h2>Debug Output</h2>
