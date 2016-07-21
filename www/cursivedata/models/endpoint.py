@@ -171,7 +171,7 @@ class Endpoint( DrawingState ):
         fd, tmp_gcode = tempfile.mkstemp()
         pycam="/usr/bin/pycam"
         #pycam="/Users/dmrust/.virtualenvs/polarsite/lib/python2.7/site-packages/pycam-0.5.1/pycam"
-        pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave", "--safety-height=5"]
+        pycam_args = [pycam, svgfile, "--export-gcode=" + tmp_gcode, "--process-path-strategy=engrave", "--safety-height=5", "--tool-feedrate=3000", "--gcode-path-mode=continuous"]
         log.debug("pycam args %s" % pycam_args)
         p = subprocess.Popen( pycam_args, stdout=subprocess.PIPE,stderr=subprocess.PIPE )
         stdout,stderr = p.communicate()
