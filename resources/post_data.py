@@ -19,7 +19,7 @@ def push_data( input_data ):
         "input_data": input_data,
         "name": "UPDATED!"
         }
-    r = requests.patch(url + str(args.datastore) + "/",headers=headers,data=json.dumps(data))
+    r = requests.patch(url + str(args.datastore) + "/",headers=headers,json=data)
     print r.status_code
     if r.text:
         try:
@@ -100,7 +100,7 @@ if __name__ == '__main__':
                 for row in csv_reader:
                     for field in keys:
                         index = fields.index(field)
-                        push_data([{"data": '{"%s":%f}' % (field,float(row[index])),"date":row[0]}],)
+                        push_data([{"data": {field : float(row[index]) },"date":row[0]}],)
                         time.sleep(args.pause)
 
                     records += 1
