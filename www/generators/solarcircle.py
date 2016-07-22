@@ -60,7 +60,7 @@ def get_params() :
     return  [ 
         #changing this needs to update the internal state, as we store an array of this number
         {"name":"circle_t", "default": 1440, "description":"the whole circle is worth this many minutes (max is one months worth)" },
-        {"name":"value", "default":1000, "description":"an input value of this will draw a 1mm bar" },
+        {"name":"value", "default":1000, "description":"maximum value expected - draws line of length r" },
         {"name":"circle_r", "default":100, "description":"radius of central circle" },
 # params can only be floats        {"name":"text", "default":'text', "description":"text for centre" },
             ]
