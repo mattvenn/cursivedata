@@ -45,7 +45,7 @@ def process(drawing,data,params,internal_state) :
                 #clouds go from 0 to 100%
                 clouds = int(float(point.getValue()))
                 clouds /= 20
-                log.debug("got %f for sun" % clouds)
+                log.info("got %f for sun" % clouds)
                 hour = get_hour(point.date)
                 draw_sun(drawing,clouds,hour)
                 sun_minute = current_minute
@@ -119,7 +119,7 @@ def draw_sun(drawing,sun_level,time):
     if sun_level < 1:
         sun_level = 1
 
-    log.debug("drawing sun %d" % sun_level)
+    log.info("drawing sun %d" % sun_level)
     sun = drawing.get_first_group_from_file("media/tree2/weather/sun_%d.svg" % sun_level)
     th=TransformBuilder()
     scale = drawing.width / svg_width
